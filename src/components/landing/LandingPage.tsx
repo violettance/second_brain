@@ -227,7 +227,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
               ))}
             </div>
             <p className="text-slate-300 mb-4 lg:mb-6 leading-relaxed text-sm lg:text-base">
-              "Second Brain has revolutionized how I manage my research. The AI insights help me discover connections I never would have found."
+              "Second Brain has revolutionized how I manage my research and helps me discover connections I never would have found."
             </p>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full" style={{ background: '#C2B5FC' }}></div>
