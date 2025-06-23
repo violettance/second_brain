@@ -31,9 +31,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
         <div className="flex items-center gap-2 mb-4">
           <button className="md:hidden ...">...</button>
-          <h1 className="hidden md:block text-xl md:text-2xl font-bold truncate max-w-[70vw] text-center mx-auto">
+          {/* <h1 className="hidden md:block text-xl md:text-2xl font-bold truncate max-w-[70vw] text-center mx-auto">
             Welcome Back, {user?.name}! 👀
-          </h1>
+          </h1> */}
         </div>
         <div className="hidden md:flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
           <div>
