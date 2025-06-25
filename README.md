@@ -2,7 +2,7 @@
 
 A modern, AI-powered knowledge management application built with React, TypeScript, and Supabase. Transform scattered thoughts into connected knowledge with intelligent note-taking, analytics, and visualization.
 
-![Second Brain Dashboard](https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1200&h=600&fit=crop)
+![Second Brain Dashboard](public/dashboard.png)
 
 ## ✨ Features
 
