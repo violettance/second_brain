@@ -72,8 +72,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) =
         {/* Logo */}
         <div className="p-4 lg:p-6 border-b border-slate-800 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg" style={{ background: '#C2B5FC' }}>
-              <Brain className="h-5 w-5 lg:h-6 lg:w-6 text-slate-900" />
+            <div className="flex-shrink-0">
+              <img src="/logo.png" alt="Second Brain Logo" className="h-8 w-8 lg:h-10 lg:w-10 rounded-lg" />
             </div>
             <span className="text-lg lg:text-xl font-bold text-white">Second Brain</span>
           </div>
