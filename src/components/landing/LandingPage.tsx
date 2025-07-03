@@ -30,7 +30,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
       <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
-            <img src="/logo.png" alt="Second Brain Logo" className="h-8 w-8 lg:h-10 lg:w-10 rounded-lg" />
+            <img src="/logo.png" alt="Second Brain Logo" className="h-14 w-14 lg:h-16 lg:w-16 rounded-lg" />
           </div>
           <span className="text-xl lg:text-2xl font-bold text-white">Second Brain</span>
         </div>
@@ -302,7 +302,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
-                <img src="/logo.png" alt="Second Brain Logo" className="h-6 w-6 lg:h-8 lg:w-8 rounded-lg" />
+                <img src="/logo.png" alt="Second Brain Logo" className="h-12 w-12 lg:h-14 lg:w-14 rounded-lg" />
               </div>
               <span className="text-lg lg:text-xl font-bold text-white">Second Brain</span>
             </div>
