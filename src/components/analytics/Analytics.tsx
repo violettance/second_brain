@@ -68,7 +68,7 @@ export const Analytics: React.FC = () => {
         <div className="flex flex-col space-y-4">
           {/* Simple Mobile Title */}
           <div className="flex items-center justify-between">
-            <div>
+            <div className="pl-12 lg:pl-0">
               <h1 className="text-xl lg:text-3xl font-bold text-white">Analytics</h1>
               <p className="text-slate-400 text-xs lg:text-base hidden lg:block">
                 Insights into your knowledge patterns and thinking trends

@@ -47,10 +47,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) =
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button - Updated positioning to avoid overlapping titles */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+        className="lg:hidden fixed top-4 left-4 z-30 p-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
       >
         {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
@@ -108,37 +108,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) =
           </nav>
 
           {/* Upgrade Section & Logout - Fixed at bottom */}
-          <div className="p-3 lg:p-4 border-t border-slate-800 flex-shrink-0 bg-slate-900">
-            <div className="border rounded-xl p-3 lg:p-4 mb-3 lg:mb-4" style={{ backgroundColor: '#C2B5FC20', borderColor: '#C2B5FC50' }}>
-              <div className="flex items-center justify-center mb-2">
-                <Sparkles className="h-6 w-6 lg:h-8 lg:w-8" style={{ color: '#C2B5FC' }} />
-              </div>
-              <h3 className="text-white font-semibold text-center mb-1 text-sm lg:text-base">Upgrade to Pro!</h3>
-              <p className="text-slate-400 text-xs lg:text-sm text-center mb-2 lg:mb-3">
-                Unlock unlimited notes and advanced AI features
-              </p>
-              <button 
-                onClick={handleUpgradeClick}
-                className="w-full text-slate-900 py-2 px-3 lg:px-4 rounded-lg font-semibold hover:opacity-90 transition-all text-sm lg:text-base" 
-                style={{ background: '#C2B5FC' }}
-              >
-                Upgrade Now
-              </button>
-            </div>
-
-            {/* Logout */}
-            <button 
-              onClick={logout}
-              className="w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+          <div className="p-3 lg:p-4 border-t border-slate-800 space-y-3">
+            <button
+              onClick={handleUpgradeClick}
+              className="w-full flex items-center justify-center space-x-2 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-semibold text-sm lg:text-base text-slate-900 hover:opacity-90 transition-colors"
+              style={{ background: '#C2B5FC' }}
             >
-              <LogOut className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
-              <span className="font-medium text-sm lg:text-base">Logout</span>
+              <Sparkles className="h-4 w-4 lg:h-5 lg:w-5" />
+              <span>Upgrade Now</span>
+            </button>
+            
+            <button
+              onClick={logout}
+              className="w-full flex items-center space-x-2 px-3 lg:px-4 py-2 lg:py-3 rounded-xl text-left text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200 text-sm lg:text-base"
+            >
+              <LogOut className="h-4 w-4 lg:h-5 lg:w-5" />
+              <span>Logout</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Paywall Modal */}
       {showPaywall && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
@@ -233,12 +223,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) =
                 <Sparkles className="h-5 w-5" />
                 <span>Upgrade to Pro</span>
               </button>
-
-              <div className="text-center mt-4">
-                <p className="text-slate-500 text-xs">
-                  ✨ 7-day free trial • 🔒 Cancel anytime • 💳 Secure payment
-                </p>
-              </div>
             </div>
           </div>
         </div>
