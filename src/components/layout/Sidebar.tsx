@@ -13,6 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { PaywallModal } from '../analytics/PaywallModal';
 
 interface SidebarProps {
   currentPage: string;
@@ -130,102 +131,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) =
       </div>
 
       {showPaywall && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="relative p-6 lg:p-8 text-center bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-b border-slate-700">
-              <button
-                onClick={() => setShowPaywall(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-slate-700 rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5 text-slate-400" />
-              </button>
-              
-              <div className="flex items-center justify-center mb-4">
-                <div className="p-4 rounded-full" style={{ background: '#C2B5FC' }}>
-                  <Sparkles className="h-10 w-10 text-slate-900" />
-                </div>
-              </div>
-              
-              <h2 className="text-3xl font-bold text-white mb-2">Upgrade to Pro</h2>
-              <p className="text-slate-300 text-lg">
-                Unlock unlimited notes and advanced AI features
-              </p>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 lg:p-8">
-              {/* Features Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <div className="flex items-start space-x-3 p-4 bg-slate-700/30 rounded-xl">
-                  <div className="p-2 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                    <Brain className="h-5 w-5" style={{ color: '#C2B5FC' }} />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold text-sm">Unlimited Notes</h3>
-                    <p className="text-slate-400 text-xs">Create as many notes as you need</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3 p-4 bg-slate-700/30 rounded-xl">
-                  <div className="p-2 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                    <Sparkles className="h-5 w-5" style={{ color: '#C2B5FC' }} />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold text-sm">AI Insights</h3>
-                    <p className="text-slate-400 text-xs">Advanced AI analysis and recommendations</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3 p-4 bg-slate-700/30 rounded-xl">
-                  <div className="p-2 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                    <BarChart3 className="h-5 w-5" style={{ color: '#C2B5FC' }} />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold text-sm">Advanced Analytics</h3>
-                    <p className="text-slate-400 text-xs">Deep insights into your knowledge patterns</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3 p-4 bg-slate-700/30 rounded-xl">
-                  <div className="p-2 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                    <Settings className="h-5 w-5" style={{ color: '#C2B5FC' }} />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold text-sm">Priority Support</h3>
-                    <p className="text-slate-400 text-xs">Get help when you need it most</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pricing */}
-              <div className="border rounded-xl p-6 mb-6" style={{ backgroundColor: '#C2B5FC10', borderColor: '#C2B5FC30' }}>
-                <div className="text-center">
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <Sparkles className="h-5 w-5" style={{ color: '#C2B5FC' }} />
-                    <span className="font-semibold" style={{ color: '#C2B5FC' }}>Pro Plan</span>
-                  </div>
-                  <div className="text-3xl font-bold text-white mb-1">$9<span className="text-lg text-slate-400">/month</span></div>
-                  <div className="text-slate-400 text-sm">Unlock your full potential</div>
-                </div>
-              </div>
-
-              {/* CTA Button */}
-              <button
-                onClick={() => {
-                  setShowPaywall(false);
-                  // In real app, this would trigger RevenueCat payment flow
-                  console.log('Starting payment flow...');
-                }}
-                className="w-full flex items-center justify-center space-x-2 px-6 py-4 text-slate-900 rounded-xl font-semibold text-lg hover:opacity-90 transition-all transform hover:scale-105 shadow-lg"
-                style={{ background: '#C2B5FC' }}
-              >
-                <Sparkles className="h-5 w-5" />
-                <span>Upgrade to Pro</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <PaywallModal 
+          onClose={() => setShowPaywall(false)}
+          onUpgrade={() => {
+            setShowPaywall(false);
+            // In real app, this would trigger RevenueCat payment flow
+            console.log('Starting payment flow...');
+          }}
+        />
       )}
     </>
   );
