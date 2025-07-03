@@ -27,12 +27,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
 
   return (
     <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
-      {/* Header */}
+      {/* Header - Added left padding for mobile view to prevent overlap with hamburger menu */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
-        <div className="flex items-center gap-2 mb-4">
-          <button className="md:hidden ...">...</button>
-        </div>
-        <div className="hidden md:flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0 pl-12 lg:pl-0">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
               Welcome Back, {user?.name}! 👀
