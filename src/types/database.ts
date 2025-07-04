@@ -35,6 +35,7 @@ export interface Database {
           content: string;
           tags: string[];
           note_date: string;
+          archived_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -45,6 +46,7 @@ export interface Database {
           content?: string;
           tags?: string[];
           note_date?: string;
+          archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -55,6 +57,7 @@ export interface Database {
           content?: string;
           tags?: string[];
           note_date?: string;
+          archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -103,6 +106,7 @@ export interface DailyNote {
   tags: string[];
   note_date: string;
   memory_type: 'short-term' | 'long-term';
+  archived_at?: string | null;
   created_at: string;
   updated_at: string;
 }
