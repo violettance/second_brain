@@ -2,25 +2,52 @@ import React, { useState } from 'react';
 import { Calendar } from './Calendar';
 import { NoteEditor } from './NoteEditor';
 import { NotesList } from './NotesList';
-import { CalendarDays, List, Plus, Menu } from 'lucide-react';
+import { CalendarDays, List, Plus, Menu, Clock, Brain, X } from 'lucide-react';
+import { DailyNote } from '../../types/database';
+import { useDailyNotes } from '../../hooks/useDailyNotes';
 
 export const DailyNotes: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [showEditor, setShowEditor] = useState(false);
+  const [editingNote, setEditingNote] = useState<DailyNote | undefined>(undefined);
+  const [defaultMemoryType, setDefaultMemoryType] = useState<'short-term' | 'long-term'>('short-term');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get all notes (not filtered by date for calendar view) and selected date notes
+  const { notes: allNotes, refetch: refetchAll } = useDailyNotes();
+  const { notes: selectedDateNotes, refetch: refetchSelected } = useDailyNotes(selectedDate);
+
+  const handleEditNote = (note?: DailyNote, memoryType?: 'short-term' | 'long-term') => {
+    setEditingNote(note);
+    setShowEditor(true);
+    // Store default memory type for new notes
+    if (!note && memoryType) {
+      setDefaultMemoryType(memoryType);
+    }
+  };
+
+  const handleCloseEditor = () => {
+    setShowEditor(false);
+    setEditingNote(undefined);
+    setDefaultMemoryType('short-term');
+    // Refresh notes after saving
+    refetchAll();
+    refetchSelected();
+  };
 
   return (
-    <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
-      {/* Header - Added left padding for mobile view to prevent overlap with hamburger menu */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
+    <div className="flex-1 bg-slate-900 overflow-hidden h-screen flex flex-col">
+      {/* Header */}
+      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 sticky top-0 z-10">
+        <div className="flex items-center justify-between">
           <div className="pl-12 lg:pl-0">
-            <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">Daily Notes</h1>
-            <p className="text-slate-400 text-sm lg:text-base">
+            <h1 className="text-2xl font-bold text-white">Daily Notes</h1>
+            <p className="text-slate-400 text-sm">
               Capture your thoughts, ideas, and reflections
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+          <div className="flex items-center space-x-3">
             {/* View Toggle */}
             <div className="flex items-center bg-slate-700 rounded-lg p-1">
               <button
@@ -51,7 +78,7 @@ export const DailyNotes: React.FC = () => {
             
             {/* New Note Button */}
             <button
-              onClick={() => setShowEditor(true)}
+              onClick={() => handleEditNote()}
               className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
               style={{ background: '#C2B5FC' }}
             >
@@ -63,44 +90,97 @@ export const DailyNotes: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="p-4 lg:p-6 space-y-6 bg-slate-900 min-h-full">
+      <div className="flex-1 overflow-hidden">
         {view === 'calendar' ? (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Calendar */}
-            <div className="xl:col-span-2">
-              <Calendar 
+          <div className="flex h-full">
+            {/* Sidebar Toggle (Mobile) */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden fixed bottom-4 right-4 z-20 p-3 bg-slate-700 hover:bg-slate-600 rounded-full shadow-lg"
+            >
+              <CalendarDays className="h-5 w-5 text-white" />
+            </button>
+            
+            {/* Notes Panel - Now on the left */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <NotesList 
                 selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
-                onNewNote={() => setShowEditor(true)}
+                onEditNote={handleEditNote}
+                notes={selectedDateNotes}
+                onRefresh={refetchSelected}
               />
             </div>
             
-            {/* Notes for Selected Date */}
-            <div>
-              <NotesList 
-                selectedDate={selectedDate}
-                onEditNote={() => setShowEditor(true)}
-              />
+            {/* Calendar Sidebar - Now on the right */}
+            <div 
+              className={`${
+                sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+              } lg:w-80 w-full lg:max-w-xs bg-slate-800/30 border-l border-slate-700/50 p-4 overflow-y-auto transition-transform duration-300 ease-in-out lg:relative fixed inset-y-0 right-0 z-10`}
+            >
+              <div className="sticky top-0">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-medium text-white">Calendar</h2>
+                  <button 
+                    className="lg:hidden p-2 hover:bg-slate-700 rounded-md"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <X className="h-5 w-5 text-slate-400" />
+                  </button>
+                </div>
+                
+                {/* Calendar Component */}
+                <Calendar 
+                  selectedDate={selectedDate}
+                  onDateSelect={setSelectedDate}
+                  onNewNote={() => handleEditNote()}
+                  notes={allNotes}
+                />
+                
+                {/* Memory Type Filters */}
+                <div className="mt-4 border-t border-slate-700/50 pt-4">
+                  <h3 className="text-sm font-medium text-slate-300 mb-3">Quick Actions</h3>
+                  <div className="flex flex-col space-y-2">
+                    <button 
+                      onClick={() => handleEditNote(undefined, 'short-term')}
+                      className="flex items-center space-x-2 px-3 py-2 bg-orange-500/20 text-orange-400 rounded-md border border-orange-500/30 hover:bg-orange-500/30 transition-colors"
+                    >
+                      <Clock className="h-4 w-4" />
+                      <span className="text-sm">New Short Term Note</span>
+                    </button>
+                    <button 
+                      onClick={() => handleEditNote(undefined, 'long-term')}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-md border border-purple-500/30 text-purple-400 hover:opacity-80 transition-colors" 
+                      style={{ backgroundColor: 'rgba(194, 181, 252, 0.2)' }}
+                    >
+                      <Brain className="h-4 w-4" />
+                      <span className="text-sm">New Long Term Note</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
-          <NotesList 
-            selectedDate={null}
-            onEditNote={() => setShowEditor(true)}
-          />
+          <div className="p-4 overflow-y-auto">
+            <NotesList 
+              selectedDate={null}
+              onEditNote={handleEditNote}
+              notes={allNotes}
+              onRefresh={refetchAll}
+            />
+          </div>
         )}
         
         {/* Note Editor Modal */}
         {showEditor && (
           <NoteEditor
             selectedDate={selectedDate}
-            onClose={() => setShowEditor(false)}
-            onSave={() => setShowEditor(false)}
+            existingNote={editingNote}
+            defaultMemoryType={editingNote ? undefined : defaultMemoryType}
+            onClose={handleCloseEditor}
+            onSave={handleCloseEditor}
           />
         )}
-        
-        {/* Extra padding at bottom */}
-        <div className="h-8"></div>
       </div>
     </div>
   );

@@ -184,6 +184,48 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 npm run dev
 ```
 
+### Setting Up Supabase (Optional)
+
+The app works with mock data by default. To connect to a real Supabase database:
+
+1. **Create a Supabase project** at [https://supabase.com](https://supabase.com)
+2. **Get your project credentials** from the API settings
+3. **Create a `.env` file** in the project root:
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+4. **Run the migration** to create the database tables:
+   - Go to your Supabase project dashboard
+   - Navigate to SQL Editor
+   - Copy and paste the contents of `supabase/migrations/20250623150558_wandering_meadow.sql`
+   - Run the migration
+
+## 📝 Using Daily Notes
+
+The daily notes feature supports both **short-term** and **long-term** memory types:
+
+### Short-term Notes
+- Automatically archived after 30 days
+- Perfect for daily reflections, meeting notes, temporary thoughts
+- Soft-deleted (can be recovered)
+- Stored in `short_term_notes` table
+
+### Long-term Notes
+- Permanent storage
+- Best for important insights, reference material, knowledge you want to keep
+- Hard-deleted when removed
+- Stored in `long_term_notes` table
+
+### Features
+- **Calendar View**: Heat-map showing note density per day
+- **List View**: Chronological list of all notes
+- **Rich Editor**: Formatting toolbar with basic text styling
+- **Tagging System**: Organize notes with hashtags
+- **Memory Type Toggle**: Move notes between short-term and long-term
+- **Search**: Find notes by title, content, or tags
+- **Star Notes**: Mark important notes for quick access
+
 ## 🎨 Design System
 
 ### Color Palette
