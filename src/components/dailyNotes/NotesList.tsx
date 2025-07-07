@@ -16,12 +16,13 @@ import { DailyNote } from '../../types/database';
 
 interface NotesListProps {
   selectedDate: Date | null;
-  onEditNote: (note?: DailyNote) => void;
+  onEditNote: (note: DailyNote) => void;
+  onDirectEdit?: (note: DailyNote) => void;
   notes?: DailyNote[];
   onRefresh?: () => Promise<void>;
 }
 
-export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, notes: propNotes, onRefresh }) => {
+export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, onDirectEdit, notes: propNotes, onRefresh }) => {
   // Use provided notes or fetch them if not provided (for backward compatibility)
   const hookData = useDailyNotes(propNotes ? undefined : (selectedDate || undefined));
   const notes = propNotes || hookData.notes;
@@ -40,7 +41,10 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
   );
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    // Parse date string without timezone issues
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed
+    
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -129,7 +133,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-medium text-white">
-            {selectedDate ? `Notes for ${formatDate(selectedDate.toISOString())}` : 'All Notes'}
+            {selectedDate ? `Notes for ${formatDate(`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`)}` : 'All Notes'}
           </h2>
           <p className="text-slate-400 text-xs">
             {notes.length} {notes.length === 1 ? 'note' : 'notes'} found
@@ -151,7 +155,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
       </div>
 
       {/* Notes List */}
-      <div className="space-y-3">
+      <div className="space-y-3 overflow-y-auto pr-1">
         {filteredNotes.length === 0 ? (
           <div className="text-center py-8">
             <Calendar className="h-10 w-10 text-slate-500 mx-auto mb-3" />
@@ -219,7 +223,11 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                     <div className="absolute right-0 top-8 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-10 py-1">
                       <button
                         onClick={() => {
-                          onEditNote(note);
+                          if (onDirectEdit) {
+                            onDirectEdit(note);
+                          } else {
+                            onEditNote(note);
+                          }
                           setShowOptions(null);
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
@@ -270,8 +278,14 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                   
                   {/* Delete Confirmation */}
                   {showDeleteConfirm === note.id && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                      <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 max-w-sm w-full mx-4">
+                    <div 
+                      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                      onClick={() => setShowDeleteConfirm(null)}
+                    >
+                      <div 
+                        className="bg-slate-800 border border-slate-700 rounded-xl p-4 max-w-sm w-full mx-4"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <h3 className="text-white text-lg font-medium mb-2">Delete Note</h3>
                         <p className="text-slate-300 text-sm mb-4">
                           Are you sure you want to delete "{note.title}"? This action cannot be undone.
@@ -301,7 +315,14 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                 className="text-slate-300 text-xs leading-relaxed line-clamp-2 mb-2"
                 onClick={() => onEditNote(note)}
               >
-                {note.content || 'No content'}
+                {note.content 
+                  ? note.content
+                      .replace(/\*\*([^*\n]+)\*\*/g, '$1')  // Remove ** for bold
+                      .replace(/\*([^*\n]+)\*/g, '$1')      // Remove * for italic
+                      .replace(/`([^`\n]+)`/g, '$1')        // Remove ` for code
+                      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links, keep text
+                  : 'No content'
+                }
               </div>
 
               {/* Tags */}
@@ -318,9 +339,9 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                           backgroundColor: note.memory_type === 'short-term' ? 'rgba(251, 146, 60, 0.2)' : 'rgba(194, 181, 252, 0.2)',
                           color: note.memory_type === 'short-term' ? '#fb923c' : '#C2B5FC'
                         }}
-                      >
-                        #{tag}
-                      </span>
+                                              >
+                          {tag}
+                        </span>
                     ))}
                   {note.tags.filter(tag => tag !== 'starred').length > 3 && (
                     <span className="inline-flex items-center text-xs px-1.5 py-0.5 rounded bg-slate-600/40 text-slate-400">

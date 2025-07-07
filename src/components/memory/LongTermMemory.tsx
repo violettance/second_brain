@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { Brain, Plus, Search, Filter, Edit3, Trash2, Calendar, Tag, MoreHorizontal, Star } from 'lucide-react';
 import { CreateMemoryModal } from './CreateMemoryModal';
+import { NotePreviewModal } from '../dailyNotes/NotePreviewModal';
+import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
+import { DailyNote } from '../../types/database';
 
 export const LongTermMemory: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewNote, setPreviewNote] = useState<DailyNote | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingNote, setEditingNote] = useState<DailyNote | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
-  const { longTermNotes, isLoading, deleteNote } = useMemoryNotes();
+  const { longTermNotes, isLoading, deleteNote, refetch } = useMemoryNotes();
 
   const filteredAndSortedNotes = longTermNotes
     .filter(note =>
@@ -27,6 +34,43 @@ export const LongTermMemory: React.FC = () => {
           return 0;
       }
     });
+
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    // Refresh the notes list after modal closes
+    refetch();
+  };
+
+  const handleNoteClick = (note: DailyNote) => {
+    setPreviewNote(note);
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewNote(null);
+  };
+
+  const handleEditFromPreview = () => {
+    if (previewNote) {
+      setEditingNote(previewNote);
+      setShowEditor(true);
+      setShowPreview(false);
+      setPreviewNote(null);
+    }
+  };
+
+  const handleEditNote = (note: DailyNote) => {
+    setEditingNote(note);
+    setShowEditor(true);
+  };
+
+  const handleCloseEditor = () => {
+    setShowEditor(false);
+    setEditingNote(undefined);
+    // Refresh notes after saving
+    refetch();
+  };
 
   return (
     <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
@@ -131,7 +175,8 @@ export const LongTermMemory: React.FC = () => {
             {filteredAndSortedNotes.map((note) => (
               <div 
                 key={note.id} 
-                className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/70 transition-all group"
+                className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/70 transition-all group cursor-pointer"
+                onClick={() => handleNoteClick(note)}
               >
                 {/* Note Header */}
                 <div className="flex items-start justify-between mb-4">
@@ -146,13 +191,20 @@ export const LongTermMemory: React.FC = () => {
                   </div>
                   <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditNote(note);
+                      }}
                       className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
                       title="Edit Note"
                     >
                       <Edit3 className="h-4 w-4 text-slate-400" />
                     </button>
                     <button
-                      onClick={() => deleteNote(note.id, 'long-term')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNote(note.id, 'long-term');
+                      }}
                       className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
                       title="Delete Note"
                     >
@@ -217,7 +269,27 @@ export const LongTermMemory: React.FC = () => {
       {showCreateModal && (
         <CreateMemoryModal 
           memoryType="long-term"
-          onClose={() => setShowCreateModal(false)} 
+          onClose={handleCloseModal} 
+        />
+      )}
+
+      {/* Note Preview Modal */}
+      {showPreview && previewNote && (
+        <NotePreviewModal
+          note={previewNote}
+          onClose={handleClosePreview}
+          onEdit={handleEditFromPreview}
+        />
+      )}
+
+      {/* Note Editor Modal */}
+      {showEditor && (
+        <NoteEditor
+          selectedDate={editingNote?.note_date ? new Date(editingNote.note_date + 'T00:00:00') : new Date()}
+          existingNote={editingNote}
+          defaultMemoryType="long-term"
+          onClose={handleCloseEditor}
+          onSave={handleCloseEditor}
         />
       )}
     </div>

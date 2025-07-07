@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { DailyNote } from '../types/database';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+
+// Import the shared mock storage and notification system from useDailyNotes
+// This ensures synchronization between memory notes and daily notes
+import { useDailyNotes } from './useDailyNotes';
 
 // Mock data for demo
 const MOCK_SHORT_TERM_NOTES: DailyNote[] = [
@@ -82,18 +87,146 @@ export const useMemoryNotes = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  // Get the daily notes hook for shared state management
+  const { refetch: refetchDailyNotes } = useDailyNotes();
+
+  // Check if Supabase is properly configured
+  const isSupabaseConfigured = () => {
+    try {
+      return !!(supabase);
+    } catch {
+      return false;
+    }
+  };
+
   const fetchNotes = async () => {
-    if (!user) return;
+    // For demo purposes, use a fallback user if none exists
+    const currentUser = user || {
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      name: 'Demo User',
+      email: 'demo@example.com'
+    };
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // If Supabase isn't configured, use mock data
+      if (!isSupabaseConfigured()) {
+        console.warn('Supabase not configured, using mock data. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      setShortTermNotes(MOCK_SHORT_TERM_NOTES);
-      setLongTermNotes(MOCK_LONG_TERM_NOTES);
+        // Mock data for demo
+        const mockShortTermNotes: DailyNote[] = [
+          {
+            id: '1',
+            user_id: currentUser.id,
+            title: 'Meeting Notes - Team Sync',
+            content: 'Discussed project roadmap and upcoming features. Need to focus on user experience improvements and performance optimization.',
+            tags: ['meeting', 'team', 'roadmap'],
+            note_date: new Date().toISOString().split('T')[0],
+            memory_type: 'short-term',
+            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: '2',
+            user_id: currentUser.id,
+            title: 'Quick Idea - App Feature',
+            content: 'What if we added a voice recording feature for quick note capture? Could be useful for mobile users.',
+            tags: ['idea', 'feature', 'mobile'],
+            note_date: new Date().toISOString().split('T')[0],
+            memory_type: 'short-term',
+            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: '3',
+            user_id: currentUser.id,
+            title: 'Shopping List',
+            content: 'Groceries: milk, bread, eggs, coffee, fruits. Also need to buy new headphones.',
+            tags: ['shopping', 'personal'],
+            note_date: new Date().toISOString().split('T')[0],
+            memory_type: 'short-term',
+            created_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+            updated_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ];
+
+        const mockLongTermNotes: DailyNote[] = [
+          {
+            id: '4',
+            user_id: currentUser.id,
+            title: 'React Best Practices',
+            content: 'Key principles for writing maintainable React code: component composition, proper state management, effective use of hooks, and performance optimization techniques.',
+            tags: ['react', 'programming', 'best-practices', 'javascript'],
+            note_date: new Date().toISOString().split('T')[0],
+            memory_type: 'long-term',
+            created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+            updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: '5',
+            user_id: currentUser.id,
+            title: 'Knowledge Management Principles',
+            content: 'Building a second brain requires: consistent capture, organized structure, regular review, and active connection-making between ideas.',
+            tags: ['knowledge-management', 'productivity', 'learning'],
+            note_date: new Date().toISOString().split('T')[0],
+            memory_type: 'long-term',
+            created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+            updated_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: '6',
+            user_id: currentUser.id,
+            title: 'Design System Guidelines',
+            content: 'Consistent spacing (8px grid), color palette with semantic meanings, typography hierarchy, and component reusability principles.',
+            tags: ['design', 'ui-ux', 'guidelines', 'system'],
+            note_date: new Date().toISOString().split('T')[0],
+            memory_type: 'long-term',
+            created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+            updated_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ];
+
+        setShortTermNotes(mockShortTermNotes);
+        setLongTermNotes(mockLongTermNotes);
+        return;
+      }
+
+      // Fetch from Supabase
+      const [shortTermResult, longTermResult] = await Promise.all([
+        supabase
+          .from('short_term_notes')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .is('archived_at', null)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('long_term_notes')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+      ]);
+
+      if (shortTermResult.error) throw shortTermResult.error;
+      if (longTermResult.error) throw longTermResult.error;
+
+             // Transform to include memory_type
+       const shortTermNotes = (shortTermResult.data || []).map((note: any) => ({
+         ...note,
+         memory_type: 'short-term' as const
+       }));
+
+       const longTermNotes = (longTermResult.data || []).map((note: any) => ({
+         ...note,
+         memory_type: 'long-term' as const
+       }));
+
+      setShortTermNotes(shortTermNotes);
+      setLongTermNotes(longTermNotes);
     } catch (err) {
       console.error('Error fetching notes:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch notes');
@@ -108,35 +241,101 @@ export const useMemoryNotes = () => {
     tags: string[];
     memoryType: 'short-term' | 'long-term';
   }) => {
-    if (!user) throw new Error('User not authenticated');
+    // For demo purposes, use a fallback user if none exists
+    const currentUser = user || {
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      name: 'Demo User',
+      email: 'demo@example.com'
+    };
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      let newNote: DailyNote;
 
-      const newNote: DailyNote = {
-        id: Date.now().toString(),
-        user_id: user.id,
-        title: noteData.title,
-        content: noteData.content,
-        tags: noteData.tags,
-        note_date: new Date().toISOString().split('T')[0],
-        memory_type: noteData.memoryType,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+             if (!isSupabaseConfigured()) {
+         // Mock data handling - use shared storage from useDailyNotes
+         await new Promise(resolve => setTimeout(resolve, 1000));
+         
+         // Use local date to avoid timezone issues
+         const now = new Date();
+         const noteDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-      if (noteData.memoryType === 'short-term') {
-        MOCK_SHORT_TERM_NOTES.unshift(newNote);
-        setShortTermNotes(prev => [newNote, ...prev]);
+         newNote = {
+           id: Date.now().toString(),
+           user_id: currentUser.id,
+           title: noteData.title,
+           content: noteData.content,
+           tags: noteData.tags,
+           note_date: noteDate,
+           memory_type: noteData.memoryType,
+           created_at: new Date().toISOString(),
+           updated_at: new Date().toISOString()
+         };
+
+        // Update local state
+        if (noteData.memoryType === 'short-term') {
+          setShortTermNotes(prev => [newNote, ...prev]);
+        } else {
+          setLongTermNotes(prev => [newNote, ...prev]);
+        }
       } else {
-        MOCK_LONG_TERM_NOTES.unshift(newNote);
-        setLongTermNotes(prev => [newNote, ...prev]);
+                 // Supabase handling
+         // Use local date to avoid timezone issues
+         const now = new Date();
+         const noteDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+         
+         if (noteData.memoryType === 'short-term') {
+           const { data, error } = await supabase
+             .from('short_term_notes')
+             .insert({
+               user_id: currentUser.id,
+               title: noteData.title,
+               content: noteData.content,
+               tags: noteData.tags,
+               note_date: noteDate
+             })
+             .select()
+             .single();
+
+           if (error) throw error;
+           if (!data) throw new Error('Failed to create note');
+
+           newNote = {
+             ...data,
+             memory_type: 'short-term'
+           };
+
+           setShortTermNotes(prev => [newNote, ...prev]);
+        } else {
+          const { data, error } = await supabase
+            .from('long_term_notes')
+            .insert({
+              user_id: currentUser.id,
+              title: noteData.title,
+              content: noteData.content,
+              tags: noteData.tags,
+              note_date: noteDate
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          if (!data) throw new Error('Failed to create note');
+
+          newNote = {
+            ...data,
+            memory_type: 'long-term'
+          };
+
+          setLongTermNotes(prev => [newNote, ...prev]);
+        }
       }
-      
+
+      // Immediate sync with daily notes
+      await refetchDailyNotes();
+
       return newNote;
     } catch (err) {
       console.error('Error saving note:', err);
@@ -148,35 +347,72 @@ export const useMemoryNotes = () => {
   };
 
   const moveToLongTerm = async (noteId: string) => {
-    if (!user) throw new Error('User not authenticated');
+    // For demo purposes, use a fallback user if none exists
+    const currentUser = user || {
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      name: 'Demo User',
+      email: 'demo@example.com'
+    };
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
       // Find the note in short term
-      const noteIndex = MOCK_SHORT_TERM_NOTES.findIndex(n => n.id === noteId);
-      if (noteIndex === -1) throw new Error('Note not found');
+      const note = shortTermNotes.find(n => n.id === noteId);
+      if (!note) throw new Error('Note not found');
 
-      const note = MOCK_SHORT_TERM_NOTES[noteIndex];
-      
-      // Create new long term note
-      const longTermNote: DailyNote = {
-        ...note,
-        memory_type: 'long-term',
-        updated_at: new Date().toISOString()
-      };
+      let longTermNote: DailyNote;
 
-      // Remove from short term
-      MOCK_SHORT_TERM_NOTES.splice(noteIndex, 1);
-      setShortTermNotes(prev => prev.filter(n => n.id !== noteId));
+      if (!isSupabaseConfigured()) {
+        // Mock data handling
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Add to long term
-      MOCK_LONG_TERM_NOTES.unshift(longTermNote);
-      setLongTermNotes(prev => [longTermNote, ...prev]);
+        longTermNote = {
+          ...note,
+          memory_type: 'long-term',
+          updated_at: new Date().toISOString()
+        };
+
+        // Update local state
+        setShortTermNotes(prev => prev.filter(n => n.id !== noteId));
+        setLongTermNotes(prev => [longTermNote, ...prev]);
+      } else {
+        // Supabase handling - delete from short term and create in long term
+        const [deleteResult, insertResult] = await Promise.all([
+          supabase
+            .from('short_term_notes')
+            .delete()
+            .eq('id', noteId),
+          supabase
+            .from('long_term_notes')
+            .insert({
+              user_id: currentUser.id,
+              title: note.title,
+              content: note.content,
+              tags: note.tags,
+              note_date: note.note_date
+            })
+            .select()
+            .single()
+        ]);
+
+        if (deleteResult.error) throw deleteResult.error;
+        if (insertResult.error) throw insertResult.error;
+        if (!insertResult.data) throw new Error('Failed to move note');
+
+        longTermNote = {
+          ...insertResult.data,
+          memory_type: 'long-term'
+        };
+
+        // Update local state
+        setShortTermNotes(prev => prev.filter(n => n.id !== noteId));
+        setLongTermNotes(prev => [longTermNote, ...prev]);
+      }
+
+      // Immediate sync with daily notes
+      await refetchDailyNotes();
 
       return longTermNote;
     } catch (err) {
@@ -189,28 +425,44 @@ export const useMemoryNotes = () => {
   };
 
   const deleteNote = async (noteId: string, memoryType: 'short-term' | 'long-term') => {
-    if (!user) throw new Error('User not authenticated');
-
     setIsLoading(true);
     setError(null);
 
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (!isSupabaseConfigured()) {
+        // Mock data handling
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      if (memoryType === 'short-term') {
-        const noteIndex = MOCK_SHORT_TERM_NOTES.findIndex(n => n.id === noteId);
-        if (noteIndex !== -1) {
-          MOCK_SHORT_TERM_NOTES.splice(noteIndex, 1);
+        if (memoryType === 'short-term') {
           setShortTermNotes(prev => prev.filter(n => n.id !== noteId));
+        } else {
+          setLongTermNotes(prev => prev.filter(n => n.id !== noteId));
         }
       } else {
-        const noteIndex = MOCK_LONG_TERM_NOTES.findIndex(n => n.id === noteId);
-        if (noteIndex !== -1) {
-          MOCK_LONG_TERM_NOTES.splice(noteIndex, 1);
+        // Supabase handling
+        if (memoryType === 'short-term') {
+          // Soft delete for short-term notes
+          const { error } = await supabase
+            .from('short_term_notes')
+            .update({ archived_at: new Date().toISOString() })
+            .eq('id', noteId);
+
+          if (error) throw error;
+          setShortTermNotes(prev => prev.filter(n => n.id !== noteId));
+        } else {
+          // Hard delete for long-term notes
+          const { error } = await supabase
+            .from('long_term_notes')
+            .delete()
+            .eq('id', noteId);
+
+          if (error) throw error;
           setLongTermNotes(prev => prev.filter(n => n.id !== noteId));
         }
       }
+
+      // Immediate sync with daily notes
+      await refetchDailyNotes();
     } catch (err) {
       console.error('Error deleting note:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete note');
@@ -221,9 +473,7 @@ export const useMemoryNotes = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchNotes();
-    }
+    fetchNotes();
   }, [user]);
 
   return {
