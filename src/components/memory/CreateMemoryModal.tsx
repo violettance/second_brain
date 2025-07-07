@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Save, Clock, Brain, Tag, Type, List, Hash, Quote, Code } from 'lucide-react';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 
@@ -16,8 +16,23 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const { saveNote } = useMemoryNotes();
+
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -63,7 +78,10 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div 
+        ref={modalRef}
+        className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 lg:p-6 border-b border-slate-700">
           <div className="flex items-center space-x-3">

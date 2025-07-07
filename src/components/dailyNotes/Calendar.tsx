@@ -49,14 +49,16 @@ export const Calendar: React.FC<CalendarProps> = ({
   };
 
   const hasNotes = (date: Date) => {
-    const dateString = date.toISOString().split('T')[0];
+    // Use local date to avoid timezone issues
+    const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const notesForDate = notes.filter(note => note.note_date === dateString);
     return notesForDate.length > 0;
   };
 
   // Get note count for a specific date
   const getNoteCount = (date: Date) => {
-    const dateString = date.toISOString().split('T')[0];
+    // Use local date to avoid timezone issues
+    const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return notes.filter(note => note.note_date === dateString).length;
   };
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar } from './Calendar';
 import { NoteEditor } from './NoteEditor';
 import { NotesList } from './NotesList';
+import { NotePreviewModal } from './NotePreviewModal';
 import { CalendarDays, List, Plus, Menu, Clock, Brain, X } from 'lucide-react';
 import { DailyNote } from '../../types/database';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
@@ -10,7 +11,9 @@ export const DailyNotes: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [showEditor, setShowEditor] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [editingNote, setEditingNote] = useState<DailyNote | undefined>(undefined);
+  const [previewNote, setPreviewNote] = useState<DailyNote | undefined>(undefined);
   const [defaultMemoryType, setDefaultMemoryType] = useState<'short-term' | 'long-term'>('short-term');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -18,12 +21,31 @@ export const DailyNotes: React.FC = () => {
   const { notes: allNotes, refetch: refetchAll } = useDailyNotes();
   const { notes: selectedDateNotes, refetch: refetchSelected } = useDailyNotes(selectedDate);
 
+  const handlePreviewNote = (note: DailyNote) => {
+    setPreviewNote(note);
+    setShowPreview(true);
+  };
+
   const handleEditNote = (note?: DailyNote, memoryType?: 'short-term' | 'long-term') => {
     setEditingNote(note);
     setShowEditor(true);
     // Store default memory type for new notes
     if (!note && memoryType) {
       setDefaultMemoryType(memoryType);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewNote(undefined);
+  };
+
+  const handleEditFromPreview = () => {
+    if (previewNote) {
+      setEditingNote(previewNote);
+      setShowEditor(true);
+      setShowPreview(false);
+      setPreviewNote(undefined);
     }
   };
 
@@ -105,7 +127,8 @@ export const DailyNotes: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-4">
               <NotesList 
                 selectedDate={selectedDate}
-                onEditNote={handleEditNote}
+                onEditNote={handlePreviewNote}
+                onDirectEdit={handleEditNote}
                 notes={selectedDateNotes}
                 onRefresh={refetchSelected}
               />
@@ -161,16 +184,26 @@ export const DailyNotes: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="p-4 overflow-y-auto">
+          <div className="p-4 overflow-y-auto h-full">
             <NotesList 
               selectedDate={null}
-              onEditNote={handleEditNote}
+              onEditNote={handlePreviewNote}
+              onDirectEdit={handleEditNote}
               notes={allNotes}
               onRefresh={refetchAll}
             />
           </div>
         )}
         
+        {/* Note Preview Modal */}
+        {showPreview && previewNote && (
+          <NotePreviewModal
+            note={previewNote}
+            onClose={handleClosePreview}
+            onEdit={handleEditFromPreview}
+          />
+        )}
+
         {/* Note Editor Modal */}
         {showEditor && (
           <NoteEditor

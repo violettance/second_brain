@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Save, 
@@ -43,6 +43,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   const [currentTag, setCurrentTag] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const { saveNote, updateNote } = useDailyNotes(selectedDate);
 
@@ -53,6 +54,41 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       titleInput.focus();
     }
   }, []);
+
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key) {
+          case 'b':
+            event.preventDefault();
+            handleBold();
+            break;
+          case 'i':
+            event.preventDefault();
+            handleItalic();
+            break;
+          case 's':
+            event.preventDefault();
+            handleSave();
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose, content]);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -111,9 +147,68 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
+  const insertText = (before: string, after: string = '') => {
+    const textarea = document.getElementById('note-content') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    
+    const newText = content.substring(0, start) + before + selectedText + after + content.substring(end);
+    setContent(newText);
+    
+    // Set cursor position after the inserted text
+    setTimeout(() => {
+      textarea.focus();
+      textarea.selectionStart = start + before.length;
+      textarea.selectionEnd = start + before.length + selectedText.length;
+    }, 0);
+  };
+
+  const handleBold = () => insertText('**', '**');
+  const handleItalic = () => insertText('*', '*');
+  const handleCode = () => insertText('`', '`');
+  const handleLink = () => {
+    const url = prompt('Enter URL:');
+    if (url) {
+      insertText('[', `](${url})`);
+    }
+  };
+  
+  const handleIndent = () => {
+    const textarea = document.getElementById('note-content') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    
+    // Get the selected text and split into lines
+    const selectedText = content.substring(start, end);
+    const lines = selectedText.split('\n');
+    
+    // Add 4 spaces to the beginning of each line
+    const indentedLines = lines.map(line => '    ' + line);
+    const indentedText = indentedLines.join('\n');
+    
+    // Replace the selected text with indented text
+    const newContent = content.substring(0, start) + indentedText + content.substring(end);
+    setContent(newContent);
+    
+    // Set cursor position after the indented text
+    setTimeout(() => {
+      textarea.focus();
+      textarea.selectionStart = start;
+      textarea.selectionEnd = start + indentedText.length;
+    }, 0);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div 
+        ref={modalRef}
+        className="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <h2 className="text-lg font-medium text-white">
@@ -195,27 +290,40 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             
             {/* Basic Formatting Toolbar */}
             <div className="flex items-center space-x-1 mb-2 p-1 bg-slate-700 rounded-t-md border-x border-t border-slate-600">
-              <button className="p-1 hover:bg-slate-600 rounded">
+              <button 
+                onClick={handleBold}
+                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                title="Bold (Ctrl+B)"
+              >
                 <Bold className="h-4 w-4 text-slate-400" />
               </button>
-              <button className="p-1 hover:bg-slate-600 rounded">
+              <button 
+                onClick={handleItalic}
+                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                title="Italic (Ctrl+I)"
+              >
                 <Italic className="h-4 w-4 text-slate-400" />
               </button>
-              <button className="p-1 hover:bg-slate-600 rounded">
-                <Underline className="h-4 w-4 text-slate-400" />
-              </button>
-              <div className="h-4 border-r border-slate-600 mx-1"></div>
-              <button className="p-1 hover:bg-slate-600 rounded">
-                <Link className="h-4 w-4 text-slate-400" />
-              </button>
-              <button className="p-1 hover:bg-slate-600 rounded">
-                <Image className="h-4 w-4 text-slate-400" />
-              </button>
-              <button className="p-1 hover:bg-slate-600 rounded">
+              <button 
+                onClick={handleCode}
+                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                title="Code"
+              >
                 <Code className="h-4 w-4 text-slate-400" />
               </button>
               <div className="h-4 border-r border-slate-600 mx-1"></div>
-              <button className="p-1 hover:bg-slate-600 rounded">
+              <button 
+                onClick={handleLink}
+                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                title="Add Link"
+              >
+                <Link className="h-4 w-4 text-slate-400" />
+              </button>
+              <button 
+                onClick={handleIndent}
+                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                title="Indent"
+              >
                 <Quote className="h-4 w-4 text-slate-400" />
               </button>
             </div>
@@ -275,7 +383,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
                     }`}
                     style={memoryType === 'long-term' ? { backgroundColor: 'rgba(194, 181, 252, 0.2)', color: '#C2B5FC' } : {}}
                   >
-                    <span>#{tag}</span>
+                                            <span>{tag}</span>
                     <button
                       onClick={() => handleRemoveTag(tag)}
                       className="hover:bg-slate-600 rounded-full p-0.5"
