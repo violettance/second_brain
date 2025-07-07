@@ -1,19 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Save, FolderOpen } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
+import { Project } from '../../types/projects';
 
-interface CreateProjectModalProps {
+interface EditProjectModalProps {
+  project: Project;
   onClose: () => void;
+  onProjectUpdated?: () => void;
 }
 
-export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [color, setColor] = useState('#C2B5FC');
-  const [dueDate, setDueDate] = useState('');
+export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, onClose, onProjectUpdated }) => {
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description);
+  const [color, setColor] = useState(project.color);
+  const [status, setStatus] = useState(project.status);
+  const [dueDate, setDueDate] = useState(project.dueDate || '');
   const [isSaving, setIsSaving] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const { createProject } = useProjects();
+  const { updateProject } = useProjects();
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -34,6 +38,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose 
     '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899'
   ];
 
+  const statuses = ['Active', 'In Progress', 'Completed', 'On Hold'] as const;
+
   const handleSave = async () => {
     if (!name.trim()) {
       alert('Please enter a project name');
@@ -42,17 +48,19 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose 
 
     setIsSaving(true);
     try {
-      await createProject({
+      await updateProject(project.id, {
         name: name.trim(),
         description: description.trim(),
         color,
+        status,
         dueDate: dueDate || undefined
       });
       
+      onProjectUpdated?.();
       onClose();
     } catch (error) {
-      console.error('Error creating project:', error);
-      alert('Failed to create project. Please try again.');
+      console.error('Error updating project:', error);
+      alert('Failed to update project. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -67,10 +75,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg" style={{ background: '#C2B5FC' }}>
+            <div className="p-2 rounded-lg" style={{ background: color }}>
               <FolderOpen className="h-5 w-5 text-slate-900" />
             </div>
-            <h2 className="text-xl font-bold text-white">Create New Project</h2>
+            <h2 className="text-xl font-bold text-white">Edit Project</h2>
           </div>
           <button
             onClick={onClose}
@@ -110,6 +118,23 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose 
               className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 resize-none"
               style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
             />
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as any)}
+              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+            >
+              {statuses.map((statusOption) => (
+                <option key={statusOption} value={statusOption}>{statusOption}</option>
+              ))}
+            </select>
           </div>
 
           {/* Color Selection */}
@@ -161,10 +186,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose 
             style={{ background: '#C2B5FC' }}
           >
             <Save className="h-4 w-4" />
-            <span>{isSaving ? 'Creating...' : 'Create Project'}</span>
+            <span>{isSaving ? 'Updating...' : 'Update Project'}</span>
           </button>
         </div>
       </div>
     </div>
   );
-};
+}; 

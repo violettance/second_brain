@@ -7,7 +7,6 @@ export interface Project {
   color: string;
   tasksCount: number;
   completedTasks: number;
-  teamMembers: number;
   dueDate?: string;
   createdAt: string;
   updatedAt: string;

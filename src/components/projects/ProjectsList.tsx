@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Search, Filter, MoreHorizontal, Calendar, Users, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, MoreHorizontal, Calendar, CheckCircle, Edit, Trash2 } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
+import { EditProjectModal } from './EditProjectModal';
 
 interface ProjectsListProps {
   onSelectProject: (projectId: string) => void;
@@ -9,7 +10,9 @@ interface ProjectsListProps {
 export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const { projects, isLoading } = useProjects();
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<string | null>(null);
+  const { projects, isLoading, deleteProject, refetch } = useProjects();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -38,6 +41,30 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
     const matchesStatus = statusFilter === 'All' || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleDeleteProject = async (projectId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this project? This will also delete all associated tasks.')) {
+      try {
+        await deleteProject(projectId);
+        setOpenDropdown(null);
+      } catch (error) {
+        console.error('Failed to delete project:', error);
+      }
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenDropdown(null);
+    };
+
+    if (openDropdown) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openDropdown]);
 
   if (isLoading) {
     return (
@@ -96,9 +123,40 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
                   <p className="text-slate-400 text-sm">{project.description}</p>
                 </div>
               </div>
-              <button className="p-2 hover:bg-slate-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                <MoreHorizontal className="h-4 w-4 text-slate-400" />
-              </button>
+              <div className="relative">
+                <button 
+                  className="p-2 hover:bg-slate-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenDropdown(openDropdown === project.id ? null : project.id);
+                  }}
+                >
+                  <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                </button>
+                
+                {openDropdown === project.id && (
+                  <div className="absolute right-0 top-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
+                    <button
+                      className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-600 flex items-center space-x-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingProject(project.id);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-slate-600 flex items-center space-x-2"
+                      onClick={(e) => handleDeleteProject(project.id, e)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Status */}
@@ -129,7 +187,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <div className="text-white font-semibold">{project.tasksCount}</div>
                 <div className="text-slate-400 text-xs">Tasks</div>
@@ -137,10 +195,6 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
               <div>
                 <div className="text-white font-semibold">{project.completedTasks}</div>
                 <div className="text-slate-400 text-xs">Done</div>
-              </div>
-              <div>
-                <div className="text-white font-semibold">{project.teamMembers}</div>
-                <div className="text-slate-400 text-xs">Members</div>
               </div>
             </div>
 
@@ -162,6 +216,15 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
           <div className="text-slate-400 text-lg mb-2">No projects found</div>
           <div className="text-slate-500 text-sm">Create your first project to get started</div>
         </div>
+      )}
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <EditProjectModal
+          project={projects.find(p => p.id === editingProject)!}
+          onClose={() => setEditingProject(null)}
+          onProjectUpdated={refetch}
+        />
       )}
     </div>
   );

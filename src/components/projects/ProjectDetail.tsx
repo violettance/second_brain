@@ -13,7 +13,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack 
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const { project, tasks, isLoading } = useProject(projectId);
+  const { project, tasks, isLoading, refetch } = useProject(projectId);
 
   if (isLoading || !project) {
     return (
@@ -64,7 +64,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack 
       </div>
 
       {/* Project Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
           <div className="text-2xl font-bold text-white">{project.tasksCount}</div>
           <div className="text-slate-400 text-sm">Total Tasks</div>
@@ -76,10 +76,6 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack 
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
           <div className="text-2xl font-bold text-white">{project.progress}%</div>
           <div className="text-slate-400 text-sm">Progress</div>
-        </div>
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
-          <div className="text-2xl font-bold text-white">{project.teamMembers}</div>
-          <div className="text-slate-400 text-sm">Team Members</div>
         </div>
       </div>
 
@@ -121,7 +117,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack 
           </div>
           <div className="space-y-3">
             {todoTasks.map(task => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onTaskUpdated={refetch} />
             ))}
           </div>
         </div>
@@ -136,7 +132,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack 
           </div>
           <div className="space-y-3">
             {inProgressTasks.map(task => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onTaskUpdated={refetch} />
             ))}
           </div>
         </div>
@@ -151,7 +147,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack 
           </div>
           <div className="space-y-3">
             {doneTasks.map(task => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onTaskUpdated={refetch} />
             ))}
           </div>
         </div>
@@ -161,7 +157,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack 
       {showCreateTask && (
         <CreateTaskModal 
           projectId={projectId}
-          onClose={() => setShowCreateTask(false)} 
+          onClose={() => setShowCreateTask(false)}
+          onTaskCreated={() => refetch()}
         />
       )}
     </div>

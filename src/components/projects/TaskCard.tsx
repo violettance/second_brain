@@ -1,12 +1,19 @@
-import React from 'react';
-import { Calendar, Flag, Link, User, MoreHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Flag, Link, User, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { Task } from '../../types/projects';
+import { useProject } from '../../hooks/useProjects';
+import { EditTaskModal } from './EditTaskModal';
 
 interface TaskCardProps {
   task: Task;
+  onTaskUpdated?: () => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onTaskUpdated }) => {
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const { deleteTask } = useProject(task.projectId);
+  
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High': return 'text-red-400';
@@ -20,6 +27,31 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
     return <Flag className={`h-3 w-3 ${getPriorityColor(priority)}`} />;
   };
 
+  const handleDeleteTask = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this task? This will also delete all subtasks.')) {
+      try {
+        await deleteTask(task.id);
+        onTaskUpdated?.();
+        setOpenDropdown(false);
+      } catch (error) {
+        console.error('Failed to delete task:', error);
+      }
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenDropdown(false);
+    };
+
+    if (openDropdown) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openDropdown]);
+
   return (
     <div className="bg-slate-700/50 border border-slate-600/50 rounded-lg p-4 hover:bg-slate-700/70 transition-all cursor-pointer group">
       {/* Task Header */}
@@ -27,9 +59,40 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
         <h4 className="text-white font-medium text-sm leading-tight flex-1 pr-2">
           {task.name}
         </h4>
-        <button className="p-1 hover:bg-slate-600 rounded transition-colors opacity-0 group-hover:opacity-100">
-          <MoreHorizontal className="h-3 w-3 text-slate-400" />
-        </button>
+        <div className="relative">
+          <button 
+            className="p-1 hover:bg-slate-600 rounded transition-colors opacity-0 group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(!openDropdown);
+            }}
+          >
+            <MoreHorizontal className="h-3 w-3 text-slate-400" />
+          </button>
+          
+          {openDropdown && (
+            <div className="absolute right-0 top-full mt-1 bg-slate-600 border border-slate-500 rounded-lg shadow-lg z-10 py-1 min-w-[100px]">
+              <button
+                className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-500 flex items-center space-x-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                  setOpenDropdown(false);
+                }}
+              >
+                <Edit className="h-3 w-3" />
+                <span>Edit</span>
+              </button>
+              <button
+                className="w-full px-3 py-2 text-left text-xs text-red-400 hover:bg-slate-500 flex items-center space-x-2"
+                onClick={handleDeleteTask}
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>Delete</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Description */}
@@ -103,6 +166,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
             ></div>
           </div>
         </div>
+      )}
+
+      {/* Edit Task Modal */}
+      {isEditing && (
+        <EditTaskModal
+          task={task}
+          projectId={task.projectId}
+          onClose={() => setIsEditing(false)}
+          onTaskUpdated={onTaskUpdated}
+        />
       )}
     </div>
   );
