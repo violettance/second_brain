@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Save, CheckSquare, Calendar, Flag, Link, User, Plus } from 'lucide-react';
+import { useProject } from '../../hooks/useProjects';
 
 interface CreateTaskModalProps {
   projectId: string;
   onClose: () => void;
+  onTaskCreated?: () => void;
 }
 
-export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ projectId, onClose }) => {
+export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ projectId, onClose, onTaskCreated }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('TO DO');
@@ -19,6 +21,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ projectId, onC
   const [subtaskInput, setSubtaskInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const { createTask } = useProject(projectId);
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -71,22 +74,18 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ projectId, onC
 
     setIsSaving(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Here you would normally save to your backend
-      console.log('Creating task:', {
-        projectId,
-        name,
-        description,
-        status,
-        priority,
-        startDate,
-        dueDate,
-        tags,
-        subtasks
+      await createTask({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        status: status as any,
+        priority: priority as any,
+        startDate: startDate || undefined,
+        dueDate: dueDate || undefined,
+        tags: tags.length > 0 ? tags : undefined,
+        subtasks: subtasks.length > 0 ? subtasks : undefined
       });
       
+      onTaskCreated?.();
       onClose();
     } catch (error) {
       console.error('Error creating task:', error);
