@@ -26,6 +26,7 @@ const menuItems = [
   { id: 'short-term-memory', icon: Clock, label: 'Short Term Memory' },
   { id: 'long-term-memory', icon: Brain, label: 'Long Term Memory' },
   { id: 'projects', icon: FolderOpen, label: 'Projects' },
+  { id: 'knowledge-network', icon: BarChart3, label: 'Knowledge Network' },
   { id: 'analytics', icon: BarChart3, label: 'Analytics' },
   { id: 'settings', icon: Settings, label: 'Settings' },
 ];

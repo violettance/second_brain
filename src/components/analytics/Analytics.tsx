@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   BarChart3, 
   Download, 
@@ -26,12 +26,15 @@ import { TopicEvolutionChart } from './TopicEvolutionChart';
 import { PaywallModal } from './PaywallModal';
 import { useAnalytics, fetchNotCreationTrends } from '../../hooks/useAnalytics';
 import { supabase } from '../../lib/supabase';
+import { useProjects } from '../../hooks/useProjects';
+import { Task } from '../../types/projects';
 
 export const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
   const [graphFilter, setGraphFilter] = useState('all');
   const [showPaywall, setShowPaywall] = useState(false);
   const { analyticsData, isLoading, exportData } = useAnalytics(timeRange);
+  const { projects, isLoading: loadingProjects } = useProjects();
 
   // Not Creation Trends state
   const [notCreationTrends, setNotCreationTrends] = useState<{ date: string; value: number }[]>([]);
@@ -54,6 +57,116 @@ export const Analytics: React.FC = () => {
   // Knowledge Score state
   const [knowledgeScore, setKnowledgeScore] = useState(0);
   const [knowledgeScoreChange, setKnowledgeScoreChange] = useState<number | null>(null);
+
+  // Memory Distribution BarChart data (real note counts)
+  const [memoryBarData, setMemoryBarData] = useState<{ label: string; value: number; color: string }[]>([]);
+  useEffect(() => {
+    async function fetchMemoryDistribution() {
+      const { data, error } = await supabase
+        .from('analytics_memory_distribution_bars')
+        .select('*')
+        .single();
+      if (error || !data) {
+        setMemoryBarData([]);
+        return;
+      }
+      let short = 0, long = 0;
+      if (timeRange === '7d') {
+        short = Number(data.st_7) || 0;
+        long = Number(data.lt_7) || 0;
+      } else if (timeRange === '30d') {
+        short = Number(data.st_30) || 0;
+        long = Number(data.lt_30) || 0;
+      } else {
+        short = Number(data.st_all) || 0;
+        long = Number(data.lt_all) || 0;
+      }
+      setMemoryBarData([
+        { label: 'Short Term', value: short, color: '#fb923c' },
+        { label: 'Long Term', value: long, color: '#a78bfa' }
+      ]);
+    }
+    fetchMemoryDistribution();
+  }, [timeRange]);
+
+  // Note Activity by Day of Week BarChart data
+  const [noteActivityBarData, setNoteActivityBarData] = useState<{ label: string; value: number; color: string }[]>([]);
+  useEffect(() => {
+    async function fetchNoteActivity() {
+      const { data, error } = await supabase
+        .from('analytics_note_activity_by_weekday')
+        .select('*')
+        .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
+        .order('weekday_num', { ascending: true });
+      if (error || !data) {
+        setNoteActivityBarData([]);
+        return;
+      }
+      setNoteActivityBarData(data.map((d: any) => ({ label: d.weekday.trim(), value: Number(d.total), color: '#38bdf8' })));
+    }
+    fetchNoteActivity();
+  }, [timeRange]);
+
+  // Note Activity by Hour BarChart data
+  const [noteHourBarData, setNoteHourBarData] = useState<{ label: string; value: number; color: string }[]>([]);
+  useEffect(() => {
+    async function fetchNoteHourActivity() {
+      const { data, error } = await supabase
+        .from('analytics_note_activity_by_hour')
+        .select('*')
+        .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
+        .order('hour', { ascending: true });
+      if (error || !data) {
+        setNoteHourBarData([]);
+        return;
+      }
+      // 0-23 tüm saatler için bar oluştur
+      const hourMap = new Map<number, number>();
+      data.forEach((d: any) => { hourMap.set(Number(d.hour), Number(d.total)); });
+      const bars = Array.from({ length: 24 }, (_, h) => ({
+        label: h.toString().padStart(2, '0') + ':00',
+        value: hourMap.get(h) || 0,
+        color: '#f472b6'
+      }));
+      setNoteHourBarData(bars);
+    }
+    fetchNoteHourActivity();
+  }, [timeRange]);
+
+  // Tag Usage Frequency BarChart data
+  const [tagUsageBarData, setTagUsageBarData] = useState<{ label: string; value: number; color: string }[]>([]);
+  useEffect(() => {
+    async function fetchTagUsage() {
+      const { data, error } = await supabase
+        .from('analytics_tag_usage_frequency')
+        .select('*')
+        .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
+        .order('total', { ascending: false });
+      if (error || !data) {
+        setTagUsageBarData([]);
+        return;
+      }
+      setTagUsageBarData(data.map((d: any) => ({ label: d.tag, value: Number(d.total), color: '#38bdf8' })));
+    }
+    fetchTagUsage();
+  }, [timeRange]);
+
+  // Tag Co-Occurrence Matrix state
+  const [tagCooccurrence, setTagCooccurrence] = useState<{ tag1: string; tag2: string; total: number }[]>([]);
+  const [loadingCooccurrence, setLoadingCooccurrence] = useState(true);
+  useEffect(() => {
+    setLoadingCooccurrence(true);
+    supabase
+      .from('analytics_tag_cooccurrence_matrix')
+      .select('*')
+      .order('total', { ascending: false })
+      .limit(5)
+      .then(({ data, error }: { data: any; error: any }) => {
+        setTagCooccurrence(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setTagCooccurrence([]))
+      .finally(() => setLoadingCooccurrence(false));
+  }, [timeRange]);
 
   useEffect(() => {
     setLoadingTrends(true);
@@ -194,6 +307,69 @@ export const Analytics: React.FC = () => {
     }
     fetchKnowledgeScore();
   }, [timeRange]);
+
+  // Fetch all tasks and group by projectId
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [loadingAllTasks, setLoadingAllTasks] = useState(false);
+  useEffect(() => {
+    setLoadingAllTasks(true);
+    supabase
+      .from('tasks')
+      .select('*, subtasks(*)')
+      .then(({ data, error }: { data: any; error: any }) => {
+        if (Array.isArray(data)) {
+          setAllTasks(data.map((task: any) => ({
+            id: task.id,
+            projectId: task.project_id,
+            name: task.name,
+            description: task.description,
+            status: task.status,
+            priority: task.priority,
+            startDate: task.start_date,
+            dueDate: task.due_date,
+            tags: task.tags,
+            subtasks: Array.isArray(task.subtasks)
+              ? task.subtasks.map((st: any) => ({
+                  id: st.id,
+                  name: st.name,
+                  completed: st.completed
+                }))
+              : [],
+            createdAt: task.created_at,
+            updatedAt: task.updated_at
+          })));
+        } else {
+          setAllTasks([]);
+        }
+      })
+      .catch(() => setAllTasks([]))
+      .finally(() => setLoadingAllTasks(false));
+  }, []);
+
+  // Group tasks by projectId
+  const tasksByProject: Record<string, Task[]> = useMemo(() => {
+    const map: Record<string, Task[]> = {};
+    allTasks.forEach((task) => {
+      if (!map[task.projectId]) map[task.projectId] = [];
+      map[task.projectId].push(task);
+    });
+    return map;
+  }, [allTasks]);
+
+  // Note Depth & Complexity Analysis data
+  const [noteDepthData, setNoteDepthData] = useState<any[]>([]);
+  const [loadingNoteDepth, setLoadingNoteDepth] = useState(true);
+  useEffect(() => {
+    setLoadingNoteDepth(true);
+    supabase
+      .from('analytics_note_depth_analysis')
+      .select('*')
+      .then(({ data, error }: { data: any; error: any }) => {
+        setNoteDepthData(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setNoteDepthData([]))
+      .finally(() => setLoadingNoteDepth(false));
+  }, []);
 
   function renderTotalChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
@@ -336,98 +512,216 @@ export const Analytics: React.FC = () => {
             )}
           </div>
           <hr className="border-slate-700" />
-          {/* 2. Memory Distribution (Short Term vs Long Term) — Bar Chart */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">📊 Memory Distribution (Short Term vs Long Term)</h2>
-            <p className="text-slate-400 text-sm mb-4">Mevcut tüm notların % kaçı short, % kaçı long?</p>
-            <div className="h-64 flex items-center justify-center text-slate-500">Bar Chart Placeholder</div>
+          {/* Memory Distribution & Note Activity by Day of Week yan yana */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Memory Distribution */}
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+              <h2 className="text-lg font-bold text-white mb-1">Memory Distribution</h2>
+              <p className="text-slate-400 text-sm mb-4">
+                {`Distribution of your notes by memory type for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
+              </p>
+              <div className="h-64 flex items-end justify-center">
+                {memoryBarData.map((bar, idx) => (
+                  <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
+                    <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
+                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
+                    <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Note Activity by Day of Week */}
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+              <h2 className="text-lg font-bold text-white mb-1">Note Activity by Day of Week</h2>
+              <p className="text-slate-400 text-sm mb-4">
+                {`Number of notes created on each day of the week for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
+              </p>
+              <div className="h-64 flex items-end justify-center">
+                {noteActivityBarData.map((bar, idx) => (
+                  <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
+                    <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
+                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
+                    <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <hr className="border-slate-700" />
           {/* 3. Note Activity by Hour — Bar Chart */}
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">🕒 Note Activity by Hour</h2>
-            <p className="text-slate-400 text-sm mb-4">Hangi saatlerde daha çok not giriyorsun?</p>
-            <div className="h-64 flex items-center justify-center text-slate-500">Bar Chart Placeholder</div>
-          </div>
-          <hr className="border-slate-700" />
-          {/* 4. Note Activity by Day of Week — Bar Chart */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">📅 Note Activity by Day of Week</h2>
-            <p className="text-slate-400 text-sm mb-4">Haftanın hangi günleri daha aktif olduğun gösterilir.</p>
-            <div className="h-64 flex items-center justify-center text-slate-500">Bar Chart Placeholder</div>
-          </div>
-          <hr className="border-slate-700" />
-          {/* 5. Tag Usage Frequency — Horizontal Bar Chart */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">🧠 Tag Usage Frequency</h2>
-            <p className="text-slate-400 text-sm mb-4">Hangi kavramlar, temalar, alanlar üzerinde daha çok çalışıyorsun?</p>
-            <div className="h-64 flex items-center justify-center text-slate-500">Horizontal Bar Chart Placeholder</div>
-          </div>
-          <hr className="border-slate-700" />
-          {/* 7. Tag Co-Occurrence Matrix — Network Graph */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">🧩 Tag Co-Occurrence Matrix</h2>
-            <p className="text-slate-400 text-sm mb-4">Hangi etiketler birbiriyle birlikte daha çok geçiyor?</p>
-            <div className="h-64 flex items-center justify-center text-slate-500">Network Graph Placeholder</div>
-          </div>
-          <hr className="border-slate-700" />
-          {/* 9. Active Project Progress Overview — Progress Bar Set */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">🚦 Active Project Progress Overview</h2>
-            <p className="text-slate-400 text-sm mb-4">Her projenin tamamlanma yüzdesi ve görev durumu.</p>
-            <div className="h-64 flex items-center justify-center text-slate-500">Project Progress Bars Placeholder</div>
-          </div>
-          <hr className="border-slate-700" />
-          {/* 10. Not Depth Analysis — Histogram */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">🧭 Not Depth Analysis</h2>
-            <p className="text-slate-400 text-sm mb-4">Notların ortalama uzunluğu / kelime sayısı / karmaşıklık düzeyi.</p>
-            <div className="h-64 flex items-center justify-center text-slate-500">Histogram Chart Placeholder</div>
-          </div>
-        </div>
-
-        {/* Advanced Knowledge Graph - Purple Theme */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 space-y-4 lg:space-y-0">
-            <div>
-              <h2 className="text-xl font-bold text-white mb-1">Knowledge Network</h2>
-              <p className="text-slate-400 text-sm">Interactive visualization of your interconnected thoughts</p>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <select
-                value={graphFilter}
-                onChange={(e) => setGraphFilter(e.target.value)}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 text-sm"
-                style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
-              >
-                <option value="all">All Connections</option>
-                <option value="short-term">Short-term Only</option>
-                <option value="long-term">Long-term Only</option>
-                <option value="recent">Recent (7 days)</option>
-                <option value="tags">By Tags</option>
-                <option value="dates">By Dates</option>
-              </select>
-              
-              <button className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg border border-slate-600 transition-colors">
-                <Filter className="h-4 w-4 text-slate-400" />
-              </button>
+            <h2 className="text-lg font-bold text-white mb-1">Note Activity by Hour</h2>
+            <p className="text-slate-400 text-sm mb-4">
+              {`Number of notes created by hour for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
+            </p>
+            <div className="h-64 flex items-end justify-center">
+              {noteHourBarData.map((bar, idx) => (
+                <div key={bar.label} className="flex-1 flex flex-col items-center mx-1">
+                  <div className="text-white text-xs font-bold mb-1">{bar.value}</div>
+                  <div className="w-4 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
+                  <div className="text-slate-400 text-[10px] text-center font-medium mt-2">{bar.label}</div>
+                </div>
+              ))}
             </div>
           </div>
-          
-          <KnowledgeGraphAdvanced 
-            data={{
-              nodes: analyticsData.knowledgeGraph.nodes.map(n => ({
-                ...n,
-                type: n.type === 'tag' ? 'tag' : 'note'
-              })),
-              edges: analyticsData.knowledgeGraph.edges.map(e => ({
-                ...e,
-                type: 'semantic'
-              }))
-            }}
-            filter={graphFilter}
-          />
+          <hr className="border-slate-700" />
+          {/* Tag Usage Frequency — Bar Chart */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">Tag Usage Frequency</h2>
+            <p className="text-slate-400 text-sm mb-4">
+              {`Most used tags for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
+            </p>
+            <div className="h-64 flex items-end justify-center">
+              {tagUsageBarData.map((bar, idx) => (
+                <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
+                  <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
+                  <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
+                  <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <hr className="border-slate-700" />
+          {/* 7. Tag Co-Occurrence Matrix — Table */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">Tag Co-Occurrence Matrix</h2>
+            <p className="text-slate-400 text-sm mb-4">
+              {`Top tag pairs that most frequently appear together in your notes for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
+            </p>
+            {loadingCooccurrence ? (
+              <div className="h-32 flex items-center justify-center text-slate-500">Loading...</div>
+            ) : tagCooccurrence.length === 0 ? (
+              <div className="h-32 flex items-center justify-center text-slate-500">No tag co-occurrence data found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-[320px] w-full text-left border-collapse">
+                  <thead>
+                    <tr className="text-slate-400 text-xs uppercase border-b border-slate-700">
+                      <th className="py-2 px-3">Tag 1</th>
+                      <th className="py-2 px-3">Tag 2</th>
+                      <th className="py-2 px-3">Co-Occurrence</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tagCooccurrence.slice(0, 5).map((row, idx) => (
+                      <tr key={row.tag1 + '-' + row.tag2} className="border-b border-slate-700 hover:bg-slate-700/30">
+                        <td className="py-2 px-3 font-medium text-white">{row.tag1}</td>
+                        <td className="py-2 px-3 font-medium text-white">{row.tag2}</td>
+                        <td className="py-2 px-3 text-slate-300">{row.total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+          <hr className="border-slate-700" />
+          {/* 9. Active Project Progress Overview + 10. Note Depth & Complexity Analysis side by side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Active Project Progress Overview */}
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+              <h2 className="text-lg font-bold text-white mb-1">Active Project Progress Overview</h2>
+              <p className="text-slate-400 text-sm mb-4">
+                Progress and task status for your in-progress projects.
+              </p>
+              {loadingProjects ? (
+                <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+              ) : (
+                <div className="flex flex-col items-center justify-start text-slate-500 w-full">
+                  {projects.filter(p => p.status === 'In Progress').length === 0 ? (
+                    <div className="h-64 flex items-center justify-center">No in-progress projects found.</div>
+                  ) : (
+                    projects.filter(p => p.status === 'In Progress').map((project) => {
+                      const projectTasks = tasksByProject[project.id] || [];
+                      return (
+                        <div key={project.id} className="w-full max-w-xl mb-6 bg-slate-900/60 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-white font-medium">{project.name}</span>
+                            <span className="text-slate-400 text-xs">{project.progress}%</span>
+                          </div>
+                          <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden mb-2">
+                            <div
+                              className="h-3 rounded-full"
+                              style={{ width: `${project.progress}%`, backgroundColor: project.color || '#a78bfa' }}
+                            ></div>
+                          </div>
+                          {/* Task List for this project */}
+                          <div className="mt-2">
+                            <div className="text-slate-400 text-xs mb-1">Tasks</div>
+                            {projectTasks.length > 0 ? (
+                              <div className="space-y-2">
+                                {projectTasks.map((task: Task) => (
+                                  <div key={task.id} className="bg-slate-800/70 rounded px-2 py-1 flex flex-col mb-1">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-slate-200 text-sm">{task.name}</span>
+                                      <span className="flex items-center gap-1 text-xs font-medium">
+                                        <span className={`inline-block w-2 h-2 rounded-full ${task.status === 'DONE' ? 'bg-green-400' : task.status === 'IN PROGRESS' ? 'bg-yellow-400' : 'bg-slate-400'}`}></span>
+                                        <span className={` ${task.status === 'DONE' ? 'text-green-400' : task.status === 'IN PROGRESS' ? 'text-yellow-400' : 'text-slate-400'}`}>{task.status}</span>
+                                      </span>
+                                    </div>
+                                    {/* Subtask progress bar if available */}
+                                    {task.subtasks && task.subtasks.length > 0 && (
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-slate-400 text-xs">
+                                          {task.subtasks.filter((st: { completed: boolean }) => st.completed).length} / {task.subtasks.length} subtasks
+                                        </span>
+                                        <div className="flex-1 h-1 bg-slate-700 rounded-full overflow-hidden">
+                                          <div
+                                            className="h-1 rounded-full bg-green-400"
+                                            style={{ width: `${(task.subtasks.filter((st: { completed: boolean }) => st.completed).length / task.subtasks.length) * 100}%` }}
+                                          ></div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-slate-500 text-xs italic">No tasks</div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+            {/* Note Depth & Complexity Analysis */}
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+              <h2 className="text-lg font-bold text-white mb-1">Note Depth & Complexity Analysis</h2>
+              <p className="text-slate-400 text-sm mb-4">
+                Average note length, word count, and lexical complexity for your notes.
+              </p>
+              {loadingNoteDepth ? (
+                <div className="h-32 flex items-center justify-center text-slate-500">Loading...</div>
+              ) : noteDepthData.length === 0 ? (
+                <div className="h-32 flex items-center justify-center text-slate-500">No data found.</div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {noteDepthData.map((row: any) => (
+                    <div key={row.type} className="rounded-lg shadow border border-slate-700 bg-slate-900/80 p-4 flex flex-col min-w-[180px]">
+                      <div className="font-bold text-white text-base mb-2 capitalize">{row.type.replace('_', ' ')} Note</div>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        <div className="flex flex-col">
+                          <span className="text-slate-400 text-xs">Avg Length</span>
+                          <span className="text-sm text-white font-semibold">{Number(row.avg_length).toFixed(1)} chars</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-slate-400 text-xs">Avg Word Count</span>
+                          <span className="text-sm text-white font-semibold">{Number(row.avg_word_count).toFixed(1)}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-slate-400 text-xs">Avg Word Complexity</span>
+                          <span className="text-sm text-white font-semibold">{Number(row.avg_word_complexity).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* AI Insights Panel with Pro Upgrade - Purple Theme */}
