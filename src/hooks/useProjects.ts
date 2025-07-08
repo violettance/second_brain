@@ -128,8 +128,8 @@ export const useProjects = () => {
 
   const fetchProjects = async () => {
     // For demo purposes, use a fallback user if none exists
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -215,8 +215,8 @@ export const useProjects = () => {
     color: string;
     dueDate?: string;
   }) => {
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -293,8 +293,8 @@ export const useProjects = () => {
     progress: number;
     dueDate?: string;
   }>) => {
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -346,8 +346,8 @@ export const useProjects = () => {
   };
 
   const deleteProject = async (projectId: string) => {
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -411,8 +411,8 @@ export const useProject = (projectId: string) => {
   const { user } = useAuth();
 
   const fetchProject = async () => {
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -516,8 +516,8 @@ export const useProject = (projectId: string) => {
     tags?: string[];
     subtasks?: string[];
   }) => {
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -640,8 +640,8 @@ export const useProject = (projectId: string) => {
     dueDate?: string;
     tags?: string[];
   }>) => {
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -710,8 +710,8 @@ export const useProject = (projectId: string) => {
   };
 
   const deleteTask = async (taskId: string) => {
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };

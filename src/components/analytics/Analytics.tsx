@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   Download, 
@@ -24,13 +24,200 @@ import { KnowledgeGraphAdvanced } from './KnowledgeGraphAdvanced';
 import { BrainGrowthChart } from './BrainGrowthChart';
 import { TopicEvolutionChart } from './TopicEvolutionChart';
 import { PaywallModal } from './PaywallModal';
-import { useAnalytics } from '../../hooks/useAnalytics';
+import { useAnalytics, fetchNotCreationTrends } from '../../hooks/useAnalytics';
+import { supabase } from '../../lib/supabase';
 
 export const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
   const [graphFilter, setGraphFilter] = useState('all');
   const [showPaywall, setShowPaywall] = useState(false);
   const { analyticsData, isLoading, exportData } = useAnalytics(timeRange);
+
+  // Not Creation Trends state
+  const [notCreationTrends, setNotCreationTrends] = useState<{ date: string; value: number }[]>([]);
+  const [loadingTrends, setLoadingTrends] = useState(true);
+
+  // Not Creation Trends description by timeRange
+  const trendsDescription =
+    timeRange === '7d' ? 'Cumulative note creation trend for the last 7 days.' :
+    timeRange === '30d' ? 'Cumulative note creation trend for the last 30 days.' :
+    'Cumulative note creation trend for all time.';
+
+  // Total Thoughts state (Supabase view)
+  const [totalThoughts, setTotalThoughts] = useState(0);
+  const [totalChange, setTotalChange] = useState<number | null>(null);
+
+  // Active Topics state
+  const [activeTopics, setActiveTopics] = useState(0);
+  const [activeTopicsChange, setActiveTopicsChange] = useState<number | null>(null);
+
+  // Knowledge Score state
+  const [knowledgeScore, setKnowledgeScore] = useState(0);
+  const [knowledgeScoreChange, setKnowledgeScoreChange] = useState<number | null>(null);
+
+  useEffect(() => {
+    setLoadingTrends(true);
+    fetchNotCreationTrends(timeRange)
+      .then(setNotCreationTrends)
+      .finally(() => setLoadingTrends(false));
+  }, [timeRange]);
+
+  useEffect(() => {
+    async function fetchTotalThoughtsFromView() {
+      const { data, error } = await supabase.from('analytics_total_thoughts_change').select('*').single();
+      if (error || !data) {
+        setTotalThoughts(0);
+        setTotalChange(null);
+        return;
+      }
+      let total = 0;
+      let prev: number | null = 0;
+      if (timeRange === '7d') {
+        total = Number(data.sum_7) || 0;
+        prev = Number(data.sum_prev_7) || 0;
+      } else if (timeRange === '30d') {
+        total = Number(data.sum_30) || 0;
+        prev = Number(data.sum_prev_30) || 0;
+      } else {
+        // all time: sum_all
+        total = Number(data.sum_all) || 0;
+        prev = null;
+      }
+      setTotalThoughts(total);
+      if (prev === null || timeRange === 'all') {
+        setTotalChange(null);
+        return;
+      }
+      let change = 0;
+      if (prev === 0 && total > 0) {
+        change = 100;
+      } else if (prev === 0 && total === 0) {
+        change = 0;
+      } else if (prev > 0) {
+        change = Math.round(((total - prev) / prev) * 100);
+        if (change > 100) change = 100;
+        if (change < -100) change = -100;
+      } else {
+        change = 0;
+      }
+      setTotalChange(change);
+    }
+    fetchTotalThoughtsFromView();
+  }, [timeRange]);
+
+  useEffect(() => {
+    async function fetchActiveTopics() {
+      const { data, error } = await supabase
+        .from('analytics_active_topics')
+        .select('*')
+        .single();
+      if (error || !data) {
+        setActiveTopics(0);
+        setActiveTopicsChange(null);
+        return;
+      }
+      let total = 0;
+      let prev: number | null = 0;
+      if (timeRange === '7d') {
+        total = Number(data.sum_7) || 0;
+        prev = Number(data.sum_prev_7) || 0;
+      } else if (timeRange === '30d') {
+        total = Number(data.sum_30) || 0;
+        prev = Number(data.sum_prev_30) || 0;
+      } else {
+        total = Number(data.sum_all) || 0;
+        prev = null;
+      }
+      setActiveTopics(total);
+      if (prev === null || timeRange === 'all') {
+        setActiveTopicsChange(null);
+        return;
+      }
+      let change = 0;
+      if (prev === 0 && total > 0) {
+        change = 100;
+      } else if (prev === 0 && total === 0) {
+        change = 0;
+      } else if (prev > 0) {
+        change = Math.round(((total - prev) / prev) * 100);
+        if (change > 100) change = 100;
+        if (change < -100) change = -100;
+      } else {
+        change = 0;
+      }
+      setActiveTopicsChange(change);
+    }
+    fetchActiveTopics();
+  }, [timeRange]);
+
+  useEffect(() => {
+    async function fetchKnowledgeScore() {
+      const { data, error } = await supabase
+        .from('analytics_knowledge_score')
+        .select('*')
+        .single();
+      if (error || !data) {
+        setKnowledgeScore(0);
+        setKnowledgeScoreChange(null);
+        return;
+      }
+      let total = 0;
+      let prev: number | null = 0;
+      if (timeRange === '7d') {
+        total = Number(data.sum_7) || 0;
+        prev = Number(data.sum_prev_7) || 0;
+      } else if (timeRange === '30d') {
+        total = Number(data.sum_30) || 0;
+        prev = Number(data.sum_prev_30) || 0;
+      } else {
+        total = Number(data.sum_all) || 0;
+        prev = null;
+      }
+      setKnowledgeScore(total);
+      if (prev === null || timeRange === 'all') {
+        setKnowledgeScoreChange(null);
+        return;
+      }
+      let change = 0;
+      if (prev === 0 && total > 0) {
+        change = 100;
+      } else if (prev === 0 && total === 0) {
+        change = 0;
+      } else if (prev > 0) {
+        change = Math.round(((total - prev) / prev) * 100);
+        if (change > 100) change = 100;
+        if (change < -100) change = -100;
+      } else {
+        change = 0;
+      }
+      setKnowledgeScoreChange(change);
+    }
+    fetchKnowledgeScore();
+  }, [timeRange]);
+
+  function renderTotalChange(change: number | null) {
+    if (change === null || timeRange === 'all') return null;
+    if (change === 0) return <span className="text-slate-400">0%</span>;
+    const color = change > 0 ? 'text-green-400' : 'text-red-400';
+    const sign = change > 0 ? '+' : '';
+    return <span className={color}>{sign}{change}% from previous period</span>;
+  }
+
+  function renderActiveTopicsChange(change: number | null) {
+    if (change === null || timeRange === 'all') return null;
+    if (change === 0) return <span className="text-slate-400">0%</span>;
+    const color = change > 0 ? 'text-green-400' : 'text-red-400';
+    const sign = change > 0 ? '+' : '';
+    return <span className={color}>{sign}{change}% from previous period</span>;
+  }
+
+  function renderKnowledgeScoreChange(change: number | null) {
+    if (change === null || timeRange === 'all') return null;
+    if (change === 0) return <span className="text-slate-400">0%</span>;
+    const color = change > 0 ? 'text-green-400' : 'text-red-400';
+    const sign = change > 0 ? '+' : '';
+    return <span className={color}>{sign}{change}% from previous period</span>;
+  }
 
   const handleExport = async () => {
     try {
@@ -74,16 +261,6 @@ export const Analytics: React.FC = () => {
                 Insights into your knowledge patterns and thinking trends
               </p>
             </div>
-            
-            {/* Mobile Export Button */}
-            <button
-              onClick={handleExport}
-              className="flex items-center justify-center space-x-2 px-3 lg:px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-xs lg:text-sm hover:opacity-90"
-              style={{ background: '#C2B5FC' }}
-            >
-              <Download className="h-3 w-3 lg:h-4 lg:w-4" />
-              <span className="hidden sm:inline">Export</span>
-            </button>
           </div>
           
           {/* Simple Controls Row */}
@@ -96,8 +273,6 @@ export const Analytics: React.FC = () => {
             >
               <option value="7d">7 days</option>
               <option value="30d">30 days</option>
-              <option value="90d">3 months</option>
-              <option value="1y">1 year</option>
               <option value="all">All time</option>
             </select>
             
@@ -110,35 +285,32 @@ export const Analytics: React.FC = () => {
 
       {/* Main Content */}
       <div className="p-4 lg:p-6 space-y-6 bg-slate-900 min-h-full">
-        {/* Key Metrics - Pastel Colors */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-slate-400 text-sm font-medium">Total Thoughts</h3>
               <Brain className="h-5 w-5" style={{ color: '#a7c7e7' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{analyticsData.totalNotes}</div>
-            <div className="text-sm" style={{ color: '#b8e6b8' }}>+{analyticsData.growthRate}% this month</div>
+            <div className="text-2xl lg:text-3xl font-bold text-white">{totalThoughts}</div>
+            {renderTotalChange(totalChange)}
           </div>
-
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-slate-400 text-sm font-medium">Active Topics</h3>
               <Tag className="h-5 w-5" style={{ color: '#f4c2a1' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{analyticsData.activeTopics}</div>
-            <div className="text-sm text-slate-400">Unique subjects</div>
+            <div className="text-2xl lg:text-3xl font-bold text-white">{activeTopics}</div>
+            {renderActiveTopicsChange(activeTopicsChange)}
           </div>
-
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-slate-400 text-sm font-medium">Knowledge Score</h3>
-              <TrendingUp className="h-5 w-5" style={{ color: '#b8e6b8' }} />
+              <TrendingUp className="h-5 w-5" style={{ color: '#a7c7e7' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{analyticsData.knowledgeScore}%</div>
-            <div className="text-sm" style={{ color: '#b8e6b8' }}>+5% this week</div>
+            <div className="text-2xl lg:text-3xl font-bold text-white">{knowledgeScore}</div>
+            {renderKnowledgeScoreChange(knowledgeScoreChange)}
           </div>
-
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-slate-400 text-sm font-medium">Connections</h3>
@@ -149,127 +321,68 @@ export const Analytics: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Analytics Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Topic Bubble Chart */}
-          <div className="xl:col-span-2">
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Thinking Patterns</h2>
-                  <p className="text-slate-400 text-sm">Topics you think about most (bubble size = frequency)</p>
-                </div>
-                <PieChart className="h-6 w-6 text-slate-400" />
+        {/* New Analytics Charts Section */}
+        <div className="space-y-8 mb-12">
+          {/* 1. Not Creation Trends (Short Term vs Long Term) — Line Chart */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">Not Creation Trends</h2>
+            <p className="text-slate-400 text-sm mb-4">{trendsDescription}</p>
+            {loadingTrends ? (
+              <div className="h-64 flex items-center justify-center text-slate-500">
+                <svg className="animate-spin h-8 w-8 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
               </div>
-              <BubbleChart data={analyticsData.topicBubbles} />
-            </div>
+            ) : (
+              <LineChart data={notCreationTrends} />
+            )}
           </div>
-
-          {/* Word Cloud */}
-          <div>
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-1">Word Cloud</h2>
-                  <p className="text-slate-400 text-sm">Most used words</p>
-                </div>
-                <Tag className="h-6 w-6 text-slate-400" />
-              </div>
-              <WordCloud words={analyticsData.wordCloud} />
-            </div>
+          <hr className="border-slate-700" />
+          {/* 2. Memory Distribution (Short Term vs Long Term) — Bar Chart */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">📊 Memory Distribution (Short Term vs Long Term)</h2>
+            <p className="text-slate-400 text-sm mb-4">Mevcut tüm notların % kaçı short, % kaçı long?</p>
+            <div className="h-64 flex items-center justify-center text-slate-500">Bar Chart Placeholder</div>
           </div>
-        </div>
-
-        {/* Charts Row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Note Creation Trends */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Note Creation Trends</h2>
-                <p className="text-slate-400 text-sm">Daily note creation over time</p>
-              </div>
-              <Calendar className="h-6 w-6 text-slate-400" />
-            </div>
-            <LineChart data={analyticsData.creationTrends} />
+          <hr className="border-slate-700" />
+          {/* 3. Note Activity by Hour — Bar Chart */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">🕒 Note Activity by Hour</h2>
+            <p className="text-slate-400 text-sm mb-4">Hangi saatlerde daha çok not giriyorsun?</p>
+            <div className="h-64 flex items-center justify-center text-slate-500">Bar Chart Placeholder</div>
           </div>
-
-          {/* Memory Type Distribution */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Memory Distribution</h2>
-                <p className="text-slate-400 text-sm">Short-term vs Long-term notes</p>
-              </div>
-              <BarChart3 className="h-6 w-6 text-slate-400" />
-            </div>
-            <BarChart data={analyticsData.memoryDistribution} />
+          <hr className="border-slate-700" />
+          {/* 4. Note Activity by Day of Week — Bar Chart */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">📅 Note Activity by Day of Week</h2>
+            <p className="text-slate-400 text-sm mb-4">Haftanın hangi günleri daha aktif olduğun gösterilir.</p>
+            <div className="h-64 flex items-center justify-center text-slate-500">Bar Chart Placeholder</div>
           </div>
-        </div>
-
-        {/* Charts Row 2 - New Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Brain Growth Chart */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Brain Growth Over Time</h2>
-                <p className="text-slate-400 text-sm">How your knowledge base fills up</p>
-              </div>
-              <Brain className="h-6 w-6 text-slate-400" />
-            </div>
-            <BrainGrowthChart data={analyticsData.brainGrowth} />
+          <hr className="border-slate-700" />
+          {/* 5. Tag Usage Frequency — Horizontal Bar Chart */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">🧠 Tag Usage Frequency</h2>
+            <p className="text-slate-400 text-sm mb-4">Hangi kavramlar, temalar, alanlar üzerinde daha çok çalışıyorsun?</p>
+            <div className="h-64 flex items-center justify-center text-slate-500">Horizontal Bar Chart Placeholder</div>
           </div>
-
-          {/* Topic Evolution */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Topic Evolution</h2>
-                <p className="text-slate-400 text-sm">How your interests change over time</p>
-              </div>
-              <Target className="h-6 w-6 text-slate-400" />
-            </div>
-            <TopicEvolutionChart data={analyticsData.topicEvolution} />
+          <hr className="border-slate-700" />
+          {/* 7. Tag Co-Occurrence Matrix — Network Graph */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">🧩 Tag Co-Occurrence Matrix</h2>
+            <p className="text-slate-400 text-sm mb-4">Hangi etiketler birbiriyle birlikte daha çok geçiyor?</p>
+            <div className="h-64 flex items-center justify-center text-slate-500">Network Graph Placeholder</div>
           </div>
-        </div>
-
-        {/* Charts Row 3 - More Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Daily Productivity */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-bold text-white mb-1">Daily Productivity</h2>
-                <p className="text-slate-400 text-xs">Notes per hour</p>
-              </div>
-              <Zap className="h-5 w-5 text-slate-400" />
-            </div>
-            <BarChart data={analyticsData.hourlyProductivity} />
+          <hr className="border-slate-700" />
+          {/* 9. Active Project Progress Overview — Progress Bar Set */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">🚦 Active Project Progress Overview</h2>
+            <p className="text-slate-400 text-sm mb-4">Her projenin tamamlanma yüzdesi ve görev durumu.</p>
+            <div className="h-64 flex items-center justify-center text-slate-500">Project Progress Bars Placeholder</div>
           </div>
-
-          {/* Weekly Patterns */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-bold text-white mb-1">Weekly Patterns</h2>
-                <p className="text-slate-400 text-xs">Best thinking days</p>
-              </div>
-              <Calendar className="h-5 w-5 text-slate-400" />
-            </div>
-            <BarChart data={analyticsData.weeklyPatterns} />
-          </div>
-
-          {/* Knowledge Velocity */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-bold text-white mb-1">Knowledge Velocity</h2>
-                <p className="text-slate-400 text-xs">Learning acceleration</p>
-              </div>
-              <TrendingUp className="h-5 w-5 text-slate-400" />
-            </div>
-            <LineChart data={analyticsData.knowledgeVelocity} />
+          <hr className="border-slate-700" />
+          {/* 10. Not Depth Analysis — Histogram */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h2 className="text-lg font-bold text-white mb-1">🧭 Not Depth Analysis</h2>
+            <p className="text-slate-400 text-sm mb-4">Notların ortalama uzunluğu / kelime sayısı / karmaşıklık düzeyi.</p>
+            <div className="h-64 flex items-center justify-center text-slate-500">Histogram Chart Placeholder</div>
           </div>
         </div>
 
@@ -303,7 +416,16 @@ export const Analytics: React.FC = () => {
           </div>
           
           <KnowledgeGraphAdvanced 
-            data={analyticsData.knowledgeGraph} 
+            data={{
+              nodes: analyticsData.knowledgeGraph.nodes.map(n => ({
+                ...n,
+                type: n.type === 'tag' ? 'tag' : 'note'
+              })),
+              edges: analyticsData.knowledgeGraph.edges.map(e => ({
+                ...e,
+                type: 'semantic'
+              }))
+            }}
             filter={graphFilter}
           />
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 interface AnalyticsData {
   totalNotes: number;
@@ -253,17 +254,61 @@ export const useAnalytics = (timeRange: string) => {
   const { user } = useAuth();
 
   const fetchAnalytics = async () => {
-    if (!user) return;
-
+    // Demo user id hardcoded for analytics
+    const demoUserId = '2994cfab-5a29-422d-81f8-63909b93bf20';
     setIsLoading(true);
     setError(null);
-
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, you would filter data based on timeRange
-      setAnalyticsData(MOCK_ANALYTICS);
+      // 1. Fetch all needed data in parallel
+      const [shortNotesRes, longNotesRes, tasksRes, subtasksRes] = await Promise.all([
+        supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', demoUserId),
+        supabase.from('long_term_notes').select('id, tags, note_date').eq('user_id', demoUserId),
+        supabase.from('tasks').select('id').eq('user_id', demoUserId),
+        supabase.from('subtasks').select('id').in('task_id',
+          (await supabase.from('tasks').select('id').eq('user_id', demoUserId)).data?.map((t: any) => t.id) || []
+        )
+      ]);
+      const shortNotes = Array.isArray(shortNotesRes.data) ? shortNotesRes.data : [];
+      const longNotes = Array.isArray(longNotesRes.data) ? longNotesRes.data : [];
+      const tasks = Array.isArray(tasksRes.data) ? tasksRes.data : [];
+      const subtasks = Array.isArray(subtasksRes.data) ? subtasksRes.data : [];
+
+      // 2. totalNotes
+      const totalNotes = shortNotes.length + longNotes.length;
+      // 3. activeTopics (unique tag count)
+      const allTags = [
+        ...shortNotes.flatMap((n: any) => n.tags || []),
+        ...longNotes.flatMap((n: any) => n.tags || [])
+      ];
+      const uniqueTags = Array.from(new Set(allTags));
+      const activeTopics = uniqueTags.length;
+      // 4. knowledgeScore
+      const knowledgeScore = shortNotes.length * 1 + longNotes.length * 3 + tasks.length * 2 + subtasks.length * 0.5;
+      // 5. connections
+      const connections = 0;
+      // 6. growthRate (bu ay ve geçen ay eklenen not sayısı)
+      const now = new Date();
+      const thisMonth = now.getMonth();
+      const thisYear = now.getFullYear();
+      const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+      const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+      const countInMonth = (notes: any[], month: number, year: number) =>
+        notes.filter(n => {
+          const d = new Date(n.note_date);
+          return d.getMonth() === month && d.getFullYear() === year;
+        }).length;
+      const thisMonthNotes = countInMonth(shortNotes, thisMonth, thisYear) + countInMonth(longNotes, thisMonth, thisYear);
+      const lastMonthNotes = countInMonth(shortNotes, lastMonth, lastMonthYear) + countInMonth(longNotes, lastMonth, lastMonthYear);
+      const growthRate = lastMonthNotes > 0 ? Math.round(((thisMonthNotes - lastMonthNotes) / lastMonthNotes) * 100) : 0;
+
+      setAnalyticsData(prev => ({
+        ...prev,
+        totalNotes,
+        activeTopics,
+        knowledgeScore,
+        connections,
+        growthRate
+      }));
     } catch (err) {
       console.error('Error fetching analytics:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch analytics');
@@ -324,3 +369,32 @@ export const useAnalytics = (timeRange: string) => {
     refetch: fetchAnalytics
   };
 };
+
+export async function fetchNotCreationTrends(timeRange: string = '30d') {
+  const now = new Date();
+  let fromDate: string | null = null;
+  if (timeRange === '7d') {
+    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString().slice(0, 10);
+  } else if (timeRange === '30d') {
+    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29).toISOString().slice(0, 10);
+  } else if (timeRange === '90d') {
+    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 89).toISOString().slice(0, 10);
+  } else if (timeRange === '1y') {
+    fromDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate() + 1).toISOString().slice(0, 10);
+  } else if (timeRange === 'all') {
+    fromDate = null;
+  }
+  let query = supabase.from('daily_note_counts').select('note_date, total_count').order('note_date', { ascending: true });
+  if (fromDate) {
+    query = query.gte('note_date', fromDate);
+  }
+  const { data, error } = await query;
+  if (error) throw error;
+  let cumulative = 0;
+  return (data || []).map((d: any) => {
+    cumulative += d.total_count;
+    const dateObj = new Date(d.note_date);
+    const label = dateObj.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+    return { date: label, value: cumulative };
+  });
+}

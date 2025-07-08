@@ -101,8 +101,8 @@ export const useMemoryNotes = () => {
 
   const fetchNotes = async () => {
     // For demo purposes, use a fallback user if none exists
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -242,8 +242,8 @@ export const useMemoryNotes = () => {
     memoryType: 'short-term' | 'long-term';
   }) => {
     // For demo purposes, use a fallback user if none exists
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
@@ -348,8 +348,8 @@ export const useMemoryNotes = () => {
 
   const moveToLongTerm = async (noteId: string) => {
     // For demo purposes, use a fallback user if none exists
-    const currentUser = user || {
-      id: '550e8400-e29b-41d4-a716-446655440000',
+    const currentUser = {
+      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
