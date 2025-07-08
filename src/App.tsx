@@ -10,6 +10,7 @@ import { ShortTermMemory } from './components/memory/ShortTermMemory';
 import { LongTermMemory } from './components/memory/LongTermMemory';
 import { Analytics } from './components/analytics/Analytics';
 import { Settings } from './components/settings/Settings';
+import { KnowledgeNetworkPage } from './components/analytics/KnowledgeNetworkPage';
 
 const AppContent: React.FC = () => {
   const { user } = useAuth();
@@ -38,6 +39,8 @@ const AppContent: React.FC = () => {
         return <Analytics />;
       case 'settings':
         return <Settings />;
+      case 'knowledge-network':
+        return <KnowledgeNetworkPage />;
       case 'dashboard':
       default:
         return <Dashboard onPageChange={setCurrentPage} />;
