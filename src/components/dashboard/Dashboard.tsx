@@ -1,11 +1,14 @@
-import React, { useEffect } from 'react';
-import { FileText, BookOpen, Link, Brain } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Zap, BookOpen, Brain, LayoutGrid } from 'lucide-react';
 import { StatsCard } from './StatsCard';
-import { RecentNotes } from './RecentNotes';
-import { KnowledgeGraph } from './KnowledgeGraph';
-import { ProjectsTable } from './ProjectsTable';
-import { mockStats, mockNotes, mockProjects } from '../../data/mockData';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAnalytics } from '../../hooks/useAnalytics';
+import { useProjects } from '../../hooks/useProjects';
+import { supabase } from '../../lib/supabase';
+import ProjectRadar from './ProjectRadar';
+import ExpiringNotes from './ExpiringNotes';
+import { ActivityHeatmap } from './heatmap/ActivityHeatmap';
+import YourMind from './YourMind';
 
 interface DashboardProps {
   onPageChange?: (page: string) => void;
@@ -13,6 +16,53 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
   const { user } = useAuth();
+  const { analyticsData, isLoading: isLoadingAnalytics } = useAnalytics('all');
+  const { projects, isLoading: isLoadingProjects } = useProjects();
+  
+  const [dailyNotesCount, setDailyNotesCount] = useState(0);
+  const [isLoadingDailyCount, setIsLoadingDailyCount] = useState(true);
+
+  const [knowledgeScore, setKnowledgeScore] = useState(0);
+  const [isLoadingKnowledgeScore, setIsLoadingKnowledgeScore] = useState(true);
+
+  useEffect(() => {
+    // Fetch daily notes count for today
+    const fetchDailyCount = async () => {
+      setIsLoadingDailyCount(true);
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('daily_note_counts')
+        .select('total_count')
+        .eq('note_date', today)
+        .single();
+      
+      if (data && !error) {
+        setDailyNotesCount(data.total_count);
+      } else {
+        setDailyNotesCount(0);
+      }
+      setIsLoadingDailyCount(false);
+    };
+
+    // Fetch knowledge score
+    const fetchKnowledgeScore = async () => {
+      setIsLoadingKnowledgeScore(true);
+      const { data, error } = await supabase
+        .from('analytics_knowledge_score')
+        .select('sum_all')
+        .single();
+      
+      if (data && !error) {
+        setKnowledgeScore(Number(data.sum_all) || 0);
+      } else {
+        setKnowledgeScore(0);
+      }
+      setIsLoadingKnowledgeScore(false);
+    };
+
+    fetchDailyCount();
+    fetchKnowledgeScore();
+  }, []);
 
   useEffect(() => {
     const handleNavigateToAnalytics = () => {
@@ -32,12 +82,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0 pl-12 lg:pl-0">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-              Welcome Back, {user?.name}! 👀
+              Welcome Back, {user?.name || 'Knowledge Seeker'}! 👀
             </h1>
             <p className="text-slate-400 text-sm lg:text-base">
-              <span className="block lg:inline">{mockStats.notesCreatedToday} Notes Created Today, </span>
-              <span className="block lg:inline">{mockStats.newConnections} New Connections, </span>
-              <span className="block lg:inline">{mockStats.insightsGenerated} Insights Generated</span>
+              Here's a snapshot of your brain's activity.
             </p>
           </div>
         </div>
@@ -48,50 +96,48 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           <StatsCard
-            title="Total Notes"
-            value={mockStats.totalNotes}
-            change="+12 vs last month"
-            icon={FileText}
-            iconColor="#C2B5FC"
+            title="Total Thoughts"
+            value={isLoadingAnalytics ? '...' : analyticsData.totalNotes}
+            change="All time"
+            icon={Zap}
+            iconColor="#a7c7e7"
           />
           <StatsCard
             title="Daily Notes"
-            value={mockStats.dailyNotes}
-            change="+6 vs last month"
+            value={isLoadingDailyCount ? '...' : dailyNotesCount}
+            change="Today"
             icon={BookOpen}
             iconColor="#A7F3D0"
           />
           <StatsCard
-            title="Connections"
-            value={mockStats.connections}
-            change="+23 vs last month"
-            icon={Link}
-            iconColor="#C2B5FC"
-          />
-          <StatsCard
             title="Knowledge Score"
-            value={`${mockStats.knowledgeScore}%`}
-            change="+8% vs last week"
+            value={isLoadingKnowledgeScore ? '...' : knowledgeScore}
+            change="All time"
             icon={Brain}
             iconColor="#FDE68A"
           />
+          <StatsCard
+            title="Total Projects"
+            value={isLoadingProjects ? '...' : projects.length}
+            change="All time"
+            icon={LayoutGrid}
+            iconColor="#C2B5FC"
+          />
         </div>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Recent Notes - Takes 2 columns on xl screens */}
-          <div className="xl:col-span-2">
-            <RecentNotes notes={mockNotes} />
-          </div>
-          
-          {/* Knowledge Graph */}
-          <div>
-            <KnowledgeGraph />
-          </div>
+        {/* Activity Heatmap */}
+        <div className="mt-8">
+            <ActivityHeatmap />
+        </div>
+        <div className="mt-6">
+          <YourMind />
         </div>
 
-        {/* Projects Table */}
-        <ProjectsTable projects={mockProjects} />
+        {/* New Dynamic Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <ProjectRadar />
+          <ExpiringNotes />
+        </div>
         
         {/* Extra padding at bottom to ensure proper scrolling */}
         <div className="h-8"></div>
@@ -99,3 +145,5 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     </div>
   );
 };
+
+export default Dashboard;

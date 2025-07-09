@@ -466,7 +466,7 @@ export const Analytics: React.FC = () => {
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-slate-400 text-sm font-medium">Total Thoughts</h3>
-              <Brain className="h-5 w-5" style={{ color: '#a7c7e7' }} />
+              <Zap className="h-5 w-5" style={{ color: '#a7c7e7' }} />
             </div>
             <div className="text-2xl lg:text-3xl font-bold text-white">{totalThoughts}</div>
             {renderTotalChange(totalChange)}

@@ -7,7 +7,7 @@ export interface Project {
   color: string;
   tasksCount: number;
   completedTasks: number;
-  dueDate?: string;
+  due_date?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,7 +20,7 @@ export interface Task {
   status: 'TO DO' | 'IN PROGRESS' | 'DONE';
   priority?: 'Low' | 'Medium' | 'High';
   startDate?: string;
-  dueDate?: string;
+  due_date?: string;
   tags?: string[];
   relationships?: string[]; // IDs of related tasks
   subtasks?: Subtask[];
