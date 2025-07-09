@@ -28,6 +28,7 @@ import { useAnalytics, fetchNotCreationTrends } from '../../hooks/useAnalytics';
 import { supabase } from '../../lib/supabase';
 import { useProjects } from '../../hooks/useProjects';
 import { Task } from '../../types/projects';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
@@ -35,6 +36,7 @@ export const Analytics: React.FC = () => {
   const [showPaywall, setShowPaywall] = useState(false);
   const { analyticsData, isLoading, exportData } = useAnalytics(timeRange);
   const { projects, isLoading: loadingProjects } = useProjects();
+  const { user } = useAuth();
 
   // Not Creation Trends state
   const [notCreationTrends, setNotCreationTrends] = useState<{ date: string; value: number }[]>([]);
@@ -177,7 +179,8 @@ export const Analytics: React.FC = () => {
 
   useEffect(() => {
     async function fetchTotalThoughtsFromView() {
-      const { data, error } = await supabase.from('analytics_total_thoughts_change').select('*').single();
+      if (!user) return;
+      const { data, error } = await supabase.from('analytics_total_thoughts_change').select('*').eq('user_id', user.id).single();
       if (error || !data) {
         setTotalThoughts(0);
         setTotalChange(null);
@@ -216,13 +219,15 @@ export const Analytics: React.FC = () => {
       setTotalChange(change);
     }
     fetchTotalThoughtsFromView();
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   useEffect(() => {
     async function fetchActiveTopics() {
+      if (!user) return;
       const { data, error } = await supabase
         .from('analytics_active_topics')
         .select('*')
+        .eq('user_id', user.id)
         .single();
       if (error || !data) {
         setActiveTopics(0);
@@ -261,13 +266,15 @@ export const Analytics: React.FC = () => {
       setActiveTopicsChange(change);
     }
     fetchActiveTopics();
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   useEffect(() => {
     async function fetchKnowledgeScore() {
+      if (!user) return;
       const { data, error } = await supabase
         .from('analytics_knowledge_score')
         .select('*')
+        .eq('user_id', user.id)
         .single();
       if (error || !data) {
         setKnowledgeScore(0);
@@ -306,7 +313,7 @@ export const Analytics: React.FC = () => {
       setKnowledgeScoreChange(change);
     }
     fetchKnowledgeScore();
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   // Fetch all tasks and group by projectId
   const [allTasks, setAllTasks] = useState<Task[]>([]);

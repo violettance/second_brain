@@ -100,12 +100,17 @@ export const useMemoryNotes = () => {
   };
 
   const fetchNotes = async () => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    let userId = user?.id;
+    if (!userId) {
+      userId = localStorage.getItem('user_id') || undefined;
+    }
+    if (!userId) {
+      setShortTermNotes([]);
+      setLongTermNotes([]);
+      setIsLoading(false);
+      setError('Kullanıcı yok, giriş yapmalısınız.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -119,77 +124,8 @@ export const useMemoryNotes = () => {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         // Mock data for demo
-        const mockShortTermNotes: DailyNote[] = [
-          {
-            id: '1',
-            user_id: currentUser.id,
-            title: 'Meeting Notes - Team Sync',
-            content: 'Discussed project roadmap and upcoming features. Need to focus on user experience improvements and performance optimization.',
-            tags: ['meeting', 'team', 'roadmap'],
-            note_date: new Date().toISOString().split('T')[0],
-            memory_type: 'short-term',
-            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-            updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            id: '2',
-            user_id: currentUser.id,
-            title: 'Quick Idea - App Feature',
-            content: 'What if we added a voice recording feature for quick note capture? Could be useful for mobile users.',
-            tags: ['idea', 'feature', 'mobile'],
-            note_date: new Date().toISOString().split('T')[0],
-            memory_type: 'short-term',
-            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            id: '3',
-            user_id: currentUser.id,
-            title: 'Shopping List',
-            content: 'Groceries: milk, bread, eggs, coffee, fruits. Also need to buy new headphones.',
-            tags: ['shopping', 'personal'],
-            note_date: new Date().toISOString().split('T')[0],
-            memory_type: 'short-term',
-            created_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
-            updated_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString()
-          }
-        ];
-
-        const mockLongTermNotes: DailyNote[] = [
-          {
-            id: '4',
-            user_id: currentUser.id,
-            title: 'React Best Practices',
-            content: 'Key principles for writing maintainable React code: component composition, proper state management, effective use of hooks, and performance optimization techniques.',
-            tags: ['react', 'programming', 'best-practices', 'javascript'],
-            note_date: new Date().toISOString().split('T')[0],
-            memory_type: 'long-term',
-            created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-            updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            id: '5',
-            user_id: currentUser.id,
-            title: 'Knowledge Management Principles',
-            content: 'Building a second brain requires: consistent capture, organized structure, regular review, and active connection-making between ideas.',
-            tags: ['knowledge-management', 'productivity', 'learning'],
-            note_date: new Date().toISOString().split('T')[0],
-            memory_type: 'long-term',
-            created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-            updated_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            id: '6',
-            user_id: currentUser.id,
-            title: 'Design System Guidelines',
-            content: 'Consistent spacing (8px grid), color palette with semantic meanings, typography hierarchy, and component reusability principles.',
-            tags: ['design', 'ui-ux', 'guidelines', 'system'],
-            note_date: new Date().toISOString().split('T')[0],
-            memory_type: 'long-term',
-            created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-            updated_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
-          }
-        ];
+        const mockShortTermNotes: DailyNote[] = MOCK_SHORT_TERM_NOTES.map(note => ({ ...note, user_id: userId }));
+        const mockLongTermNotes: DailyNote[] = MOCK_LONG_TERM_NOTES.map(note => ({ ...note, user_id: userId }));
 
         setShortTermNotes(mockShortTermNotes);
         setLongTermNotes(mockLongTermNotes);
@@ -201,13 +137,13 @@ export const useMemoryNotes = () => {
         supabase
           .from('short_term_notes')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', userId)
           .is('archived_at', null)
           .order('created_at', { ascending: false }),
         supabase
           .from('long_term_notes')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', userId)
           .order('created_at', { ascending: false })
       ]);
 
@@ -241,12 +177,7 @@ export const useMemoryNotes = () => {
     tags: string[];
     memoryType: 'short-term' | 'long-term';
   }) => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    if (!user) throw new Error('Kullanıcı yok!');
 
     setIsLoading(true);
     setError(null);
@@ -264,7 +195,7 @@ export const useMemoryNotes = () => {
 
          newNote = {
            id: Date.now().toString(),
-           user_id: currentUser.id,
+           user_id: user.id,
            title: noteData.title,
            content: noteData.content,
            tags: noteData.tags,
@@ -290,7 +221,7 @@ export const useMemoryNotes = () => {
            const { data, error } = await supabase
              .from('short_term_notes')
              .insert({
-               user_id: currentUser.id,
+               user_id: user.id,
                title: noteData.title,
                content: noteData.content,
                tags: noteData.tags,
@@ -312,7 +243,7 @@ export const useMemoryNotes = () => {
           const { data, error } = await supabase
             .from('long_term_notes')
             .insert({
-              user_id: currentUser.id,
+              user_id: user.id,
               title: noteData.title,
               content: noteData.content,
               tags: noteData.tags,
@@ -347,12 +278,7 @@ export const useMemoryNotes = () => {
   };
 
   const moveToLongTerm = async (noteId: string) => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    if (!user) throw new Error('Kullanıcı yok!');
 
     setIsLoading(true);
     setError(null);
@@ -387,7 +313,7 @@ export const useMemoryNotes = () => {
           supabase
             .from('long_term_notes')
             .insert({
-              user_id: currentUser.id,
+              user_id: user.id,
               title: note.title,
               content: note.content,
               tags: note.tags,
@@ -425,6 +351,8 @@ export const useMemoryNotes = () => {
   };
 
   const deleteNote = async (noteId: string, memoryType: 'short-term' | 'long-term') => {
+    if (!user) throw new Error('Kullanıcı yok!');
+
     setIsLoading(true);
     setError(null);
 

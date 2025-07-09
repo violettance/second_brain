@@ -256,16 +256,17 @@ export const useAnalytics = (timeRange: string) => {
   const fetchAnalytics = async () => {
     // Demo user id hardcoded for analytics
     const demoUserId = '2994cfab-5a29-422d-81f8-63909b93bf20';
+    const userId = user?.id || demoUserId;
     setIsLoading(true);
     setError(null);
     try {
       // 1. Fetch all needed data in parallel
       const [shortNotesRes, longNotesRes, tasksRes, subtasksRes] = await Promise.all([
-        supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', demoUserId),
-        supabase.from('long_term_notes').select('id, tags, note_date').eq('user_id', demoUserId),
-        supabase.from('tasks').select('id').eq('user_id', demoUserId),
+        supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', userId),
+        supabase.from('long_term_notes').select('id, tags, note_date').eq('user_id', userId),
+        supabase.from('tasks').select('id').eq('user_id', userId),
         supabase.from('subtasks').select('id').in('task_id',
-          (await supabase.from('tasks').select('id').eq('user_id', demoUserId)).data?.map((t: any) => t.id) || []
+          (await supabase.from('tasks').select('id').eq('user_id', userId)).data?.map((t: any) => t.id) || []
         )
       ]);
       const shortNotes = Array.isArray(shortNotesRes.data) ? shortNotesRes.data : [];

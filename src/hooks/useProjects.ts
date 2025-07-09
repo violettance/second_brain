@@ -127,12 +127,12 @@ export const useProjects = () => {
   const { user } = useAuth();
 
   const fetchProjects = async () => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     setIsLoading(true);
     setError(null);
@@ -215,11 +215,12 @@ export const useProjects = () => {
     color: string;
     dueDate?: string;
   }) => {
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     setIsLoading(true);
     setError(null);
@@ -293,11 +294,12 @@ export const useProjects = () => {
     progress: number;
     dueDate?: string;
   }>) => {
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     setIsLoading(true);
     setError(null);
@@ -346,11 +348,12 @@ export const useProjects = () => {
   };
 
   const deleteProject = async (projectId: string) => {
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     setIsLoading(true);
     setError(null);
@@ -411,11 +414,12 @@ export const useProject = (projectId: string) => {
   const { user } = useAuth();
 
   const fetchProject = async () => {
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     if (!projectId) return;
 
@@ -516,11 +520,12 @@ export const useProject = (projectId: string) => {
     tags?: string[];
     subtasks?: string[];
   }) => {
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     setIsLoading(true);
     setError(null);
@@ -640,11 +645,12 @@ export const useProject = (projectId: string) => {
     dueDate?: string;
     tags?: string[];
   }>) => {
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     setIsLoading(true);
     setError(null);
@@ -710,11 +716,12 @@ export const useProject = (projectId: string) => {
   };
 
   const deleteTask = async (taskId: string) => {
-    const currentUser = {
+    const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
       name: 'Demo User',
       email: 'demo@example.com'
     };
+    const currentUser = user || demoUser;
 
     setIsLoading(true);
     setError(null);
