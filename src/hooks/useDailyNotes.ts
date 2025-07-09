@@ -72,12 +72,16 @@ export const useDailyNotes = (selectedDate?: Date) => {
   };
 
   const fetchNotes = async (date?: Date) => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    let userId = user?.id;
+    if (!userId) {
+      userId = localStorage.getItem('user_id') || undefined;
+    }
+    if (!userId) {
+      setNotes([]);
+      setIsLoading(false);
+      setError('Kullanıcı yok, giriş yapmalısınız.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -90,7 +94,8 @@ export const useDailyNotes = (selectedDate?: Date) => {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        let filteredNotes = [...mockNotesStorage];
+        // Önce user_id'ye göre filtrele
+        let filteredNotes = mockNotesStorage.filter(note => note.user_id === userId);
         if (date) {
           // Use local date to avoid timezone issues
           const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -107,14 +112,14 @@ export const useDailyNotes = (selectedDate?: Date) => {
       let shortTermQuery = supabase
         .from('short_term_notes')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .is('archived_at', null)
         .order('created_at', { ascending: false });
         
       let longTermQuery = supabase
         .from('long_term_notes')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
       // Filter by date if provided
@@ -167,12 +172,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
     memoryType: 'short-term' | 'long-term';
     noteDate: Date;
   }) => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    if (!user) throw new Error('Kullanıcı yok!');
 
     setIsLoading(true);
     setError(null);
@@ -184,7 +184,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
         
         const newNote: DailyNote = {
           id: Date.now().toString(),
-          user_id: currentUser.id,
+          user_id: user.id,
           title: noteData.title,
           content: noteData.content,
           tags: noteData.tags,
@@ -199,14 +199,9 @@ export const useDailyNotes = (selectedDate?: Date) => {
         
         // Add to shared mock storage
         mockNotesStorage.unshift(newNote);
-        
-        // Update local state
-        setNotes(prev => [newNote, ...prev]);
-        
-        // Notify all subscribers of the change
-        setTimeout(() => notifySubscribers(), 0);
-        
-        return newNote;
+        setNotes([...mockNotesStorage]);
+        notifySubscribers(); // <-- Bunu ekledim
+        return;
       }
       
       // This should never be reached when supabase is null
@@ -225,7 +220,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
         const { data, error } = await supabase
           .from('short_term_notes')
           .insert({
-            user_id: currentUser.id,
+            user_id: user.id,
             title,
             content,
             tags,
@@ -246,7 +241,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
         const { data, error } = await supabase
           .from('long_term_notes')
           .insert({
-            user_id: currentUser.id,
+            user_id: user.id,
             title,
             content,
             tags,
@@ -286,12 +281,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
     tags?: string[];
     memory_type?: 'short-term' | 'long-term';
   }) => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    if (!user) throw new Error('Kullanıcı yok!');
 
     setIsLoading(true);
     setError(null);
@@ -312,12 +302,8 @@ export const useDailyNotes = (selectedDate?: Date) => {
         
         // Update shared mock storage
         mockNotesStorage[noteIndex] = updatedNote;
-        
-        // Update local state
-        setNotes(prev => prev.map(note => note.id === noteId ? updatedNote : note));
-        
-        // Notify all subscribers of the change (async to avoid circular dependencies)
-        setTimeout(() => notifySubscribers(), 0);
+        setNotes([...mockNotesStorage]);
+        notifySubscribers(); // <-- Bunu ekledim
         
         return updatedNote;
       }
@@ -419,12 +405,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
   };
 
   const deleteNote = async (noteId: string) => {
-    // For demo purposes, use a fallback user if none exists
-    const currentUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    if (!user) throw new Error('Kullanıcı yok!');
 
     setIsLoading(true);
     setError(null);
@@ -436,12 +417,8 @@ export const useDailyNotes = (selectedDate?: Date) => {
         
         // Remove from shared mock storage
         mockNotesStorage = mockNotesStorage.filter(note => note.id !== noteId);
-        
-        // Update local state
-        setNotes(prev => prev.filter(note => note.id !== noteId));
-        
-        // Notify all subscribers of the change (async to avoid circular dependencies)
-        setTimeout(() => notifySubscribers(), 0);
+        setNotes([...mockNotesStorage]);
+        notifySubscribers(); // <-- Bunu ekledim
         
         return;
       }

@@ -41,6 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }: any) => {
+      console.log('[AUTH] getSession yanıtı:', session);
       if (session?.user) {
         fetchUserProfile(session.user.id);
       }
@@ -50,6 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+      console.log('[AUTH] onAuthStateChange:', { event, session });
       if (session?.user) {
         await fetchUserProfile(session.user.id);
       } else {
@@ -61,6 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
+    console.log('[PROFILE] Profil çekiliyor:', userId);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -69,38 +72,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .single();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('[PROFILE] Hata:', error);
         return;
       }
 
+      console.log('[PROFILE] Profil bulundu:', data);
       setUser(data);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('[PROFILE] Exception:', error);
     }
   };
 
   const login = async (email: string, password: string) => {
     if (!supabase) {
+      console.error('Supabase client not initialized');
       throw new Error('Supabase client not initialized. Please create a .env file with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
     }
 
     setIsLoading(true);
+    console.log('[LOGIN] Başladı:', { email });
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      console.log('[LOGIN] Supabase yanıtı:', { data, error });
 
       if (error) {
+        console.error('[LOGIN] Hata:', error);
         throw error;
       }
-
       // User profile will be fetched via the auth state change listener
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('[LOGIN] Exception:', error);
       throw new Error(error.message || 'Login failed');
     } finally {
       setIsLoading(false);
+      console.log('[LOGIN] Bitti');
     }
   };
 
