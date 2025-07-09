@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 import { Profile } from '../types/database';
 
 interface User extends Profile {
@@ -27,54 +28,128 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Demo user with fixed UUID
-const DEMO_USER: User = {
-  id: '550e8400-e29b-41d4-a716-446655440000', // Fixed UUID for demo
-  name: 'Knowledge Seeker',
-  email: 'demo@secondbrain.com',
-  avatar_url: null,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString()
-};
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null); // Start with no user to show landing
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    // Check if we have a supabase client
+    if (!supabase) {
+      console.warn('Supabase client not initialized');
+      return;
+    }
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+
+      setUser(data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
   const login = async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase client not initialized. Please create a .env file with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+    }
+
     setIsLoading(true);
     try {
-      // Simulate login delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUser(DEMO_USER);
-    } catch (error) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // User profile will be fetched via the auth state change listener
+    } catch (error: any) {
       console.error('Login error:', error);
-      throw error;
+      throw new Error(error.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase client not initialized. Please create a .env file with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+    }
+
     setIsLoading(true);
     try {
-      // Simulate registration delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUser({
-        ...DEMO_USER,
-        name: name,
-        email: email
+      // Sign up the user
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          }
+        }
       });
-    } catch (error) {
+
+      if (error) {
+        throw error;
+      }
+
+      // We're assuming a trigger handles profile creation.
+      // And the success message will be shown in the form.
+      // The onAuthStateChange listener will handle setting the user.
+      alert('Registration successful! Please check your email to confirm your account.');
+
+    } catch (error: any) {
       console.error('Registration error:', error);
-      throw error;
+      throw new Error(error.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    if (!supabase) {
+      return;
+    }
+
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const value: AuthContextType = {

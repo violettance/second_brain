@@ -11,11 +11,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { register, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register(name, email, password);
+    setError(null);
+    
+    try {
+      await register(name, email, password);
+      // The success alert is now in AuthContext
+    } catch (error: any) {
+      setError(error.message || 'Registration failed');
+    }
   };
 
   return (
@@ -31,6 +39,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+        
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
             Full Name
