@@ -7,14 +7,21 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
-  const [email, setEmail] = useState('demo@secondbrain.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
+    setError(null);
+    
+    try {
+      await login(email, password);
+    } catch (error: any) {
+      setError(error.message || 'Login failed');
+    }
   };
 
   return (
@@ -30,6 +37,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+        
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
             Email
