@@ -251,17 +251,7 @@ export const Analytics: React.FC = () => {
         return;
       }
       let change = 0;
-      if (prev === 0 && total > 0) {
-        change = 100;
-      } else if (prev === 0 && total === 0) {
-        change = 0;
-      } else if (prev > 0) {
-        change = Math.round(((total - prev) / prev) * 100);
-        if (change > 100) change = 100;
-        if (change < -100) change = -100;
-      } else {
-        change = 0;
-      }
+      change = total - prev;
       setTotalChange(change);
     }
     fetchTotalThoughtsFromView();
@@ -298,17 +288,7 @@ export const Analytics: React.FC = () => {
         return;
       }
       let change = 0;
-      if (prev === 0 && total > 0) {
-        change = 100;
-      } else if (prev === 0 && total === 0) {
-        change = 0;
-      } else if (prev > 0) {
-        change = Math.round(((total - prev) / prev) * 100);
-        if (change > 100) change = 100;
-        if (change < -100) change = -100;
-      } else {
-        change = 0;
-      }
+      change = total - prev;
       setActiveTopicsChange(change);
     }
     fetchActiveTopics();
@@ -318,23 +298,40 @@ export const Analytics: React.FC = () => {
     async function fetchKnowledgeScore() {
       if (!user?.id) {
         setKnowledgeScore(0);
+        setKnowledgeScoreChange(null);
         return;
       }
       const { data, error } = await supabase
         .from('v2_analytics_knowledge_score')
-        .select('sum_all')
+        .select('*')
         .eq('user_id', user.id)
         .single();
       if (data && !error) {
-        setKnowledgeScore(Number(data.sum_all) || 0);
+        let score = 0;
+        let prev = null;
+        if (timeRange === '7d') {
+          score = Number(data.sum_7) || 0;
+          prev = Number(data.sum_prev_7) || 0;
+        } else if (timeRange === '30d') {
+          score = Number(data.sum_30) || 0;
+          prev = Number(data.sum_prev_30) || 0;
+        } else {
+          score = Number(data.sum_all) || 0;
+          prev = null;
+        }
+        setKnowledgeScore(score);
+        if (prev !== null && timeRange !== 'all') {
+          setKnowledgeScoreChange(score - prev);
+        } else {
+          setKnowledgeScoreChange(null);
+        }
       } else {
         setKnowledgeScore(0);
+        setKnowledgeScoreChange(null);
       }
-      // Dashboard'daki gibi sadece toplam gösterilecek, değişim oranı gösterilmeyecek
-      setKnowledgeScoreChange(null);
     }
     fetchKnowledgeScore();
-  }, [user]);
+  }, [user, timeRange]);
 
   // Fetch all tasks and group by projectId
   const [allTasks, setAllTasks] = useState<Task[]>([]);
@@ -407,26 +404,26 @@ export const Analytics: React.FC = () => {
 
   function renderTotalChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
-    if (change === 0) return <span className="text-slate-400">0%</span>;
+    if (change === 0) return <span className="text-slate-400">0</span>;
     const color = change > 0 ? 'text-green-400' : 'text-red-400';
     const sign = change > 0 ? '+' : '';
-    return <span className={color}>{sign}{change}% from previous period</span>;
+    return <span className={color}>{sign}{change} from previous period</span>;
   }
 
   function renderActiveTopicsChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
-    if (change === 0) return <span className="text-slate-400">0%</span>;
+    if (change === 0) return <span className="text-slate-400">0</span>;
     const color = change > 0 ? 'text-green-400' : 'text-red-400';
     const sign = change > 0 ? '+' : '';
-    return <span className={color}>{sign}{change}% from previous period</span>;
+    return <span className={color}>{sign}{change} from previous period</span>;
   }
 
   function renderKnowledgeScoreChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
-    if (change === 0) return <span className="text-slate-400">0%</span>;
+    if (change === 0) return <span className="text-slate-400">0</span>;
     const color = change > 0 ? 'text-green-400' : 'text-red-400';
     const sign = change > 0 ? '+' : '';
-    return <span className={color}>{sign}{change}% from previous period</span>;
+    return <span className={color}>{sign}{change} from previous period</span>;
   }
 
   const handleExport = async () => {
@@ -511,7 +508,7 @@ export const Analytics: React.FC = () => {
                   ? 'text-red-400'
                   : 'text-slate-400'
               }>
-                {totalChange > 0 ? `+${totalChange}%` : `${totalChange}%`} from previous {timeRange === '7d' ? '7 days' : '30 days'}
+                {totalChange > 0 ? `+${totalChange}` : `${totalChange}`} from previous {timeRange === '7d' ? '7 days' : '30 days'}
               </span>
             )}
           </div>
