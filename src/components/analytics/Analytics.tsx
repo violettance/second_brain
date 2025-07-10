@@ -62,52 +62,83 @@ export const Analytics: React.FC = () => {
 
   // Memory Distribution BarChart data (real note counts)
   const [memoryBarData, setMemoryBarData] = useState<{ label: string; value: number; color: string }[]>([]);
-  useEffect(() => {
-    async function fetchMemoryDistribution() {
-      const { data, error } = await supabase
-        .from('v2_analytics_memory_distribution_bars')
-        .select('*')
-        .single();
-      if (error || !data) {
-        setMemoryBarData([]);
-        return;
-      }
-      let short = 0, long = 0;
-      if (timeRange === '7d') {
-        short = Number(data.st_7) || 0;
-        long = Number(data.lt_7) || 0;
-      } else if (timeRange === '30d') {
-        short = Number(data.st_30) || 0;
-        long = Number(data.lt_30) || 0;
-      } else {
-        short = Number(data.st_all) || 0;
-        long = Number(data.lt_all) || 0;
-      }
-      setMemoryBarData([
-        { label: 'Short Term', value: short, color: '#fb923c' },
-        { label: 'Long Term', value: long, color: '#a78bfa' }
-      ]);
+  const fetchMemoryDistribution = async () => {
+    if (!user?.id) return;
+    const { data, error } = await supabase
+      .from('v2_analytics_memory_distribution_bars')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    if (error || !data) {
+      setMemoryBarData([]);
+      return;
     }
+    let short = 0, long = 0;
+    if (timeRange === '7d') {
+      short = Number(data.st_7) || 0;
+      long = Number(data.lt_7) || 0;
+    } else if (timeRange === '30d') {
+      short = Number(data.st_30) || 0;
+      long = Number(data.lt_30) || 0;
+    } else {
+      short = Number(data.st_all) || 0;
+      long = Number(data.lt_all) || 0;
+    }
+    setMemoryBarData([
+      { label: 'Short Term', value: short, color: '#fb923c' },
+      { label: 'Long Term', value: long, color: '#a78bfa' }
+    ]);
+  };
+
+  useEffect(() => {
     fetchMemoryDistribution();
-  }, [timeRange]);
+  }, [timeRange, user]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const stSubscription = supabase
+      .channel('short_term_notes_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'short_term_notes', filter: `user_id=eq.${user.id}` }, () => {
+        fetchMemoryDistribution();
+      })
+      .subscribe();
+
+    const ltSubscription = supabase
+      .channel('long_term_notes_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'long_term_notes', filter: `user_id=eq.${user.id}` }, () => {
+        fetchMemoryDistribution();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(stSubscription);
+      supabase.removeChannel(ltSubscription);
+    };
+  }, [user]);
 
   // Note Activity by Day of Week BarChart data
   const [noteActivityBarData, setNoteActivityBarData] = useState<{ label: string; value: number; color: string }[]>([]);
   useEffect(() => {
     async function fetchNoteActivity() {
+      if (!user?.id) {
+        setNoteActivityBarData([]);
+        return;
+      }
       const { data, error } = await supabase
         .from('v2_analytics_note_activity_by_weekday')
         .select('*')
+        .eq('user_id', user.id)
         .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
         .order('weekday_num', { ascending: true });
       if (error || !data) {
         setNoteActivityBarData([]);
         return;
       }
-      setNoteActivityBarData(data.map((d: any) => ({ label: d.weekday.trim(), value: Number(d.total), color: '#38bdf8' })));
+      setNoteActivityBarData(data.map((d: any) => ({ label: d.weekday_name.trim(), value: Number(d.total), color: '#38bdf8' })));
     }
     fetchNoteActivity();
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   // Note Activity by Hour BarChart data
   const [noteHourBarData, setNoteHourBarData] = useState<{ label: string; value: number; color: string }[]>([]);
@@ -139,11 +170,13 @@ export const Analytics: React.FC = () => {
   const [tagUsageBarData, setTagUsageBarData] = useState<{ label: string; value: number; color: string }[]>([]);
   useEffect(() => {
     async function fetchTagUsage() {
+      if (!user?.id) return;
       const { data, error } = await supabase
-        .from('analytics_tag_usage_frequency')
+        .from('v2_analytics_tag_usage_frequency')
         .select('*')
-        .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
-        .order('total', { ascending: false });
+        .eq('user_id', user.id)
+        .order('total', { ascending: false })
+        .limit(10); // sadece en çok kullanılan 10 tag
       if (error || !data) {
         setTagUsageBarData([]);
         return;
@@ -151,16 +184,22 @@ export const Analytics: React.FC = () => {
       setTagUsageBarData(data.map((d: any) => ({ label: d.tag, value: Number(d.total), color: '#38bdf8' })));
     }
     fetchTagUsage();
-  }, [timeRange]);
+  }, [user]);
 
   // Tag Co-Occurrence Matrix state
   const [tagCooccurrence, setTagCooccurrence] = useState<{ tag1: string; tag2: string; total: number }[]>([]);
   const [loadingCooccurrence, setLoadingCooccurrence] = useState(true);
   useEffect(() => {
     setLoadingCooccurrence(true);
+    if (!user?.id) {
+      setTagCooccurrence([]);
+      setLoadingCooccurrence(false);
+      return;
+    }
     supabase
-      .from('analytics_tag_cooccurrence_matrix')
+      .from('v2_analytics_tag_cooccurrence_matrix')
       .select('*')
+      .eq('user_id', user.id)
       .order('total', { ascending: false })
       .limit(5)
       .then(({ data, error }: { data: any; error: any }) => {
@@ -168,7 +207,7 @@ export const Analytics: React.FC = () => {
       })
       .catch(() => setTagCooccurrence([]))
       .finally(() => setLoadingCooccurrence(false));
-  }, [timeRange]);
+  }, [user]);
 
   useEffect(() => {
     setLoadingTrends(true);
@@ -179,8 +218,16 @@ export const Analytics: React.FC = () => {
 
   useEffect(() => {
     async function fetchTotalThoughtsFromView() {
-      if (!user) return;
-      const { data, error } = await supabase.from('v2_analytics_total_thoughts_change').select('*').eq('user_id', user.id).single();
+      if (!user?.id) {
+        setTotalThoughts(0);
+        setTotalChange(null);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('v2_analytics_total_thoughts_change')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
       if (error || !data) {
         setTotalThoughts(0);
         setTotalChange(null);
@@ -195,7 +242,6 @@ export const Analytics: React.FC = () => {
         total = Number(data.sum_30) || 0;
         prev = Number(data.sum_prev_30) || 0;
       } else {
-        // all time: sum_all
         total = Number(data.sum_all) || 0;
         prev = null;
       }
@@ -270,50 +316,25 @@ export const Analytics: React.FC = () => {
 
   useEffect(() => {
     async function fetchKnowledgeScore() {
-      if (!user) return;
+      if (!user?.id) {
+        setKnowledgeScore(0);
+        return;
+      }
       const { data, error } = await supabase
-        .from('analytics_knowledge_score')
-        .select('*')
+        .from('v2_analytics_knowledge_score')
+        .select('sum_all')
         .eq('user_id', user.id)
         .single();
-      if (error || !data) {
+      if (data && !error) {
+        setKnowledgeScore(Number(data.sum_all) || 0);
+      } else {
         setKnowledgeScore(0);
-        setKnowledgeScoreChange(null);
-        return;
       }
-      let total = 0;
-      let prev: number | null = 0;
-      if (timeRange === '7d') {
-        total = Number(data.sum_7) || 0;
-        prev = Number(data.sum_prev_7) || 0;
-      } else if (timeRange === '30d') {
-        total = Number(data.sum_30) || 0;
-        prev = Number(data.sum_prev_30) || 0;
-      } else {
-        total = Number(data.sum_all) || 0;
-        prev = null;
-      }
-      setKnowledgeScore(total);
-      if (prev === null || timeRange === 'all') {
-        setKnowledgeScoreChange(null);
-        return;
-      }
-      let change = 0;
-      if (prev === 0 && total > 0) {
-        change = 100;
-      } else if (prev === 0 && total === 0) {
-        change = 0;
-      } else if (prev > 0) {
-        change = Math.round(((total - prev) / prev) * 100);
-        if (change > 100) change = 100;
-        if (change < -100) change = -100;
-      } else {
-        change = 0;
-      }
-      setKnowledgeScoreChange(change);
+      // Dashboard'daki gibi sadece toplam gösterilecek, değişim oranı gösterilmeyecek
+      setKnowledgeScoreChange(null);
     }
     fetchKnowledgeScore();
-  }, [timeRange, user]);
+  }, [user]);
 
   // Fetch all tasks and group by projectId
   const [allTasks, setAllTasks] = useState<Task[]>([]);
@@ -368,15 +389,21 @@ export const Analytics: React.FC = () => {
   const [loadingNoteDepth, setLoadingNoteDepth] = useState(true);
   useEffect(() => {
     setLoadingNoteDepth(true);
+    if (!user?.id) {
+      setNoteDepthData([]);
+      setLoadingNoteDepth(false);
+      return;
+    }
     supabase
-      .from('analytics_note_depth_analysis')
+      .from('v2_analytics_note_depth_analysis')
       .select('*')
+      .eq('user_id', user.id)
       .then(({ data, error }: { data: any; error: any }) => {
         setNoteDepthData(Array.isArray(data) ? data : []);
       })
       .catch(() => setNoteDepthData([]))
       .finally(() => setLoadingNoteDepth(false));
-  }, []);
+  }, [timeRange, user]);
 
   function renderTotalChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
@@ -476,7 +503,17 @@ export const Analytics: React.FC = () => {
               <Zap className="h-5 w-5" style={{ color: '#a7c7e7' }} />
             </div>
             <div className="text-2xl lg:text-3xl font-bold text-white">{totalThoughts}</div>
-            {renderTotalChange(totalChange)}
+            {totalChange !== null && timeRange !== 'all' && (
+              <span className={
+                totalChange > 0
+                  ? 'text-green-400'
+                  : totalChange < 0
+                  ? 'text-red-400'
+                  : 'text-slate-400'
+              }>
+                {totalChange > 0 ? `+${totalChange}%` : `${totalChange}%`} from previous {timeRange === '7d' ? '7 days' : '30 days'}
+              </span>
+            )}
           </div>
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
@@ -576,10 +613,10 @@ export const Analytics: React.FC = () => {
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
             <h2 className="text-lg font-bold text-white mb-1">Tag Usage Frequency</h2>
             <p className="text-slate-400 text-sm mb-4">
-              {`Most used tags for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
+              {`All time tag usage frequency`}
             </p>
             <div className="h-64 flex items-end justify-center">
-              {tagUsageBarData.map((bar, idx) => (
+              {tagUsageBarData.slice(0, 10).map((bar, idx) => (
                 <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
                   <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
                   <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
@@ -593,7 +630,7 @@ export const Analytics: React.FC = () => {
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
             <h2 className="text-lg font-bold text-white mb-1">Tag Co-Occurrence Matrix</h2>
             <p className="text-slate-400 text-sm mb-4">
-              {`Top tag pairs that most frequently appear together in your notes for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
+              {`All time tag co-occurrence matrix`}
             </p>
             {loadingCooccurrence ? (
               <div className="h-32 flex items-center justify-center text-slate-500">Loading...</div>

@@ -59,11 +59,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
     // Fetch knowledge score
     const fetchKnowledgeScore = async () => {
       setIsLoadingKnowledgeScore(true);
+      if (!user?.id) {
+        setKnowledgeScore(0);
+        setIsLoadingKnowledgeScore(false);
+        return;
+      }
       const { data, error } = await supabase
-        .from('analytics_knowledge_score')
+        .from('v2_analytics_knowledge_score')
         .select('sum_all')
+        .eq('user_id', user.id)
         .single();
-      
       if (data && !error) {
         setKnowledgeScore(Number(data.sum_all) || 0);
       } else {
