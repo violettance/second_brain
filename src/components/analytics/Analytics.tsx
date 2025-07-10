@@ -500,16 +500,9 @@ export const Analytics: React.FC = () => {
               <Zap className="h-5 w-5" style={{ color: '#a7c7e7' }} />
             </div>
             <div className="text-2xl lg:text-3xl font-bold text-white">{totalThoughts}</div>
-            {totalChange !== null && timeRange !== 'all' && (
-              <span className={
-                totalChange > 0
-                  ? 'text-green-400'
-                  : totalChange < 0
-                  ? 'text-red-400'
-                  : 'text-slate-400'
-              }>
-                {totalChange > 0 ? `+${totalChange}` : `${totalChange}`} from previous {timeRange === '7d' ? '7 days' : '30 days'}
-              </span>
+            {renderTotalChange(totalChange)}
+            {timeRange === 'all' && (
+              <div className="text-sm text-slate-400 mt-1">All time total thoughts</div>
             )}
           </div>
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
@@ -519,6 +512,9 @@ export const Analytics: React.FC = () => {
             </div>
             <div className="text-2xl lg:text-3xl font-bold text-white">{activeTopics}</div>
             {renderActiveTopicsChange(activeTopicsChange)}
+            {timeRange === 'all' && (
+              <div className="text-sm text-slate-400 mt-1">All time active topics</div>
+            )}
           </div>
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
@@ -527,6 +523,9 @@ export const Analytics: React.FC = () => {
             </div>
             <div className="text-2xl lg:text-3xl font-bold text-white">{knowledgeScore}</div>
             {renderKnowledgeScoreChange(knowledgeScoreChange)}
+            {timeRange === 'all' && (
+              <div className="text-sm text-slate-400 mt-1">All time cumulative score</div>
+            )}
           </div>
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
