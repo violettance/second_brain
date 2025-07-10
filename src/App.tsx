@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LandingPage } from './components/landing/LandingPage';
 import { AuthPage } from './components/auth/AuthPage';
@@ -13,9 +13,23 @@ import { Settings } from './components/settings/Settings';
 import { KnowledgeNetworkPage } from './components/analytics/KnowledgeNetworkPage';
 
 const AppContent: React.FC = () => {
-  const { user } = useAuth();
-  const [showLanding, setShowLanding] = useState(true); // Start with landing page
+  const { user, isLoading } = useAuth();
+  const [showLanding, setShowLanding] = useState(() => !user);
   const [currentPage, setCurrentPage] = useState('dashboard');
+
+  // Eğer kullanıcı oturum açtıysa landing ekranını kapat
+  useEffect(() => {
+    if (user) setShowLanding(false);
+  }, [user]);
+
+  // Kullanıcının oturum durumu henüz belli değilse loading göster
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center text-white">
+        Loading...
+      </div>
+    );
+  }
 
   if (showLanding && !user) {
     return <LandingPage onGoToApp={() => setShowLanding(false)} />;

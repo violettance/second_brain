@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const { user } = useAuth();
+
+  // Eğer kullanıcı zaten giriş yaptıysa dashboard'a yönlendir
+  useEffect(() => {
+    if (user) {
+      window.location.href = '/'; // ya da direkt Dashboard bileşenini render edebilirsin
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
