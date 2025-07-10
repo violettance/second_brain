@@ -65,7 +65,7 @@ export const Analytics: React.FC = () => {
   useEffect(() => {
     async function fetchMemoryDistribution() {
       const { data, error } = await supabase
-        .from('analytics_memory_distribution_bars')
+        .from('v2_analytics_memory_distribution_bars')
         .select('*')
         .single();
       if (error || !data) {
@@ -96,7 +96,7 @@ export const Analytics: React.FC = () => {
   useEffect(() => {
     async function fetchNoteActivity() {
       const { data, error } = await supabase
-        .from('analytics_note_activity_by_weekday')
+        .from('v2_analytics_note_activity_by_weekday')
         .select('*')
         .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
         .order('weekday_num', { ascending: true });
@@ -180,7 +180,7 @@ export const Analytics: React.FC = () => {
   useEffect(() => {
     async function fetchTotalThoughtsFromView() {
       if (!user) return;
-      const { data, error } = await supabase.from('analytics_total_thoughts_change').select('*').eq('user_id', user.id).single();
+      const { data, error } = await supabase.from('v2_analytics_total_thoughts_change').select('*').eq('user_id', user.id).single();
       if (error || !data) {
         setTotalThoughts(0);
         setTotalChange(null);

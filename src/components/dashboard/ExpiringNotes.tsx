@@ -65,7 +65,7 @@ const ExpiringNotes = () => {
       </div>
       {expiringNotes.length > 0 ? (
         <ul className="space-y-3">
-          {expiringNotes.map(note => {
+          {expiringNotes.slice(0, 3).map(note => {
             const daysLeft = getDaysRemaining(note.created_at);
             return (
               <li key={note.id} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between transition-colors hover:bg-slate-700/50">
