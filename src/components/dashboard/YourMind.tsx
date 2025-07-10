@@ -22,7 +22,7 @@ const YourMind = () => {
 
             const [tagsResponse, distributionResponse] = await Promise.all([
                 supabase.from('top_tags_view').select('tag').limit(3),
-                supabase.from('analytics_memory_distribution').select('st_7, lt_7, st_30, lt_30, st_all, lt_all').single()
+                supabase.from('v2_analytics_memory_distribution').select('st_7, lt_7, st_30, lt_30, st_all, lt_all').single()
             ]);
 
             if (tagsResponse.error) {

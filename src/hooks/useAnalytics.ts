@@ -385,7 +385,7 @@ export async function fetchNotCreationTrends(timeRange: string = '30d') {
   } else if (timeRange === 'all') {
     fromDate = null;
   }
-  let query = supabase.from('daily_note_counts').select('note_date, total_count').order('note_date', { ascending: true });
+  let query = supabase.from('v2_daily_note_counts').select('note_date, total_count').order('note_date', { ascending: true });
   if (fromDate) {
     query = query.gte('note_date', fromDate);
   }

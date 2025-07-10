@@ -26,20 +26,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
   const [isLoadingKnowledgeScore, setIsLoadingKnowledgeScore] = useState(true);
 
   useEffect(() => {
-    // Fetch daily notes count for today
+    // Fetch daily notes count for today (user-specific)
     const fetchDailyCount = async () => {
       setIsLoadingDailyCount(true);
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('daily_note_counts')
-        .select('total_count')
-        .eq('note_date', today)
-        .single();
-      
-      if (data && !error) {
-        setDailyNotesCount(data.total_count);
-      } else {
+      if (!user?.id) {
         setDailyNotesCount(0);
+        setIsLoadingDailyCount(false);
+        return;
+      }
+      const today = new Date().toISOString().split('T')[0];
+      // Count short-term notes for today
+      const { count: stCount, error: stError } = await supabase
+        .from('short_term_notes')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('note_date', today)
+        .is('archived_at', null);
+      // Count long-term notes for today
+      const { count: ltCount, error: ltError } = await supabase
+        .from('long_term_notes')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('note_date', today);
+      if ((stError && !stCount) && (ltError && !ltCount)) {
+        setDailyNotesCount(0);
+      } else {
+        setDailyNotesCount((stCount || 0) + (ltCount || 0));
       }
       setIsLoadingDailyCount(false);
     };

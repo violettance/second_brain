@@ -15,7 +15,7 @@ export const ActivityHeatmap = () => {
     const fetchData = async () => {
       setLoading(true);
       const { data: rawData, error } = await supabase
-        .from('daily_note_counts')
+        .from('v2_daily_note_counts')
         .select('note_date, total_count')
         .gte('note_date', '2025-01-01')
         .lte('note_date', '2025-12-31');
