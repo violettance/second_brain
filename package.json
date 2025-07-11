@@ -16,10 +16,14 @@
     "@nivo/calendar": "^0.99.0",
     "@nivo/core": "^0.99.0",
     "@supabase/supabase-js": "^2.39.0",
+    "@types/d3-force": "^3.0.10",
+    "d3-force": "^3.0.0",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-force-graph": "^1.48.0"
+    "react-force-graph": "^1.48.0",
+    "react-force-graph-2d": "^1.28.0",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
