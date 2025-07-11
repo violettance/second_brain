@@ -31,7 +31,6 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
   const deleteNote = hookData.deleteNote;
   const updateNote = hookData.updateNote;
   const [searchTerm, setSearchTerm] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [showOptions, setShowOptions] = useState<string | null>(null);
 
   const filteredNotes = notes.filter(note => 
@@ -65,7 +64,6 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
   const handleDeleteNote = async (noteId: string, memoryType: 'short-term' | 'long-term') => {
     try {
       await deleteNote(noteId, memoryType);
-      setShowDeleteConfirm(null);
       // Refresh notes if callback provided
       if (onRefresh) {
         await onRefresh();
@@ -155,7 +153,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
       </div>
 
       {/* Notes List */}
-      <div className="space-y-3 overflow-y-auto pr-1">
+      <div className="space-y-3 pr-1">
         {filteredNotes.length === 0 ? (
           <div className="text-center py-8">
             <Calendar className="h-10 w-10 text-slate-500 mx-auto mb-3" />
@@ -220,7 +218,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                   
                   {/* Options Menu */}
                   {showOptions === note.id && (
-                    <div className="absolute right-0 top-8 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-10 py-1">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 py-1">
                       <button
                         onClick={() => {
                           if (onDirectEdit) {
@@ -265,7 +263,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                       
                       <button
                         onClick={() => {
-                          setShowDeleteConfirm(note.id);
+                          handleDeleteNote(note.id, note.memory_type);
                           setShowOptions(null);
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-slate-700 flex items-center space-x-2"
@@ -273,38 +271,6 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                         <Trash2 className="h-3.5 w-3.5" />
                         <span>Delete Note</span>
                       </button>
-                    </div>
-                  )}
-                  
-                  {/* Delete Confirmation */}
-                  {showDeleteConfirm === note.id && (
-                    <div 
-                      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-                      onClick={() => setShowDeleteConfirm(null)}
-                    >
-                      <div 
-                        className="bg-slate-800 border border-slate-700 rounded-xl p-4 max-w-sm w-full mx-4"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <h3 className="text-white text-lg font-medium mb-2">Delete Note</h3>
-                        <p className="text-slate-300 text-sm mb-4">
-                          Are you sure you want to delete "{note.title}"? This action cannot be undone.
-                        </p>
-                        <div className="flex justify-end space-x-3">
-                          <button
-                            onClick={() => setShowDeleteConfirm(null)}
-                            className="px-3 py-1.5 bg-slate-700 text-slate-300 rounded text-sm hover:bg-slate-600"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => handleDeleteNote(note.id, note.memory_type)}
-                            className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
                     </div>
                   )}
                 </div>
