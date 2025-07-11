@@ -371,7 +371,11 @@ export const useAnalytics = (timeRange: string) => {
   };
 };
 
-export async function fetchNotCreationTrends(timeRange: string = '30d') {
+export async function fetchNotCreationTrends(timeRange: string = '30d', userId?: string) {
+  if (!userId) {
+    return [];
+  }
+
   const now = new Date();
   let fromDate: string | null = null;
   if (timeRange === '7d') {
@@ -385,7 +389,7 @@ export async function fetchNotCreationTrends(timeRange: string = '30d') {
   } else if (timeRange === 'all') {
     fromDate = null;
   }
-  let query = supabase.from('v2_daily_note_counts').select('note_date, total_count').order('note_date', { ascending: true });
+  let query = supabase.from('v2_daily_note_counts').select('note_date, total_count').eq('user_id', userId).order('note_date', { ascending: true });
   if (fromDate) {
     query = query.gte('note_date', fromDate);
   }

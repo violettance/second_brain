@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { Profile } from '../types/database';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 interface User extends Profile {}
 
@@ -38,16 +39,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initializeAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       if (session?.user) {
-        supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
-          .single()
-          .then(({ data: profile }) => {
-            if (profile) setUser(profile);
-          });
+          .single();
+        
+        if (profile) {
+          setUser(profile);
+        }
       } else {
         setUser(null);
       }
@@ -63,11 +65,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { name } },
     });
+
+    if (error) throw error;
+
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      throw new Error("This email is already registered. Please try to sign in.");
+    }
   };
 
   const logout = async () => {

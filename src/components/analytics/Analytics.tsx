@@ -197,9 +197,14 @@ export const Analytics: React.FC = () => {
   const [noteHourBarData, setNoteHourBarData] = useState<{ label: string; value: number; color: string }[]>([]);
   useEffect(() => {
     async function fetchNoteHourActivity() {
+      if (!user?.id) {
+        setNoteHourBarData([]);
+        return;
+      }
       const { data, error } = await supabase
-        .from('analytics_note_activity_by_hour')
+        .from('v2_analytics_note_activity_by_hour')
         .select('*')
+        .eq('user_id', user.id)
         .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
         .order('hour', { ascending: true });
       if (error || !data) {
@@ -217,7 +222,7 @@ export const Analytics: React.FC = () => {
       setNoteHourBarData(bars);
     }
     fetchNoteHourActivity();
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   // Tag Usage Frequency BarChart data
   const [tagUsageBarData, setTagUsageBarData] = useState<{ label: string; value: number; color: string }[]>([]);
@@ -263,11 +268,16 @@ export const Analytics: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
+    if (!user?.id) {
+      setNotCreationTrends([]);
+      setLoadingTrends(false);
+      return;
+    }
     setLoadingTrends(true);
-    fetchNotCreationTrends(timeRange)
+    fetchNotCreationTrends(timeRange, user.id)
       .then(setNotCreationTrends)
       .finally(() => setLoadingTrends(false));
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   useEffect(() => {
     async function fetchTotalThoughtsFromView() {
@@ -390,10 +400,15 @@ export const Analytics: React.FC = () => {
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [loadingAllTasks, setLoadingAllTasks] = useState(false);
   useEffect(() => {
+    if (!user?.id) {
+      setAllTasks([]);
+      return;
+    }
     setLoadingAllTasks(true);
     supabase
       .from('tasks')
       .select('*, subtasks(*)')
+      .eq('user_id', user.id)
       .then(({ data, error }: { data: any; error: any }) => {
         if (Array.isArray(data)) {
           setAllTasks(data.map((task: any) => ({
@@ -422,7 +437,7 @@ export const Analytics: React.FC = () => {
       })
       .catch(() => setAllTasks([]))
       .finally(() => setLoadingAllTasks(false));
-  }, []);
+  }, [user]);
 
   // Group tasks by projectId
   const tasksByProject: Record<string, Task[]> = useMemo(() => {
@@ -728,31 +743,39 @@ export const Analytics: React.FC = () => {
               </p>
               {loadingProjects ? (
                 <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
-              ) : (
-                <div className="flex flex-col items-center justify-start text-slate-500 w-full">
-                  {projects.filter(p => p.status === 'In Progress').length === 0 ? (
-                    <div className="h-64 flex items-center justify-center">No in-progress projects found.</div>
-                  ) : (
-                    projects.filter(p => p.status === 'In Progress').map((project) => {
-                      const projectTasks = tasksByProject[project.id] || [];
-                      return (
-                        <div key={project.id} className="w-full max-w-xl mb-6 bg-slate-900/60 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-white font-medium">{project.name}</span>
-                            <span className="text-slate-400 text-xs">{project.progress}%</span>
-                          </div>
-                          <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden mb-2">
-                            <div
-                              className="h-3 rounded-full"
-                              style={{ width: `${project.progress}%`, backgroundColor: project.color || '#a78bfa' }}
-                            ></div>
-                          </div>
-                          {/* Task List for this project */}
-                          <div className="mt-2">
-                            <div className="text-slate-400 text-xs mb-1">Tasks</div>
-                            {projectTasks.length > 0 ? (
+              ) : (() => {
+                  const activeProjects = projects
+                    .filter(p => ['In Progress', 'Active'].includes(p.status))
+                    .map(project => ({
+                      ...project,
+                      inProgressTasks: (tasksByProject[project.id] || []).filter(task => task.status === 'IN PROGRESS'),
+                    }))
+                    .filter(p => p.inProgressTasks.length > 0);
+
+                  if (activeProjects.length === 0) {
+                    return <div className="h-64 flex items-center justify-center">No in-progress projects found.</div>;
+                  }
+
+                  return (
+                    <div className="flex flex-col items-center justify-start text-slate-500 w-full">
+                      {activeProjects.map((project) => {
+                        return (
+                          <div key={project.id} className="w-full max-w-xl mb-6 bg-slate-900/60 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-white font-medium">{project.name}</span>
+                              <span className="text-slate-400 text-xs">{project.progress}%</span>
+                            </div>
+                            <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden mb-2">
+                              <div
+                                className="h-3 rounded-full"
+                                style={{ width: `${project.progress}%`, backgroundColor: project.color || '#a78bfa' }}
+                              ></div>
+                            </div>
+                            {/* Task List for this project */}
+                            <div className="mt-2">
+                              <div className="text-slate-400 text-xs mb-1">Tasks</div>
                               <div className="space-y-2">
-                                {projectTasks.map((task: Task) => (
+                                {project.inProgressTasks.map((task: Task) => (
                                   <div key={task.id} className="bg-slate-800/70 rounded px-2 py-1 flex flex-col mb-1">
                                     <div className="flex items-center justify-between">
                                       <span className="text-slate-200 text-sm">{task.name}</span>
@@ -778,16 +801,13 @@ export const Analytics: React.FC = () => {
                                   </div>
                                 ))}
                               </div>
-                            ) : (
-                              <div className="text-slate-500 text-xs italic">No tasks</div>
-                            )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              )}
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
             </div>
             {/* Note Depth & Complexity Analysis */}
             <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
