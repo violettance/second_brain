@@ -1,6 +1,7 @@
 import { ResponsiveCalendar } from '@nivo/calendar';
 import { supabase } from '../../../lib/supabase';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 type HeatmapData = {
   day: string;
@@ -8,15 +9,18 @@ type HeatmapData = {
 };
 
 export const ActivityHeatmap = () => {
+  const { user } = useAuth();
   const [data, setData] = useState<HeatmapData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!user) return;
       setLoading(true);
       const { data: rawData, error } = await supabase
         .from('v2_daily_note_counts')
         .select('note_date, total_count')
+        .eq('user_id', user.id)
         .gte('note_date', '2025-01-01')
         .lte('note_date', '2025-12-31');
       
