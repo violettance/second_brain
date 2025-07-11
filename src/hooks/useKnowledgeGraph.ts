@@ -37,7 +37,7 @@ const useKnowledgeGraph = () => {
     setError(null);
 
     try {
-      const { data: graphData, error: rpcError } = await supabase.rpc('get_knowledge_graph');
+      const { data: graphData, error: rpcError } = await supabase.rpc('get_knowledge_graph_v2');
 
       if (rpcError) {
         throw new Error(`Failed to fetch knowledge graph: ${rpcError.message}`);
@@ -51,7 +51,7 @@ const useKnowledgeGraph = () => {
         setData({ nodes: graphData.nodes, links: links });
       } else {
         // Handle cases where RPC returns unexpected data format
-        console.warn('RPC function get_knowledge_graph returned data in an unexpected format.', graphData);
+        console.warn('RPC function get_knowledge_graph_v2 returned data in an unexpected format.', graphData);
         setData({ nodes: [], links: [] });
       }
 

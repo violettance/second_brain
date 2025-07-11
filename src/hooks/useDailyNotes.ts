@@ -406,26 +406,22 @@ export const useDailyNotes = (selectedDate?: Date) => {
         return;
       }
 
-      if (memoryType === 'short-term') {
-        // For short-term notes, use soft delete (archived_at)
-        const { error } = await supabase
-          .from('short_term_notes')
-          .update({ archived_at: new Date().toISOString() })
-          .eq('id', noteId);
-          
-        if (error) throw error;
-      } else {
-        // For long-term notes, use hard delete
-        const { error } = await supabase
-          .from('long_term_notes')
-          .delete()
-          .eq('id', noteId);
-          
-        if (error) throw error;
-      }
+      const tableName = memoryType === 'short-term' ? 'short_term_notes' : 'long_term_notes';
       
-      // Refetch notes to reflect the deletion
-      await fetchNotes(selectedDate);
+      const { error: deleteError } = await supabase
+        .from(tableName)
+        .delete()
+        .eq('id', noteId)
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      // Update local state by removing the deleted note
+      setNotes(prevNotes => prevNotes.filter(note => note.id !== noteId));
+      notifySubscribers();
+
     } catch (err) {
       console.error('Error deleting note:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete note');
