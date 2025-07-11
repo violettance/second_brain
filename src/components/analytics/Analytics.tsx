@@ -144,9 +144,14 @@ export const Analytics: React.FC = () => {
   const [noteHourBarData, setNoteHourBarData] = useState<{ label: string; value: number; color: string }[]>([]);
   useEffect(() => {
     async function fetchNoteHourActivity() {
+      if (!user?.id) {
+        setNoteHourBarData([]);
+        return;
+      }
       const { data, error } = await supabase
-        .from('analytics_note_activity_by_hour')
+        .from('v2_analytics_note_activity_by_hour')
         .select('*')
+        .eq('user_id', user.id)
         .eq('range', timeRange === '7d' ? '7d' : timeRange === '30d' ? '30d' : 'all')
         .order('hour', { ascending: true });
       if (error || !data) {
@@ -164,7 +169,7 @@ export const Analytics: React.FC = () => {
       setNoteHourBarData(bars);
     }
     fetchNoteHourActivity();
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   // Tag Usage Frequency BarChart data
   const [tagUsageBarData, setTagUsageBarData] = useState<{ label: string; value: number; color: string }[]>([]);
@@ -211,10 +216,10 @@ export const Analytics: React.FC = () => {
 
   useEffect(() => {
     setLoadingTrends(true);
-    fetchNotCreationTrends(timeRange)
+    fetchNotCreationTrends(timeRange, user?.id)
       .then(setNotCreationTrends)
       .finally(() => setLoadingTrends(false));
-  }, [timeRange]);
+  }, [timeRange, user]);
 
   useEffect(() => {
     async function fetchTotalThoughtsFromView() {
@@ -338,9 +343,15 @@ export const Analytics: React.FC = () => {
   const [loadingAllTasks, setLoadingAllTasks] = useState(false);
   useEffect(() => {
     setLoadingAllTasks(true);
+    if (!user?.id) {
+      setAllTasks([]);
+      setLoadingAllTasks(false);
+      return;
+    }
     supabase
       .from('tasks')
       .select('*, subtasks(*)')
+      .eq('user_id', user.id)
       .then(({ data, error }: { data: any; error: any }) => {
         if (Array.isArray(data)) {
           setAllTasks(data.map((task: any) => ({
@@ -369,7 +380,7 @@ export const Analytics: React.FC = () => {
       })
       .catch(() => setAllTasks([]))
       .finally(() => setLoadingAllTasks(false));
-  }, []);
+  }, [user]);
 
   // Group tasks by projectId
   const tasksByProject: Record<string, Task[]> = useMemo(() => {
@@ -541,7 +552,7 @@ export const Analytics: React.FC = () => {
         <div className="space-y-8 mb-12">
           {/* 1. Not Creation Trends (Short Term vs Long Term) — Line Chart */}
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">Not Creation Trends</h2>
+            <h2 className="text-lg font-bold text-white mb-1">Note Creation Trends</h2>
             <p className="text-slate-400 text-sm mb-4">{trendsDescription}</p>
             {loadingTrends ? (
               <div className="h-64 flex items-center justify-center text-slate-500">
