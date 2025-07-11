@@ -10,7 +10,7 @@ import { ShortTermMemory } from './components/memory/ShortTermMemory';
 import { LongTermMemory } from './components/memory/LongTermMemory';
 import { Analytics } from './components/analytics/Analytics';
 import { Settings } from './components/settings/Settings';
-import { KnowledgeNetworkPage } from './components/analytics/KnowledgeNetworkPage';
+import { KnowledgeNetworkPage } from './components/knowledge-network/KnowledgeNetworkPage';
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
