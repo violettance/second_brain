@@ -116,7 +116,10 @@ export const TasksPage: React.FC = () => {
         {/* Kanban Board */}
         <div className="flex-1 text-white p-4 sm:p-6 lg:p-8 overflow-y-auto">
           {tasks.length > 0 ? (
-            <KanbanBoard tasks={tasks} onSelectTask={handleSelectTask} />
+            <KanbanBoard 
+              initialTasks={tasks}
+              onSelectTask={handleSelectTask} 
+            />
           ) : (
             !loading && <p>No tasks found for this project. Get started by creating a new one!</p>
           )}
