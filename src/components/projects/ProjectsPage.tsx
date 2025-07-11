@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProjectsList } from './ProjectsList';
-import { ProjectDetail } from './ProjectDetail';
 import { CreateProjectModal } from './CreateProjectModal';
-import { Plus, FolderOpen } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export const ProjectsPage: React.FC = () => {
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSelectProject = (projectId: string) => {
+    navigate('/tasks', { state: { projectId } });
+  };
 
   return (
     <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
@@ -32,14 +36,7 @@ export const ProjectsPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="p-4 lg:p-6 bg-slate-900 min-h-full">
-        {selectedProjectId ? (
-          <ProjectDetail 
-            projectId={selectedProjectId} 
-            onBack={() => setSelectedProjectId(null)} 
-          />
-        ) : (
-          <ProjectsList onSelectProject={setSelectedProjectId} />
-        )}
+        <ProjectsList onSelectProject={handleSelectProject} />
       </div>
 
       {/* Create Project Modal */}

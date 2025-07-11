@@ -12,6 +12,7 @@ import { LongTermMemory } from './components/memory/LongTermMemory';
 import { Analytics } from './components/analytics/Analytics';
 import { Settings } from './components/settings/Settings';
 import { KnowledgeNetworkPage } from './components/knowledge-network/KnowledgeNetworkPage';
+import { TasksPage } from './components/tasks/TasksPage';
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -52,6 +53,7 @@ const AppContent: React.FC = () => {
             <Route path="/short-term-memory" element={<ShortTermMemory />} />
             <Route path="/long-term-memory" element={<LongTermMemory />} />
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/tasks" element={<TasksPage />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/knowledge-network" element={<KnowledgeNetworkPage />} />
