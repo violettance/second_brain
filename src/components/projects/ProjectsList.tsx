@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, MoreHorizontal, Calendar, CheckCircle, Edit, Trash2 } from 'lucide-react';
-import { useProjects } from '../../hooks/useProjects';
 import { EditProjectModal } from './EditProjectModal';
+import { Project } from '../../types/projects';
 
 interface ProjectsListProps {
+  projects: Project[];
+  isLoading: boolean;
+  deleteProject: (projectId: string) => Promise<void>;
+  refetch: () => void;
   onSelectProject: (projectId: string) => void;
 }
 
-export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) => {
+export const ProjectsList: React.FC<ProjectsListProps> = ({ 
+  projects,
+  isLoading,
+  deleteProject,
+  refetch,
+  onSelectProject
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<string | null>(null);
-  const { projects, isLoading, deleteProject, refetch } = useProjects();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -199,11 +208,11 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
             </div>
 
             {/* Due Date */}
-            {project.dueDate && (
+            {project.due_date && (
               <div className="mt-4 pt-4 border-t border-slate-700/50">
                 <div className="flex items-center space-x-2 text-slate-400 text-sm">
                   <Calendar className="h-4 w-4" />
-                  <span>Due {project.dueDate}</span>
+                  <span>Due {new Date(project.due_date).toLocaleDateString()}</span>
                 </div>
               </div>
             )}
