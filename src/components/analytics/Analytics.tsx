@@ -60,6 +60,10 @@ export const Analytics: React.FC = () => {
   const [knowledgeScore, setKnowledgeScore] = useState(0);
   const [knowledgeScoreChange, setKnowledgeScoreChange] = useState<number | null>(null);
 
+  // Connections state
+  const [connectionsCount, setConnectionsCount] = useState(0);
+  const [connectionsChange, setConnectionsChange] = useState<number | null>(null);
+
   // Memory Distribution BarChart data (real note counts)
   const [memoryBarData, setMemoryBarData] = useState<{ label: string; value: number; color: string }[]>([]);
   const fetchMemoryDistribution = async () => {
@@ -116,6 +120,55 @@ export const Analytics: React.FC = () => {
       supabase.removeChannel(ltSubscription);
     };
   }, [user]);
+
+  // Connections data
+  useEffect(() => {
+    async function fetchConnections() {
+      if (!user?.id) {
+        setConnectionsCount(0);
+        setConnectionsChange(null);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('connections_statistics')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error || !data) {
+        setConnectionsCount(0);
+        setConnectionsChange(null);
+        return;
+      }
+
+      let total = 0;
+      let prev_total = 0;
+
+      if (timeRange === '7d') {
+        total = data.last_7_days_connections || 0;
+        prev_total = data.prev_7_days_connections || 0;
+      } else if (timeRange === '30d') {
+        total = data.last_30_days_connections || 0;
+        prev_total = data.prev_30_days_connections || 0;
+      } else {
+        total = data.all_time_connections || 0;
+        prev_total = 0; // No previous period for all time
+      }
+      setConnectionsCount(total);
+
+      if (timeRange !== 'all' && prev_total > 0) {
+        const change = ((total - prev_total) / prev_total) * 100;
+        setConnectionsChange(change);
+      } else if (timeRange !== 'all' && prev_total === 0 && total > 0) {
+        setConnectionsChange(100);
+      }
+      else {
+        setConnectionsChange(null);
+      }
+    }
+    fetchConnections();
+  }, [timeRange, user]);
+
 
   // Note Activity by Day of Week BarChart data
   const [noteActivityBarData, setNoteActivityBarData] = useState<{ label: string; value: number; color: string }[]>([]);
@@ -530,10 +583,19 @@ export const Analytics: React.FC = () => {
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-slate-400 text-sm font-medium">Connections</h3>
-              <Activity className="h-5 w-5" style={{ color: '#d4a5d4' }} />
+              <Tag className="h-5 w-5" style={{ color: '#d4a5d4' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{analyticsData.connections}</div>
-            <div className="text-sm" style={{ color: '#d4a5d4' }}>Neural links</div>
+            <div className="text-2xl lg:text-3xl font-bold text-white">{connectionsCount}</div>
+            <div>
+              {connectionsChange !== null && timeRange !== 'all' ? (
+                <span className={`text-sm ${connectionsChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {connectionsChange >= 0 ? '+' : ''}{connectionsChange.toFixed(1)}%
+                </span>
+              ) : null}
+              {timeRange === '7d' && <span className="text-sm text-slate-400"> in last 7 days</span>}
+              {timeRange === '30d' && <span className="text-sm text-slate-400"> in last 30 days</span>}
+              {timeRange === 'all' && <span className="text-sm text-slate-400">All time connections</span>}
+            </div>
           </div>
         </div>
 
