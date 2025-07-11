@@ -263,9 +263,10 @@ export const useMemoryNotes = () => {
           setLongTermNotes(prev => [newNote, ...prev]);
         }
       }
-
-      // Immediate sync with daily notes
-      await refetchDailyNotes();
+      
+      // Refetch notes for both memory and daily views
+      await fetchNotes();
+      refetchDailyNotes();
 
       return newNote;
     } catch (err) {
@@ -388,13 +389,13 @@ export const useMemoryNotes = () => {
           setLongTermNotes(prev => prev.filter(n => n.id !== noteId));
         }
       }
-
-      // Immediate sync with daily notes
-      await refetchDailyNotes();
+      
+      // Refetch notes to reflect the deletion
+      await fetchNotes();
+      refetchDailyNotes();
     } catch (err) {
       console.error('Error deleting note:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete note');
-      throw err;
     } finally {
       setIsLoading(false);
     }

@@ -15,7 +15,7 @@ const MOCK_PROJECTS: Project[] = [
     tasksCount: 12,
     completedTasks: 9,
 
-    dueDate: '2025-02-15',
+    due_date: '2025-02-15',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -29,7 +29,7 @@ const MOCK_PROJECTS: Project[] = [
     tasksCount: 8,
     completedTasks: 3,
 
-    dueDate: '2025-03-01',
+    due_date: '2025-03-01',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -56,7 +56,7 @@ const MOCK_TASKS: Task[] = [
     status: 'DONE',
     priority: 'High',
     startDate: '2025-01-01',
-    dueDate: '2025-01-15',
+    due_date: '2025-01-15',
     tags: ['design', 'ui', 'dashboard'],
     subtasks: [
       { id: '1', name: 'Create wireframes', completed: true },
@@ -74,7 +74,7 @@ const MOCK_TASKS: Task[] = [
     status: 'IN PROGRESS',
     priority: 'High',
     startDate: '2025-01-10',
-    dueDate: '2025-01-25',
+    due_date: '2025-01-25',
     tags: ['backend', 'auth', 'security'],
     subtasks: [
       { id: '1', name: 'Setup Supabase auth', completed: true },
@@ -91,7 +91,7 @@ const MOCK_TASKS: Task[] = [
     description: 'Design and implement the database structure',
     status: 'TO DO',
     priority: 'Medium',
-    dueDate: '2025-02-01',
+    due_date: '2025-02-01',
     tags: ['database', 'schema', 'backend'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -103,7 +103,7 @@ const MOCK_TASKS: Task[] = [
     description: 'Create REST API endpoints for data operations',
     status: 'TO DO',
     priority: 'High',
-    dueDate: '2025-02-10',
+    due_date: '2025-02-10',
     tags: ['api', 'backend', 'endpoints'],
     relationships: ['2'], // Related to authentication task
     createdAt: new Date().toISOString(),
@@ -188,7 +188,7 @@ export const useProjects = () => {
           color: project.color,
           tasksCount,
           completedTasks,
-          dueDate: project.due_date || undefined,
+          due_date: project.due_date || undefined,
           createdAt: project.created_at,
           updatedAt: project.updated_at
         } as Project;
@@ -213,7 +213,7 @@ export const useProjects = () => {
     name: string;
     description: string;
     color: string;
-    dueDate?: string;
+    due_date?: string;
   }) => {
     const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
@@ -238,7 +238,7 @@ export const useProjects = () => {
           color: projectData.color,
           tasksCount: 0,
           completedTasks: 0,
-          dueDate: projectData.dueDate,
+          due_date: projectData.due_date,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
@@ -253,13 +253,16 @@ export const useProjects = () => {
           name: projectData.name,
           description: projectData.description,
           color: projectData.color,
-          due_date: projectData.dueDate || null,
+          due_date: projectData.due_date || null,
           status: 'Active'
         })
         .select()
         .single();
 
       if (error) throw error;
+
+      // Refetch projects to update the list
+      await fetchProjects();
 
       const newProject: Project = {
         id: data.id,
@@ -270,7 +273,7 @@ export const useProjects = () => {
         color: data.color,
         tasksCount: 0,
         completedTasks: 0,
-        dueDate: data.due_date || undefined,
+        due_date: data.due_date || undefined,
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
@@ -292,7 +295,7 @@ export const useProjects = () => {
     status: Project['status'];
     color: string;
     progress: number;
-    dueDate?: string;
+    due_date?: string;
   }>) => {
     const demoUser = {
       id: '2994cfab-5a29-422d-81f8-63909b93bf20',
@@ -324,13 +327,16 @@ export const useProjects = () => {
           ...(updates.status && { status: updates.status }),
           ...(updates.color && { color: updates.color }),
           ...(updates.progress !== undefined && { progress: updates.progress }),
-          ...(updates.dueDate !== undefined && { due_date: updates.dueDate }),
+          ...(updates.due_date !== undefined && { due_date: updates.due_date }),
           updated_at: new Date().toISOString()
         })
         .eq('id', projectId)
         .eq('user_id', currentUser.id);
 
       if (error) throw error;
+
+      // Refetch projects to update the list
+      await fetchProjects();
 
       // Update local state
       setProjects(prev => prev.map(p => 
@@ -366,7 +372,7 @@ export const useProjects = () => {
         return;
       }
 
-      // Delete related tasks and subtasks first
+      // First, delete related tasks to maintain data integrity
       const { error: tasksError } = await supabase
         .from('tasks')
         .delete()
@@ -375,7 +381,7 @@ export const useProjects = () => {
 
       if (tasksError) throw tasksError;
 
-      // Delete the project
+      // Then delete the project
       const { error: projectError } = await supabase
         .from('projects')
         .delete()
@@ -383,9 +389,9 @@ export const useProjects = () => {
         .eq('user_id', currentUser.id);
 
       if (projectError) throw projectError;
-
-      // Update local state
-      setProjects(prev => prev.filter(p => p.id !== projectId));
+      
+      // Refetch projects to update the list
+      await fetchProjects();
     } catch (err) {
       console.error('Error deleting project:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete project');
@@ -406,109 +412,155 @@ export const useProjects = () => {
   };
 };
 
-export const useProject = (projectId: string) => {
+// --- HOOK FOR A SINGLE PROJECT'S DATA ---
+export const useProjectData = (projectId: string) => {
   const [project, setProject] = useState<Project | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const fetchProject = async () => {
-    const demoUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
+    if (!projectId) {
+      setProject(null);
+      return;
+    }
+    
+    const demoUser = { id: '2994cfab-5a29-422d-81f8-63909b93bf20' };
     const currentUser = user || demoUser;
-
-    if (!projectId) return;
 
     setIsLoading(true);
     setError(null);
-
     try {
       if (!isSupabaseConfigured()) {
-        // Use mock data
         await new Promise(resolve => setTimeout(resolve, 500));
         const foundProject = MOCK_PROJECTS.find(p => p.id === projectId);
-        const projectTasks = MOCK_TASKS.filter(t => t.projectId === projectId);
         setProject(foundProject || null);
-        setTasks(projectTasks);
         return;
       }
 
-      // Fetch project from Supabase
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select('*')
         .eq('id', projectId)
         .eq('user_id', currentUser.id)
         .single();
-
+      
       if (projectError) throw projectError;
+      if (!projectData) {
+        setProject(null);
+        return;
+      }
 
-      // Fetch tasks with subtasks
       const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
-        .select(`
-          *,
-          subtasks (*)
-        `)
-        .eq('project_id', projectId)
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: true });
+        .select('status')
+        .eq('project_id', projectId);
 
       if (tasksError) throw tasksError;
 
-      // Transform Supabase data to match our Project interface
-      const transformedProject: Project = {
+      const completedTasks = tasksData?.filter((task: any) => task.status === 'DONE').length || 0;
+      const tasksCount = tasksData?.length || 0;
+      const calculatedProgress = tasksCount > 0 ? Math.round((completedTasks / tasksCount) * 100) : projectData.progress;
+      
+      const projectWithCounts: Project = {
         id: projectData.id,
         name: projectData.name,
         description: projectData.description || '',
         status: projectData.status as Project['status'],
-        progress: projectData.progress,
+        progress: calculatedProgress,
         color: projectData.color,
-        tasksCount: tasksData?.length || 0,
-        completedTasks: tasksData?.filter((task: any) => task.status === 'DONE').length || 0,
-        dueDate: projectData.due_date || undefined,
+        tasksCount,
+        completedTasks,
+        due_date: projectData.due_date || undefined,
         createdAt: projectData.created_at,
-        updatedAt: projectData.updated_at
+        updatedAt: projectData.updated_at,
       };
-
-      // Transform tasks data
-      const transformedTasks: Task[] = tasksData?.map((task: any) => ({
-        id: task.id,
-        projectId: task.project_id,
-        name: task.name,
-        description: task.description || undefined,
-        status: task.status as Task['status'],
-        priority: task.priority as Task['priority'],
-        startDate: task.start_date || undefined,
-        dueDate: task.due_date || undefined,
-        tags: task.tags || undefined,
-        subtasks: task.subtasks?.map((st: any) => ({
-          id: st.id,
-          name: st.name,
-          completed: st.completed
-        })) || undefined,
-        createdAt: task.created_at,
-        updatedAt: task.updated_at
-      })) || [];
-
-      setProject(transformedProject);
-      setTasks(transformedTasks);
+      setProject(projectWithCounts);
     } catch (err) {
       console.error('Error fetching project:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch project');
-      // Fallback to mock data
-      const foundProject = MOCK_PROJECTS.find(p => p.id === projectId);
-      const projectTasks = MOCK_TASKS.filter(t => t.projectId === projectId);
-      setProject(foundProject || null);
-      setTasks(projectTasks);
+      setError(err instanceof Error ? err.message : 'Failed to fetch project details');
+      setProject(null);
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProject();
+  }, [projectId, user]);
+
+  return { project, isLoading, error, fetchProject };
+};
+
+
+// --- HOOK FOR A SINGLE PROJECT'S TASKS ---
+export const useProjectTasks = (projectId: string, onTaskChange: () => void) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTasks = async () => {
+    if (!projectId) {
+      setTasks([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (!isSupabaseConfigured()) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const projectTasks = MOCK_TASKS.filter(t => t.projectId === projectId);
+        setTasks(projectTasks);
+        return;
+      }
+      
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
+
+      if (tasksError) throw tasksError;
+      
+      const tasksWithSubtasks = await Promise.all(
+        (tasksData || []).map(async (task: any) => {
+          const { data: subtasks, error: subtasksError } = await supabase
+            .from('subtasks')
+            .select('*')
+            .eq('task_id', task.id);
+          if (subtasksError) console.error('Error fetching subtasks:', subtasksError);
+          return {
+            ...task,
+            id: task.id,
+            projectId: task.project_id,
+            name: task.name,
+            description: task.description || undefined,
+            status: task.status as Task['status'],
+            priority: task.priority as Task['priority'],
+            startDate: task.start_date || undefined,
+            due_date: task.due_date || undefined,
+            tags: task.tags || undefined,
+            subtasks: subtasks?.map((st: any) => ({ id: st.id, name: st.name, completed: st.completed })) || [],
+            createdAt: task.created_at,
+            updatedAt: task.updated_at,
+          } as Task;
+        })
+      );
+      
+      setTasks(tasksWithSubtasks);
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch tasks');
+      setTasks([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchTasks();
+  }, [projectId]);
 
   const createTask = async (taskData: {
     name: string;
@@ -516,225 +568,96 @@ export const useProject = (projectId: string) => {
     status: Task['status'];
     priority?: Task['priority'];
     startDate?: string;
-    dueDate?: string;
+    due_date?: string;
     tags?: string[];
     subtasks?: string[];
   }) => {
-    const demoUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
-    const currentUser = user || demoUser;
-
-    setIsLoading(true);
-    setError(null);
-
     try {
       if (!isSupabaseConfigured()) {
-        // Mock creation
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 300));
         const newTask: Task = {
           id: Date.now().toString(),
-          projectId: projectId,
+          projectId,
           name: taskData.name,
           description: taskData.description,
           status: taskData.status,
-          priority: taskData.priority,
+          priority: taskData.priority || 'Medium',
           startDate: taskData.startDate,
-          dueDate: taskData.dueDate,
+          due_date: taskData.due_date,
           tags: taskData.tags,
-          subtasks: taskData.subtasks?.map((name, index) => ({
-            id: (Date.now() + index).toString(),
-            name,
-            completed: false
-          })),
+          subtasks: taskData.subtasks?.map((name, i) => ({ id: `${Date.now()}-${i}`, name, completed: false })),
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         };
         setTasks(prev => [...prev, newTask]);
-        return newTask;
+        onTaskChange(); // Notify that project data might need a refresh
+        return;
       }
 
       const { data: taskResult, error: taskError } = await supabase
         .from('tasks')
         .insert({
           project_id: projectId,
-          user_id: currentUser.id,
           name: taskData.name,
-          description: taskData.description || null,
+          description: taskData.description,
           status: taskData.status,
           priority: taskData.priority || 'Medium',
           start_date: taskData.startDate || null,
-          due_date: taskData.dueDate || null,
+          due_date: taskData.due_date || null,
           tags: taskData.tags || []
         })
         .select()
         .single();
-
-      if (taskError) throw taskError;
-
-      let subtasks: any[] = [];
-      if (taskData.subtasks && taskData.subtasks.length > 0) {
-        const { data: subtaskResults, error: subtaskError } = await supabase
-          .from('subtasks')
-          .insert(
-            taskData.subtasks.map(name => ({
-              task_id: taskResult.id,
-              name,
-              completed: false
-            }))
-          )
-          .select();
-
-        if (subtaskError) throw subtaskError;
-        subtasks = subtaskResults || [];
-      }
-
-      const newTask: Task = {
-        id: taskResult.id,
-        projectId: taskResult.project_id,
-        name: taskResult.name,
-        description: taskResult.description || undefined,
-        status: taskResult.status as Task['status'],
-        priority: taskResult.priority as Task['priority'],
-        startDate: taskResult.start_date || undefined,
-        dueDate: taskResult.due_date || undefined,
-        tags: taskResult.tags || undefined,
-        subtasks: subtasks.map(st => ({
-          id: st.id,
-          name: st.name,
-          completed: st.completed
-        })),
-        createdAt: taskResult.created_at,
-        updatedAt: taskResult.updated_at
-      };
-
-      setTasks(prev => [...prev, newTask]);
       
-      // Update project task count
-      if (project) {
-        setProject(prev => prev ? {
-          ...prev,
-          tasksCount: prev.tasksCount + 1
-        } : null);
-      }
-
-      return newTask;
+      if (taskError) throw taskError;
+      
+      await fetchTasks();
+      onTaskChange();
     } catch (err) {
       console.error('Error creating task:', err);
       setError(err instanceof Error ? err.message : 'Failed to create task');
-      throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (projectId) {
-      fetchProject();
-    }
-  }, [user, projectId]);
-
+  
   const updateTask = async (taskId: string, updates: Partial<{
     name: string;
     description?: string;
     status: Task['status'];
     priority?: Task['priority'];
     startDate?: string;
-    dueDate?: string;
+    due_date?: string;
     tags?: string[];
   }>) => {
-    const demoUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
-    const currentUser = user || demoUser;
-
-    setIsLoading(true);
-    setError(null);
-
     try {
       if (!isSupabaseConfigured()) {
-        // Mock update
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setTasks(prev => prev.map(t => 
-          t.id === taskId 
-            ? { ...t, ...updates, updatedAt: new Date().toISOString() }
-            : t
-        ));
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...updates } : t));
+        onTaskChange();
         return;
       }
 
       const { error } = await supabase
         .from('tasks')
-        .update({
-          ...(updates.name && { name: updates.name }),
-          ...(updates.description !== undefined && { description: updates.description }),
-          ...(updates.status && { status: updates.status }),
-          ...(updates.priority && { priority: updates.priority }),
-          ...(updates.startDate !== undefined && { start_date: updates.startDate }),
-          ...(updates.dueDate !== undefined && { due_date: updates.dueDate }),
-          ...(updates.tags && { tags: updates.tags }),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', taskId)
-        .eq('user_id', currentUser.id);
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', taskId);
 
       if (error) throw error;
-
-      // Update local state
-      setTasks(prev => prev.map(t => 
-        t.id === taskId 
-          ? { ...t, ...updates, updatedAt: new Date().toISOString() }
-          : t
-      ));
-
-      // Update project completed tasks count if status changed
-      if (updates.status && project) {
-        const currentTask = tasks.find(t => t.id === taskId);
-        if (currentTask) {
-          const wasCompleted = currentTask.status === 'DONE';
-          const isCompleted = updates.status === 'DONE';
-          
-          if (wasCompleted !== isCompleted) {
-            setProject(prev => prev ? {
-              ...prev,
-              completedTasks: prev.completedTasks + (isCompleted ? 1 : -1)
-            } : null);
-          }
-        }
-      }
+      
+      await fetchTasks();
+      onTaskChange();
     } catch (err) {
       console.error('Error updating task:', err);
       setError(err instanceof Error ? err.message : 'Failed to update task');
-      throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const deleteTask = async (taskId: string) => {
-    const demoUser = {
-      id: '2994cfab-5a29-422d-81f8-63909b93bf20',
-      name: 'Demo User',
-      email: 'demo@example.com'
-    };
-    const currentUser = user || demoUser;
-
-    setIsLoading(true);
-    setError(null);
-
     try {
       if (!isSupabaseConfigured()) {
-        // Mock deletion
-        await new Promise(resolve => setTimeout(resolve, 500));
         setTasks(prev => prev.filter(t => t.id !== taskId));
+        onTaskChange();
         return;
       }
-
-      // Delete subtasks first
+      
       const { error: subtasksError } = await supabase
         .from('subtasks')
         .delete()
@@ -742,46 +665,20 @@ export const useProject = (projectId: string) => {
 
       if (subtasksError) throw subtasksError;
 
-      // Delete the task
       const { error: taskError } = await supabase
         .from('tasks')
         .delete()
-        .eq('id', taskId)
-        .eq('user_id', currentUser.id);
+        .eq('id', taskId);
 
       if (taskError) throw taskError;
-
-      // Update local state
-      const taskToDelete = tasks.find(t => t.id === taskId);
-      setTasks(prev => prev.filter(t => t.id !== taskId));
       
-      // Update project task counts
-      if (project && taskToDelete) {
-        setProject(prev => prev ? {
-          ...prev,
-          tasksCount: prev.tasksCount - 1,
-          completedTasks: taskToDelete.status === 'DONE' 
-            ? prev.completedTasks - 1 
-            : prev.completedTasks
-        } : null);
-      }
+      await fetchTasks();
+      onTaskChange();
     } catch (err) {
       console.error('Error deleting task:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete task');
-      throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  return {
-    project,
-    tasks,
-    isLoading,
-    error,
-    refetch: fetchProject,
-    createTask,
-    updateTask,
-    deleteTask
-  };
+  return { tasks, isLoading, error, createTask, updateTask, deleteTask, fetchTasks };
 };

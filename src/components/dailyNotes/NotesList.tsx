@@ -62,9 +62,9 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
     }
   };
 
-  const handleDeleteNote = async (noteId: string) => {
+  const handleDeleteNote = async (noteId: string, memoryType: 'short-term' | 'long-term') => {
     try {
-      await deleteNote(noteId);
+      await deleteNote(noteId, memoryType);
       setShowDeleteConfirm(null);
       // Refresh notes if callback provided
       if (onRefresh) {
@@ -298,7 +298,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                             Cancel
                           </button>
                           <button
-                            onClick={() => handleDeleteNote(note.id)}
+                            onClick={() => handleDeleteNote(note.id, note.memory_type)}
                             className="px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                           >
                             Delete

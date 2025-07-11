@@ -118,10 +118,19 @@ export const DailyNotes: React.FC = () => {
             {/* Sidebar Toggle (Mobile) */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden fixed bottom-4 right-4 z-20 p-3 bg-slate-700 hover:bg-slate-600 rounded-full shadow-lg"
+              className="lg:hidden fixed bottom-4 right-4 z-30 p-3 bg-slate-700 hover:bg-slate-600 rounded-full shadow-lg"
             >
               <CalendarDays className="h-5 w-5 text-white" />
             </button>
+            
+            {/* Backdrop for mobile sidebar */}
+            {sidebarOpen && (
+              <div 
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden fixed inset-0 bg-black/60 z-10 transition-opacity duration-300"
+                aria-hidden="true"
+              ></div>
+            )}
             
             {/* Notes Panel - Now on the left */}
             <div className="flex-1 overflow-y-auto p-4">
@@ -136,9 +145,9 @@ export const DailyNotes: React.FC = () => {
             
             {/* Calendar Sidebar - Now on the right */}
             <div 
-              className={`${
-                sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
-              } lg:w-80 w-full lg:max-w-xs bg-slate-800/30 border-l border-slate-700/50 p-4 overflow-y-auto transition-transform duration-300 ease-in-out lg:relative fixed inset-y-0 right-0 z-10`}
+              className={`transform transition-transform duration-300 ease-in-out ${
+                sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+              } lg:translate-x-0 w-screen max-w-sm lg:w-80 lg:max-w-xs bg-slate-800/80 backdrop-blur-md border-l border-slate-700/50 p-4 overflow-y-auto fixed lg:relative inset-y-0 right-0 z-20`}
             >
               <div className="sticky top-0">
                 <div className="flex items-center justify-between mb-4">

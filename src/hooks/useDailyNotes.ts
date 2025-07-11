@@ -259,17 +259,11 @@ export const useDailyNotes = (selectedDate?: Date) => {
         };
       }
       
-      // Update local state
-      setNotes(prev => [newNote, ...prev]);
-      
-      // Notify all subscribers of the change
-      setTimeout(() => notifySubscribers(), 0);
-      
-      return newNote;
+      // Refetch notes to reflect the new addition
+      await fetchNotes(selectedDate);
     } catch (err) {
       console.error('Error saving note:', err);
       setError(err instanceof Error ? err.message : 'Failed to save note');
-      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -368,7 +362,6 @@ export const useDailyNotes = (selectedDate?: Date) => {
           note.id === noteId ? newNote : note
         ));
         
-        return newNote;
       } else {
         // Regular update in the same table
         const tableName = currentNote.memory_type === 'short-term' ? 'short_term_notes' : 'long_term_notes';
@@ -381,30 +374,20 @@ export const useDailyNotes = (selectedDate?: Date) => {
           .single();
           
         if (error) throw error;
-        if (!data) throw new Error('Failed to update note');
-        
-        const updatedNote = {
-          ...data,
-          memory_type: currentNote.memory_type
-        };
-        
-        // Update local state
-        setNotes(prev => prev.map(note => 
-          note.id === noteId ? updatedNote : note
-        ));
-        
-        return updatedNote;
       }
+      
+      // Refetch notes to reflect the update
+      await fetchNotes(selectedDate);
+
     } catch (err) {
       console.error('Error updating note:', err);
       setError(err instanceof Error ? err.message : 'Failed to update note');
-      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteNote = async (noteId: string) => {
+  const deleteNote = async (noteId: string, memoryType: 'short-term' | 'long-term') => {
     if (!user) throw new Error('Kullanıcı yok!');
 
     setIsLoading(true);
@@ -422,13 +405,8 @@ export const useDailyNotes = (selectedDate?: Date) => {
         
         return;
       }
-      // Find the note to determine which table to delete from
-      const noteToDelete = notes.find(note => note.id === noteId);
-      if (!noteToDelete) {
-        throw new Error('Note not found');
-      }
 
-      if (noteToDelete.memory_type === 'short-term') {
+      if (memoryType === 'short-term') {
         // For short-term notes, use soft delete (archived_at)
         const { error } = await supabase
           .from('short_term_notes')
@@ -446,15 +424,11 @@ export const useDailyNotes = (selectedDate?: Date) => {
         if (error) throw error;
       }
       
-      // Update local state
-      setNotes(prev => prev.filter(note => note.id !== noteId));
-      
-      // Notify all subscribers of the change
-      setTimeout(() => notifySubscribers(), 0);
+      // Refetch notes to reflect the deletion
+      await fetchNotes(selectedDate);
     } catch (err) {
       console.error('Error deleting note:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete note');
-      throw err;
     } finally {
       setIsLoading(false);
     }
