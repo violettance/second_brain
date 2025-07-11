@@ -1,194 +1,100 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Save, FolderOpen } from 'lucide-react';
-import { useProjects } from '../../hooks/useProjects';
+import React, { useState } from 'react';
 import { Project } from '../../types/projects';
+
+type ProjectUpdates = Partial<Omit<Project, 'id' | 'tasksCount' | 'completedTasks' | 'createdAt' | 'updatedAt'>>;
 
 interface EditProjectModalProps {
   project: Project;
   onClose: () => void;
-  onProjectUpdated?: () => void;
+  onSave: (projectId: string, updates: ProjectUpdates) => void;
 }
 
-export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, onClose, onProjectUpdated }) => {
+export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, onClose, onSave }) => {
   const [name, setName] = useState(project.name);
-  const [description, setDescription] = useState(project.description);
-  const [color, setColor] = useState(project.color);
+  const [description, setDescription] = useState(project.description || '');
+  const [color, setColor] = useState(project.color || '#C2B5FC');
   const [status, setStatus] = useState(project.status);
-  const [dueDate, setDueDate] = useState(project.dueDate || '');
-  const [isSaving, setIsSaving] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
-  const { updateProject } = useProjects();
+  const [dueDate, setDueDate] = useState(project.due_date ? project.due_date.split('T')[0] : '');
 
-  // Close modal when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose]);
-
-  const colors = [
-    '#C2B5FC', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
-    '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899'
-  ];
-
-  const statuses = ['Active', 'In Progress', 'Completed', 'On Hold'] as const;
-
-  const handleSave = async () => {
-    if (!name.trim()) {
-      alert('Please enter a project name');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await updateProject(project.id, {
-        name: name.trim(),
-        description: description.trim(),
-        color,
-        status,
-        dueDate: dueDate || undefined
-      });
-      
-      onProjectUpdated?.();
-      onClose();
-    } catch (error) {
-      console.error('Error updating project:', error);
-      alert('Failed to update project. Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
+    onSave(project.id, {
+      name: name.trim(),
+      description: description.trim(),
+      color,
+      status,
+      due_date: dueDate || undefined,
+    });
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div 
-        ref={modalRef}
-        className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg" style={{ background: color }}>
-              <FolderOpen className="h-5 w-5 text-slate-900" />
-            </div>
-            <h2 className="text-xl font-bold text-white">Edit Project</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-slate-400" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Project Name */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Project Name *
-            </label>
+    <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center">
+      <div className="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-white mb-4">Edit Project</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="project-name" className="block text-slate-400 text-sm font-medium mb-2">Project Name</label>
             <input
+              id="project-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter project name..."
-              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white"
+              required
             />
           </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Description
-            </label>
+          <div className="mb-4">
+            <label htmlFor="project-description" className="block text-slate-400 text-sm font-medium mb-2">Description</label>
             <textarea
+              id="project-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your project..."
-              rows={4}
-              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 resize-none"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
-            />
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white"
+              rows={3}
+            ></textarea>
           </div>
-
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Status
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
-            >
-              {statuses.map((statusOption) => (
-                <option key={statusOption} value={statusOption}>{statusOption}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Color Selection */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">
-              Project Color
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {colors.map((colorOption) => (
-                <button
-                  key={colorOption}
-                  onClick={() => setColor(colorOption)}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    color === colorOption ? 'border-white scale-110' : 'border-slate-600 hover:border-slate-500'
-                  }`}
-                  style={{ backgroundColor: colorOption }}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label htmlFor="project-status" className="block text-slate-400 text-sm font-medium mb-2">Status</label>
+                <select
+                id="project-status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as Project['status'])}
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white"
+                >
+                <option value="Active">Active</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div>
+                <label htmlFor="project-color" className="block text-slate-400 text-sm font-medium mb-2">Color</label>
+                <input
+                id="project-color"
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-full h-10 p-1 bg-slate-700 border border-slate-600 rounded-lg"
                 />
-              ))}
             </div>
           </div>
-
-          {/* Due Date */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Due Date (Optional)
-            </label>
+           <div className="mb-6">
+            <label htmlFor="project-due-date" className="block text-slate-400 text-sm font-medium mb-2">Due Date</label>
             <input
+              id="project-due-date"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white"
             />
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t border-slate-700">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 border border-slate-600 text-slate-300 rounded-xl font-semibold hover:bg-slate-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isSaving || !name.trim()}
-            className="flex items-center space-x-2 px-6 py-3 text-slate-900 rounded-xl font-semibold transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: '#C2B5FC' }}
-          >
-            <Save className="h-4 w-4" />
-            <span>{isSaving ? 'Updating...' : 'Update Project'}</span>
-          </button>
-        </div>
+          <div className="flex justify-end space-x-3">
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg">Cancel</button>
+            <button type="submit" className="px-4 py-2 text-slate-900 rounded-lg font-semibold" style={{ background: color }}>Save Changes</button>
+          </div>
+        </form>
       </div>
     </div>
   );

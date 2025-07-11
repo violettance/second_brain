@@ -12,12 +12,14 @@ export interface Project {
   updatedAt: string;
 }
 
+export type TaskStatus = 'TO DO' | 'IN PROGRESS' | 'DONE';
+
 export interface Task {
   id: string;
   projectId: string;
   name: string;
   description?: string;
-  status: 'TO DO' | 'IN PROGRESS' | 'DONE';
+  status: TaskStatus;
   priority?: 'Low' | 'Medium' | 'High';
   startDate?: string;
   due_date?: string;
