@@ -603,7 +603,7 @@ export const Analytics: React.FC = () => {
         <div className="space-y-8 mb-12">
           {/* 1. Not Creation Trends (Short Term vs Long Term) — Line Chart */}
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">Not Creation Trends</h2>
+            <h2 className="text-lg font-bold text-white mb-1">Note Creation Trends</h2>
             <p className="text-slate-400 text-sm mb-4">{trendsDescription}</p>
             {loadingTrends ? (
               <div className="h-64 flex items-center justify-center text-slate-500">

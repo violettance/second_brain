@@ -17,6 +17,7 @@ const ProjectRadar = () => {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .eq('user_id', user.id)
         .in('status', ['Active', 'In Progress'])
         .order('due_date', { ascending: true, nullsFirst: false })
         .limit(1)

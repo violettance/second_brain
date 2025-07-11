@@ -28,6 +28,7 @@ const ExpiringNotes = () => {
       const { data, error } = await supabase
         .from('short_term_notes')
         .select('*')
+        .eq('user_id', user.id)
         .is('archived_at', null)
         .order('created_at', { ascending: true });
 
