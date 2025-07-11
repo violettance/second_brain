@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LandingPage } from './components/landing/LandingPage';
 import { AuthPage } from './components/auth/AuthPage';
@@ -15,7 +16,7 @@ import { KnowledgeNetworkPage } from './components/knowledge-network/KnowledgeNe
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [showLanding, setShowLanding] = useState(() => !user);
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const location = useLocation();
 
   // Eğer kullanıcı oturum açtıysa landing ekranını kapat
   useEffect(() => {
@@ -39,33 +40,23 @@ const AppContent: React.FC = () => {
     return <AuthPage />;
   }
 
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'daily-notes':
-        return <DailyNotes />;
-      case 'short-term-memory':
-        return <ShortTermMemory />;
-      case 'long-term-memory':
-        return <LongTermMemory />;
-      case 'projects':
-        return <ProjectsPage />;
-      case 'analytics':
-        return <Analytics />;
-      case 'settings':
-        return <Settings />;
-      case 'knowledge-network':
-        return <KnowledgeNetworkPage />;
-      case 'dashboard':
-      default:
-        return <Dashboard onPageChange={setCurrentPage} />;
-    }
-  };
+  const currentPage = location.pathname.substring(1);
 
   return (
     <div className="flex h-screen bg-slate-900 overflow-hidden">
-      <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
-      <div className="flex-1 lg:ml-0">
-        {renderCurrentPage()}
+      <Sidebar currentPage={currentPage} />
+      <div className="flex-1 lg:ml-0 overflow-y-auto">
+        <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/daily-notes" element={<DailyNotes />} />
+            <Route path="/short-term-memory" element={<ShortTermMemory />} />
+            <Route path="/long-term-memory" element={<LongTermMemory />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/knowledge-network" element={<KnowledgeNetworkPage />} />
+            <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
       </div>
     </div>
   );

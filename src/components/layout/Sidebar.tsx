@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -17,29 +18,23 @@ import { PaywallModal } from '../analytics/PaywallModal';
 
 interface SidebarProps {
   currentPage: string;
-  onPageChange: (page: string) => void;
 }
 
 const menuItems = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { id: 'daily-notes', icon: BookOpen, label: 'Daily Notes' },
-  { id: 'short-term-memory', icon: Clock, label: 'Short Term Memory' },
-  { id: 'long-term-memory', icon: Brain, label: 'Long Term Memory' },
-  { id: 'projects', icon: FolderOpen, label: 'Projects' },
-  { id: 'knowledge-network', icon: BarChart3, label: 'Knowledge Network' },
-  { id: 'analytics', icon: BarChart3, label: 'Analytics' },
-  { id: 'settings', icon: Settings, label: 'Settings' },
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+  { id: 'daily-notes', icon: BookOpen, label: 'Daily Notes', path: '/daily-notes' },
+  { id: 'short-term-memory', icon: Clock, label: 'Short Term Memory', path: '/short-term-memory' },
+  { id: 'long-term-memory', icon: Brain, label: 'Long Term Memory', path: '/long-term-memory' },
+  { id: 'projects', icon: FolderOpen, label: 'Projects', path: '/projects' },
+  { id: 'knowledge-network', icon: BarChart3, label: 'Knowledge Network', path: '/knowledge-network' },
+  { id: 'analytics', icon: BarChart3, label: 'Analytics', path: '/analytics' },
+  { id: 'settings', icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentPage }) => {
   const { logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
-
-  const handlePageChange = (page: string) => {
-    onPageChange(page);
-    setIsMobileMenuOpen(false);
-  };
 
   const handleUpgradeClick = () => {
     setShowPaywall(true);
@@ -88,22 +83,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange }) =
             <ul className="space-y-1 lg:space-y-2">
               {menuItems.map((item) => (
                 <li key={item.id}>
-                  <button 
-                    onClick={() => handlePageChange(item.id)}
-                    className={`w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl text-left transition-all duration-200 ${
-                      currentPage === item.id
-                        ? 'border' 
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                    }`}
-                    style={currentPage === item.id ? {
-                      backgroundColor: '#C2B5FC20',
-                      color: '#C2B5FC',
-                      borderColor: '#C2B5FC50'
-                    } : {}}
+                  <Link 
+                    to={item.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <item.icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
-                    <span className="font-medium text-sm lg:text-base">{item.label}</span>
-                  </button>
+                    <div
+                      className={`w-full flex items-center space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl text-left transition-all duration-200 ${
+                        currentPage === item.id
+                          ? 'border' 
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      }`}
+                      style={currentPage === item.id ? {
+                        backgroundColor: '#C2B5FC20',
+                        color: '#C2B5FC',
+                        borderColor: '#C2B5FC50'
+                      } : {}}
+                    >
+                      <item.icon className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                      <span className="font-medium text-sm lg:text-base">{item.label}</span>
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ul>

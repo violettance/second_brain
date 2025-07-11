@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Zap, BookOpen, Brain, LayoutGrid } from 'lucide-react';
 import { StatsCard } from './StatsCard';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,12 +11,9 @@ import ExpiringNotes from './ExpiringNotes';
 import { ActivityHeatmap } from './heatmap/ActivityHeatmap';
 import YourMind from './YourMind';
 
-interface DashboardProps {
-  onPageChange?: (page: string) => void;
-}
-
-export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
+export const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { analyticsData, isLoading: isLoadingAnalytics } = useAnalytics('all');
   const { projects, isLoading: isLoadingProjects } = useProjects();
   
@@ -79,18 +77,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onPageChange }) => {
 
     fetchDailyCount();
     fetchKnowledgeScore();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const handleNavigateToAnalytics = () => {
-      if (onPageChange) {
-        onPageChange('analytics');
-      }
+      navigate('/analytics');
     };
 
     window.addEventListener('navigate-to-analytics', handleNavigateToAnalytics);
     return () => window.removeEventListener('navigate-to-analytics', handleNavigateToAnalytics);
-  }, [onPageChange]);
+  }, [navigate]);
 
   return (
     <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
