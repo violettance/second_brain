@@ -139,7 +139,7 @@ export const DailyNotes: React.FC = () => {
                 onEditNote={handlePreviewNote}
                 onDirectEdit={handleEditNote}
                 notes={selectedDateNotes}
-                onRefresh={refetchSelected}
+                onRefresh={async () => { await refetchSelected(); await refetchAll(); }}
               />
             </div>
             
