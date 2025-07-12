@@ -29,6 +29,20 @@ import { supabase } from '../../lib/supabase';
 import { useProjects } from '../../hooks/useProjects';
 import { Task } from '../../types/projects';
 import { useAuth } from '../../contexts/AuthContext';
+import { generateGeminiSummary } from '../../lib/gemini';
+import { useMemoryNotes } from '../../hooks/useMemoryNotes';
+import { createHash } from 'crypto'; // Node yok, basit hash fonksiyonu yazılacak
+
+function simpleHash(str: string): string {
+  let hash = 0, i, chr;
+  if (str.length === 0) return hash.toString();
+  for (i = 0; i < str.length; i++) {
+    chr   = str.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash.toString();
+}
 
 export const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
@@ -37,6 +51,9 @@ export const Analytics: React.FC = () => {
   const { analyticsData, isLoading, exportData } = useAnalytics(timeRange);
   const { projects, isLoading: loadingProjects } = useProjects();
   const { user } = useAuth();
+  const { shortTermNotes, isLoading: notesLoading } = useMemoryNotes();
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
 
   // Not Creation Trends state
   const [notCreationTrends, setNotCreationTrends] = useState<{ date: string; value: number }[]>([]);
@@ -429,6 +446,32 @@ export const Analytics: React.FC = () => {
       .finally(() => setLoadingNoteDepth(false));
   }, [timeRange, user]);
 
+  useEffect(() => {
+    const fetchSummary = async () => {
+      if (!user || (user as any).subscription_plan !== 'pro') return;
+      if (!shortTermNotes || shortTermNotes.length === 0) return;
+      const notesString = JSON.stringify(shortTermNotes.map(n => ({ title: n.title, content: n.content, tags: n.tags })));
+      const notesHash = simpleHash(notesString);
+      const cacheKey = `aiSummary_${user.id}_${notesHash}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setAiSummary(cached);
+        return;
+      }
+      setAiSummaryLoading(true);
+      try {
+        const summary = await generateGeminiSummary(shortTermNotes);
+        setAiSummary(summary);
+        localStorage.setItem(cacheKey, summary);
+      } catch (e) {
+        setAiSummary('AI insight could not be generated.');
+      } finally {
+        setAiSummaryLoading(false);
+      }
+    };
+    fetchSummary();
+  }, [user, shortTermNotes]);
+
   function renderTotalChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
     if (change === 0) return <span className="text-slate-400">0</span>;
@@ -819,54 +862,66 @@ export const Analytics: React.FC = () => {
               </div>
             </div>
             
-            {/* Pro Upgrade Required */}
-            <div className="relative max-h-96 overflow-y-auto">
-              {/* Blurred Content */}
-              <div className="filter blur-sm pointer-events-none">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {analyticsData.insights.slice(0, 6).map((insight, index) => (
-                    <div key={index} className="p-4 bg-slate-700/50 rounded-lg border border-slate-600/50">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <div className="w-2 h-2 rounded-full" style={{ background: insight.color }}></div>
-                        <h3 className="text-white font-medium text-sm">{insight.title}</h3>
-                      </div>
-                      <p className="text-slate-400 text-sm">{insight.description}</p>
-                      <div className="mt-2 text-xs" style={{ color: insight.color }}>
-                        {insight.impact}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {(user as any)?.subscription_plan === 'pro' ? (
+              <div className="mb-4">
+                {aiSummaryLoading ? (
+                  <div className="text-slate-400">Generating AI insights...</div>
+                ) : aiSummary ? (
+                  <div className="text-white whitespace-pre-line">{aiSummary}</div>
+                ) : (
+                  <div className="text-slate-400">Yeterli not bulunamadı.</div>
+                )}
               </div>
-              
-              {/* Upgrade Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-lg">
-                <div className="text-center p-8">
-                  <div className="flex items-center justify-center mb-4">
-                    <div className="p-3 rounded-full" style={{ background: '#C2B5FC' }}>
-                      <Crown className="h-8 w-8 text-slate-900" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Unlock AI Insights</h3>
-                  <p className="text-slate-400 text-sm mb-6 max-w-md">
-                    Discover hidden patterns, knowledge gaps, and personalized recommendations with our advanced AI analysis.
-                  </p>
-                  <div className="space-y-3">
-                    <button 
-                      onClick={() => setShowPaywall(true)}
-                      className="w-full flex items-center justify-center space-x-2 px-6 py-3 text-slate-900 rounded-lg font-semibold transition-colors hover:opacity-90"
-                      style={{ background: '#C2B5FC' }}
-                    >
-                      <Crown className="h-4 w-4" />
-                      <span>Upgrade to Pro</span>
-                    </button>
-                    <div className="text-xs text-slate-500">
-                      ✨ Advanced AI insights • 🧠 Knowledge gap analysis • 📊 Personalized recommendations
-                    </div>
+            ) : (
+              // Pro Upgrade Required
+              <div className="relative max-h-96 overflow-y-auto">
+                {/* Blurred Content */}
+                <div className="filter blur-sm pointer-events-none">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {analyticsData.insights.slice(0, 6).map((insight, index) => (
+                      <div key={index} className="p-4 bg-slate-700/50 rounded-lg border border-slate-600/50">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="w-2 h-2 rounded-full" style={{ background: insight.color }}></div>
+                          <h3 className="text-white font-medium text-sm">{insight.title}</h3>
+                        </div>
+                        <p className="text-slate-400 text-sm">{insight.description}</p>
+                        <div className="mt-2 text-xs" style={{ color: insight.color }}>
+                          {insight.impact}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
+                
+                {/* Upgrade Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-lg">
+                  <div className="text-center p-8">
+                    <div className="flex items-center justify-center mb-4">
+                      <div className="p-3 rounded-full" style={{ background: '#C2B5FC' }}>
+                        <Crown className="h-8 w-8 text-slate-900" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Unlock AI Insights</h3>
+                    <p className="text-slate-400 text-sm mb-6 max-w-md">
+                      Discover hidden patterns, knowledge gaps, and personalized recommendations with our advanced AI analysis.
+                    </p>
+                    <div className="space-y-3">
+                      <button 
+                        onClick={() => setShowPaywall(true)}
+                        className="w-full flex items-center justify-center space-x-2 px-6 py-3 text-slate-900 rounded-lg font-semibold transition-colors hover:opacity-90"
+                        style={{ background: '#C2B5FC' }}
+                      >
+                        <Crown className="h-4 w-4" />
+                        <span>Upgrade to Pro</span>
+                      </button>
+                      <div className="text-xs text-slate-500">
+                        ✨ Advanced AI insights • 🧠 Knowledge gap analysis • 📊 Personalized recommendations
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
