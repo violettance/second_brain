@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Database } from '../../types/database';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
@@ -18,6 +18,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
   const [isSaving, setIsSaving] = useState(false);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
   const [newSubtaskName, setNewSubtaskName] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     setName(task.name);
@@ -93,13 +94,42 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
     }
   };
 
+  const handleDeleteSubtask = async (subtaskId: string) => {
+    const { error } = await supabase
+      .from('subtasks')
+      .delete()
+      .eq('id', subtaskId);
+    if (error) {
+      console.error('Error deleting subtask:', error);
+    } else {
+      setSubtasks(subtasks.filter(s => s.id !== subtaskId));
+    }
+  };
+
+  const handleDeleteTask = async () => {
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', task.id);
+    if (error) {
+      alert('Error deleting task: ' + error.message);
+    } else {
+      onClose();
+    }
+  };
+
   return (
     <div className="w-96 bg-slate-800 border-l border-slate-700 p-6 flex flex-col h-screen">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-white">Task Details</h2>
-        <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-700">
-          <X className="h-6 w-6 text-slate-400" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowDeleteConfirm(true)} className="p-1 rounded-full hover:bg-slate-700" title="Delete Task">
+            <Trash2 className="h-6 w-6" style={{ color: '#C2B5FC' }} />
+          </button>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-700" title="Close">
+            <X className="h-6 w-6 text-slate-400" />
+          </button>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto space-y-4">
         <div>
@@ -135,6 +165,9 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
                 <span className={`flex-1 ${subtask.completed ? 'line-through text-slate-500' : 'text-slate-300'}`}>
                   {subtask.name}
                 </span>
+                <button onClick={() => handleDeleteSubtask(subtask.id)} className="ml-2 p-1 rounded hover:bg-slate-600" style={{ color: '#C2B5FC' }} title="Delete Subtask">
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             ))}
           </div>
@@ -147,20 +180,46 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
               className="flex-1 bg-slate-700 text-white rounded-md p-2 text-sm"
               onKeyDown={(e) => e.key === 'Enter' && handleCreateSubtask()}
             />
-            <button onClick={handleCreateSubtask} className="ml-2 p-2 bg-indigo-600 hover:bg-indigo-700 rounded-md">
-              <Plus className="h-4 w-4 text-white" />
+            <button onClick={handleCreateSubtask} className="ml-2 p-2 rounded-md transition-colors" style={{ background: '#C2B5FC', color: '#18181b' }} title="Add Subtask"
+              onMouseOver={e => { e.currentTarget.style.background = '#b39ddb'; }}
+              onMouseOut={e => { e.currentTarget.style.background = '#C2B5FC'; }}
+            >
+              <Plus className="h-4 w-4" />
             </button>
           </div>
         </div>
       </div>
-      <div className="mt-6">
+      <div className="mt-6 space-y-3">
         <button 
           onClick={handleSave} 
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors"
+          className="w-full font-bold py-2 px-4 rounded-md transition-colors"
+          style={{ background: '#C2B5FC', color: '#18181b' }}
           disabled={isSaving}
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
         </button>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-xs flex flex-col items-center">
+              <Trash2 className="h-8 w-8 text-red-400 mb-2" />
+              <p className="text-white text-lg font-semibold mb-4 text-center">Are you sure you want to delete this task?</p>
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-2 rounded-md bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => { setShowDeleteConfirm(false); await handleDeleteTask(); }}
+                  className="flex-1 py-2 rounded-md bg-red-500 text-white font-bold hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

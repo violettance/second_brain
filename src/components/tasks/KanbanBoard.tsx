@@ -53,6 +53,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialTasks, onSelect
         const destTasks = sourceColId === destColId ? sourceTasks : [...endCol.tasks];
 
         const [movedTask] = sourceTasks.splice(source.index, 1);
+        // Update the moved task's status locally if moved to a different column
+        if (sourceColId !== destColId) {
+          movedTask.status = destColId;
+        }
         destTasks.splice(destination.index, 0, movedTask);
 
         const newColumns = {

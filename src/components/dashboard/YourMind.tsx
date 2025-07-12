@@ -11,7 +11,7 @@ interface NoteCounts {
 
 const YourMind = () => {
     const { user } = useAuth();
-    const [topTags, setTopTags] = useState<string[]>([]);
+    const [topTags, setTopTags] = useState<{ tag: string; usage_count: number }[]>([]);
     const [noteCounts, setNoteCounts] = useState<NoteCounts | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -21,7 +21,7 @@ const YourMind = () => {
             setIsLoading(true);
 
             const [tagsResponse, distributionResponse] = await Promise.all([
-                supabase.from('top_tags_view').select('tag').eq('user_id', user.id).limit(3),
+                supabase.from('v2_top_tags_view').select('tag, usage_count').eq('user_id', user.id).limit(3),
                 supabase.from('v2_analytics_memory_distribution').select('st_7, lt_7, st_30, lt_30, st_all, lt_all').eq('user_id', user.id).single()
             ]);
 
@@ -29,7 +29,7 @@ const YourMind = () => {
                 console.error('Error fetching top tags:', tagsResponse.error);
                 setTopTags([]);
             } else if (tagsResponse.data) {
-                setTopTags(tagsResponse.data.map((item: { tag: string }) => item.tag));
+                setTopTags(tagsResponse.data.map((item: { tag: string; usage_count: number }) => ({ tag: item.tag, usage_count: item.usage_count })));
             }
 
             if (distributionResponse.error) {
@@ -55,9 +55,9 @@ const YourMind = () => {
             return <p className="text-center text-slate-400">Analyzing your mind...</p>;
         }
 
-        const tagElements = topTags.length > 0 ? topTags.map((tag, index) => (
-            <React.Fragment key={tag}>
-                <strong className="font-semibold text-indigo-400">"{tag}"</strong>
+        const tagElements = topTags.length > 0 ? topTags.map((tagObj, index) => (
+            <React.Fragment key={tagObj.tag}>
+                <strong className="font-semibold text-indigo-400">"{tagObj.tag}"</strong>
                 {index < topTags.length - 2 ? ', ' : (index === topTags.length - 2 ? ' and ' : '')}
             </React.Fragment>
         )) : null;

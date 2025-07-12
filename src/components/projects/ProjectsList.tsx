@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Search, Filter, MoreHorizontal, Calendar, CheckCircle, Edit, Trash2 } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
 import { EditProjectModal } from './EditProjectModal';
@@ -7,12 +7,20 @@ interface ProjectsListProps {
   onSelectProject: (projectId: string) => void;
 }
 
-export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) => {
+export interface ProjectsListRef {
+  refetch: () => void;
+}
+
+export const ProjectsList = forwardRef<ProjectsListRef, ProjectsListProps>(({ onSelectProject }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<string | null>(null);
-  const { projects, isLoading, deleteProject, refetch } = useProjects();
+  const { projects, isLoading, deleteProject, refetch, updateProject } = useProjects();
+
+  useImperativeHandle(ref, () => ({
+    refetch
+  }));
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -186,6 +194,13 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
               </div>
             </div>
 
+            {/* Due Date */}
+            {project.due_date && (
+              <div className="mb-2 text-slate-400 text-xs">
+                Due: {project.due_date}
+              </div>
+            )}
+
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
@@ -197,16 +212,6 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
                 <div className="text-slate-400 text-xs">Done</div>
               </div>
             </div>
-
-            {/* Due Date */}
-            {project.dueDate && (
-              <div className="mt-4 pt-4 border-t border-slate-700/50">
-                <div className="flex items-center space-x-2 text-slate-400 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  <span>Due {project.dueDate}</span>
-                </div>
-              </div>
-            )}
           </div>
         ))}
       </div>
@@ -223,9 +228,13 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({ onSelectProject }) =
         <EditProjectModal
           project={projects.find(p => p.id === editingProject)!}
           onClose={() => setEditingProject(null)}
-          onProjectUpdated={refetch}
+          onSave={async (id, updates) => {
+            await updateProject(id, updates);
+            await refetch();
+            setEditingProject(null);
+          }}
         />
       )}
     </div>
   );
-};
+});

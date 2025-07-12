@@ -181,12 +181,28 @@ export const Analytics: React.FC = () => {
         .select('*')
         .eq('user_id', user.id)
         .order('total', { ascending: false })
-        .limit(10); // sadece en çok kullanılan 10 tag
+        .limit(50); // daha fazla çek, sonra birleştir
       if (error || !data) {
         setTagUsageBarData([]);
         return;
       }
-      setTagUsageBarData(data.map((d: any) => ({ label: d.tag, value: Number(d.total), color: '#38bdf8' })));
+      // Aynı isimli tag'leri birleştir
+      const tagMap = new Map();
+      data.forEach((d: any) => {
+        const tag = d.tag;
+        const total = Number(d.total);
+        if (!tagMap.has(tag)) {
+          tagMap.set(tag, total);
+        } else {
+          tagMap.set(tag, tagMap.get(tag) + total);
+        }
+      });
+      // En çok kullanılan 10 tag'i al
+      const merged = Array.from(tagMap.entries())
+        .map(([label, value]) => ({ label, value, color: '#38bdf8' }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10);
+      setTagUsageBarData(merged);
     }
     fetchTagUsage();
   }, [user]);
@@ -466,6 +482,11 @@ export const Analytics: React.FC = () => {
     );
   }
 
+  // Active Project Progress Overview için projeleri filtrele
+  const projectsWithInProgressTasks = projects.filter(
+    p => (tasksByProject[p.id] || []).some(task => task.status === 'IN PROGRESS')
+  );
+
   return (
     <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
       {/* Mobile-Optimized Header */}
@@ -605,66 +626,75 @@ export const Analytics: React.FC = () => {
             <p className="text-slate-400 text-sm mb-4">
               {`Number of notes created by hour for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
             </p>
-            <div className="h-64 flex items-end justify-center">
+            {/* Mobilde yatay scroll, desktopta klasik görünüm */}
+            <div className="h-64 flex items-end justify-center md:overflow-visible md:flex-nowrap overflow-x-auto flex-nowrap gap-0.5">
               {noteHourBarData.map((bar, idx) => (
-                <div key={bar.label} className="flex-1 flex flex-col items-center mx-1">
+                <div
+                  key={bar.label}
+                  className="flex flex-col items-center mx-1 min-w-[32px] md:min-w-0 flex-1"
+                >
                   <div className="text-white text-xs font-bold mb-1">{bar.value}</div>
-                  <div className="w-4 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
+                  <div
+                    className="w-4 rounded-t-lg"
+                    style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }}
+                  />
                   <div className="text-slate-400 text-[10px] text-center font-medium mt-2">{bar.label}</div>
                 </div>
               ))}
             </div>
           </div>
           <hr className="border-slate-700" />
-          {/* Tag Usage Frequency — Bar Chart */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">Tag Usage Frequency</h2>
-            <p className="text-slate-400 text-sm mb-4">
-              {`All time tag usage frequency`}
-            </p>
-            <div className="h-64 flex items-end justify-center">
-              {tagUsageBarData.slice(0, 10).map((bar, idx) => (
-                <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
-                  <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
-                  <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
-                  <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <hr className="border-slate-700" />
-          {/* 7. Tag Co-Occurrence Matrix — Table */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">Tag Co-Occurrence Matrix</h2>
-            <p className="text-slate-400 text-sm mb-4">
-              {`All time tag co-occurrence matrix`}
-            </p>
-            {loadingCooccurrence ? (
-              <div className="h-32 flex items-center justify-center text-slate-500">Loading...</div>
-            ) : tagCooccurrence.length === 0 ? (
-              <div className="h-32 flex items-center justify-center text-slate-500">No tag co-occurrence data found.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-[320px] w-full text-left border-collapse">
-                  <thead>
-                    <tr className="text-slate-400 text-xs uppercase border-b border-slate-700">
-                      <th className="py-2 px-3">Tag 1</th>
-                      <th className="py-2 px-3">Tag 2</th>
-                      <th className="py-2 px-3">Co-Occurrence</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tagCooccurrence.slice(0, 5).map((row, idx) => (
-                      <tr key={row.tag1 + '-' + row.tag2} className="border-b border-slate-700 hover:bg-slate-700/30">
-                        <td className="py-2 px-3 font-medium text-white">{row.tag1}</td>
-                        <td className="py-2 px-3 font-medium text-white">{row.tag2}</td>
-                        <td className="py-2 px-3 text-slate-300">{row.total}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          {/* Tag Usage Frequency & Tag Co-Occurrence yan yana */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Tag Usage Frequency — Bar Chart */}
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+              <h2 className="text-lg font-bold text-white mb-1">Tag Usage Frequency</h2>
+              <p className="text-slate-400 text-sm mb-4">
+                {`All time tag usage frequency`}
+              </p>
+              <div className="h-64 flex items-end justify-center">
+                {tagUsageBarData.slice(0, 5).map((bar, idx) => (
+                  <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
+                    <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
+                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
+                    <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+            {/* Tag Co-Occurrence Matrix — Table */}
+            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+              <h2 className="text-lg font-bold text-white mb-1">Tag Co-Occurrence Matrix</h2>
+              <p className="text-slate-400 text-sm mb-4">
+                {`All time tag co-occurrence matrix`}
+              </p>
+              {loadingCooccurrence ? (
+                <div className="h-32 flex items-center justify-center text-slate-500">Loading...</div>
+              ) : tagCooccurrence.length === 0 ? (
+                <div className="h-32 flex items-center justify-center text-slate-500">No tag co-occurrence data found.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-[320px] w-full text-left border-collapse">
+                    <thead>
+                      <tr className="text-slate-400 text-xs uppercase border-b border-slate-700">
+                        <th className="py-2 px-3">Tag 1</th>
+                        <th className="py-2 px-3">Tag 2</th>
+                        <th className="py-2 px-3">Co-Occurrence</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tagCooccurrence.slice(0, 5).map((row, idx) => (
+                        <tr key={row.tag1 + '-' + row.tag2} className="border-b border-slate-700 hover:bg-slate-700/30">
+                          <td className="py-2 px-3 font-medium text-white">{row.tag1}</td>
+                          <td className="py-2 px-3 font-medium text-white">{row.tag2}</td>
+                          <td className="py-2 px-3 text-slate-300">{row.total}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
           <hr className="border-slate-700" />
           {/* 9. Active Project Progress Overview + 10. Note Depth & Complexity Analysis side by side */}
@@ -679,11 +709,12 @@ export const Analytics: React.FC = () => {
                 <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
               ) : (
                 <div className="flex flex-col items-center justify-start text-slate-500 w-full">
-                  {projects.filter(p => p.status === 'In Progress').length === 0 ? (
+                  {projectsWithInProgressTasks.length === 0 ? (
                     <div className="h-64 flex items-center justify-center">No in-progress projects found.</div>
-                  ) : (
-                    projects.filter(p => p.status === 'In Progress').map((project) => {
+                  ) :
+                    projectsWithInProgressTasks.map((project) => {
                       const projectTasks = tasksByProject[project.id] || [];
+                      const inProgressTasks = projectTasks.filter(task => task.status === 'IN PROGRESS');
                       return (
                         <div key={project.id} className="w-full max-w-xl mb-6 bg-slate-900/60 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-1">
@@ -699,15 +730,15 @@ export const Analytics: React.FC = () => {
                           {/* Task List for this project */}
                           <div className="mt-2">
                             <div className="text-slate-400 text-xs mb-1">Tasks</div>
-                            {projectTasks.length > 0 ? (
+                            {inProgressTasks.length > 0 ? (
                               <div className="space-y-2">
-                                {projectTasks.map((task: Task) => (
+                                {inProgressTasks.map((task: Task) => (
                                   <div key={task.id} className="bg-slate-800/70 rounded px-2 py-1 flex flex-col mb-1">
                                     <div className="flex items-center justify-between">
                                       <span className="text-slate-200 text-sm">{task.name}</span>
                                       <span className="flex items-center gap-1 text-xs font-medium">
-                                        <span className={`inline-block w-2 h-2 rounded-full ${task.status === 'DONE' ? 'bg-green-400' : task.status === 'IN PROGRESS' ? 'bg-yellow-400' : 'bg-slate-400'}`}></span>
-                                        <span className={` ${task.status === 'DONE' ? 'text-green-400' : task.status === 'IN PROGRESS' ? 'text-yellow-400' : 'text-slate-400'}`}>{task.status}</span>
+                                        <span className={`inline-block w-2 h-2 rounded-full bg-yellow-400`}></span>
+                                        <span className="text-yellow-400">IN PROGRESS</span>
                                       </span>
                                     </div>
                                     {/* Subtask progress bar if available */}
@@ -728,13 +759,13 @@ export const Analytics: React.FC = () => {
                                 ))}
                               </div>
                             ) : (
-                              <div className="text-slate-500 text-xs italic">No tasks</div>
+                              <div className="text-slate-500 text-xs italic">No in-progress tasks</div>
                             )}
                           </div>
                         </div>
                       );
                     })
-                  )}
+                  }
                 </div>
               )}
             </div>

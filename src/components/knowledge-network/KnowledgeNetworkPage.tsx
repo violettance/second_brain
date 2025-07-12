@@ -72,6 +72,18 @@ export const KnowledgeNetworkPage: React.FC = () => {
         return null;
       }
 
+      // If this is a project and details.name is missing, try to fetch the name again
+      if (node.type === 'project' && (!details || !details.name)) {
+        const { data: projectData, error: projectError } = await supabase
+          .from('projects')
+          .select('name')
+          .eq('id', node.id)
+          .single();
+        if (!projectError && projectData && projectData.name) {
+          return { ...details, name: projectData.name };
+        }
+      }
+
       return details;
     } catch (err) {
       console.error('Error in fetchNodeDetails:', err);
@@ -101,7 +113,12 @@ export const KnowledgeNetworkPage: React.FC = () => {
       <div className="fixed top-0 right-0 h-full w-80 bg-slate-800 border-l border-slate-700 shadow-xl z-50 overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white truncate">{selectedNode.label}</h3>
+          <h3 className="text-lg font-semibold text-white truncate">
+            {/* Show project name if available, otherwise fallback to label */}
+            {selectedNode.type === 'project' && nodeDetails && nodeDetails.name
+              ? nodeDetails.name
+              : selectedNode.label}
+          </h3>
           <button
             onClick={() => {
               setSelectedNode(null);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useProjectData, useProjectTasks } from '../../hooks/useProjects';
+import { useProjectData, useProjectTasks, useProjects } from '../../hooks/useProjects';
 import { ArrowLeft, Plus, Edit, Trash2, Calendar, Tag, CheckSquare, Square, Users, Link as LinkIcon, MoreVertical } from 'lucide-react';
 import { Task, TaskStatus, Subtask, Project } from '../../types/projects';
 import { CreateTaskModal } from './CreateTaskModal';
@@ -25,6 +25,7 @@ export const ProjectDetail: React.FC = () => {
 
   const { project, isLoading: projectLoading, error: projectError, fetchProject } = useProjectData(projectId);
   const { tasks, isLoading: tasksLoading, error: tasksError, createTask, updateTask, deleteTask } = useProjectTasks(projectId, fetchProject);
+  const { updateProject } = useProjects();
   
   const isLoading = projectLoading || tasksLoading;
 
@@ -135,8 +136,15 @@ export const ProjectDetail: React.FC = () => {
         <CreateTaskModal
           projectId={projectId}
           onClose={() => setShowCreateTask(false)}
-          onCreate={async (taskData) => {
-            await createTask(taskData);
+          onTaskCreated={async (taskData) => {
+            await createTask({
+              ...taskData,
+              description: taskData.description || undefined,
+              status: taskData.status as TaskStatus,
+              priority: taskData.priority as 'Low' | 'Medium' | 'High' | undefined,
+              due_date: taskData.due_date || undefined,
+              tags: taskData.tags || undefined
+            });
             setShowCreateTask(false);
           }}
         />
@@ -156,12 +164,9 @@ export const ProjectDetail: React.FC = () => {
           project={showEditProject}
           onClose={() => setShowEditProject(null)}
           onSave={async (id, updates) => {
-            // This function needs to be from useProjects (plural) hook
-            // For now, we'll just refetch. A better approach would be to have a global context for projects.
-            // await updateProject(id, updates);
-            console.log("Project update needs a function from useProjects hook");
+            await updateProject(id, updates);
             setShowEditProject(null);
-            fetchProject(); // Refetch project data after editing
+            fetchProject();
           }}
         />
       )}
