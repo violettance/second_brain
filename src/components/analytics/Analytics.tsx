@@ -31,6 +31,18 @@ import { Task } from '../../types/projects';
 import { useAuth } from '../../contexts/AuthContext';
 import { generateGeminiSummary } from '../../lib/gemini';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
+import { createHash } from 'crypto'; // Node yok, basit hash fonksiyonu yazılacak
+
+function simpleHash(str: string): string {
+  let hash = 0, i, chr;
+  if (str.length === 0) return hash.toString();
+  for (i = 0; i < str.length; i++) {
+    chr   = str.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash.toString();
+}
 
 export const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
@@ -438,12 +450,21 @@ export const Analytics: React.FC = () => {
     const fetchSummary = async () => {
       if (!user || (user as any).subscription_plan !== 'pro') return;
       if (!shortTermNotes || shortTermNotes.length === 0) return;
+      const notesString = JSON.stringify(shortTermNotes.map(n => ({ title: n.title, content: n.content, tags: n.tags })));
+      const notesHash = simpleHash(notesString);
+      const cacheKey = `aiSummary_${user.id}_${notesHash}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setAiSummary(cached);
+        return;
+      }
       setAiSummaryLoading(true);
       try {
         const summary = await generateGeminiSummary(shortTermNotes);
         setAiSummary(summary);
+        localStorage.setItem(cacheKey, summary);
       } catch (e) {
-        setAiSummary('AI özeti alınamadı.');
+        setAiSummary('AI insight could not be generated.');
       } finally {
         setAiSummaryLoading(false);
       }
