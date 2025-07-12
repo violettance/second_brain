@@ -37,8 +37,8 @@ const ExpiringNotes = () => {
         setExpiringNotes([]);
       } else {
         // Filter for notes expiring in 5 days or less
-        const filteredNotes = data.filter((note: { created_at: string }) => {
-          const daysLeft = getDaysRemaining(note.created_at);
+        const filteredNotes = data.filter((note: { created_at: string, note_date?: string }) => {
+          const daysLeft = getDaysRemaining(note.note_date || note.created_at);
           return daysLeft <= 5;
         });
         setExpiringNotes(filteredNotes);
@@ -67,7 +67,7 @@ const ExpiringNotes = () => {
       {expiringNotes.length > 0 ? (
         <ul className="space-y-3">
           {expiringNotes.slice(0, 3).map(note => {
-            const daysLeft = getDaysRemaining(note.created_at);
+            const daysLeft = getDaysRemaining(note.note_date || note.created_at);
             return (
               <li key={note.id} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between transition-colors hover:bg-slate-700/50">
                 <p className="text-sm text-slate-300 truncate pr-4">{note.title}</p>

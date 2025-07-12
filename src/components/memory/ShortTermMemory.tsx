@@ -200,7 +200,9 @@ export const ShortTermMemory: React.FC = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteNote(note.id, 'short-term');
+                          if (window.confirm('Are you sure you want to delete this item?')) {
+                            deleteNote(note.id, 'short-term');
+                          }
                         }}
                         className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
                         title="Delete Note"

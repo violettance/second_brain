@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProjectsList } from './ProjectsList';
+import { ProjectsList, ProjectsListRef } from './ProjectsList';
 import { CreateProjectModal } from './CreateProjectModal';
 import { Plus } from 'lucide-react';
 
 export const ProjectsPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const projectsListRef = useRef<ProjectsListRef>(null);
   const navigate = useNavigate();
 
   const handleSelectProject = (projectId: string) => {
@@ -36,12 +37,15 @@ export const ProjectsPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="p-4 lg:p-6 bg-slate-900 min-h-full">
-        <ProjectsList onSelectProject={handleSelectProject} />
+        <ProjectsList ref={projectsListRef} onSelectProject={handleSelectProject} />
       </div>
 
       {/* Create Project Modal */}
       {showCreateModal && (
-        <CreateProjectModal onClose={() => setShowCreateModal(false)} />
+        <CreateProjectModal 
+          onClose={() => setShowCreateModal(false)} 
+          onProjectCreated={() => projectsListRef.current?.refetch()} 
+        />
       )}
     </div>
   );

@@ -263,7 +263,9 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                       
                       <button
                         onClick={() => {
-                          handleDeleteNote(note.id, note.memory_type);
+                          if (window.confirm('Are you sure you want to delete this item?')) {
+                            handleDeleteNote(note.id, note.memory_type);
+                          }
                           setShowOptions(null);
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-slate-700 flex items-center space-x-2"

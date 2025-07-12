@@ -203,7 +203,9 @@ export const LongTermMemory: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteNote(note.id, 'long-term');
+                        if (window.confirm('Are you sure you want to delete this item?')) {
+                          deleteNote(note.id, 'long-term');
+                        }
                       }}
                       className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
                       title="Delete Note"

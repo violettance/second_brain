@@ -9,20 +9,24 @@ interface TaskCardProps {
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onSelectTask }) => {
-  const priorityColors = {
-    High: 'border-red-500',
-    Medium: 'border-yellow-500',
-    Low: 'border-blue-500',
-    default: 'border-slate-500'
-  };
-  
-  const priority = task.priority as keyof typeof priorityColors;
-  const borderColor = priorityColors[priority] || priorityColors.default;
-
+  let statusBorder = '';
+  switch (task.status) {
+    case 'TO DO':
+      statusBorder = 'border-slate-500'; // gray
+      break;
+    case 'IN PROGRESS':
+      statusBorder = 'border-orange-400'; // orange
+      break;
+    case 'DONE':
+      statusBorder = 'border-green-500'; // green
+      break;
+    default:
+      statusBorder = 'border-slate-500';
+  }
 
   return (
     <div 
-      className={`bg-slate-800 p-3 rounded-lg border-l-4 ${borderColor} mb-3 cursor-pointer hover:bg-slate-700/80 transition-colors`}
+      className={`bg-slate-800 p-3 rounded-lg border-l-4 ${statusBorder} mb-3 cursor-pointer hover:bg-slate-700/80 transition-colors`}
       onClick={() => onSelectTask(task)}
     >
       <h4 className="font-semibold text-slate-200 mb-2">{task.name}</h4>

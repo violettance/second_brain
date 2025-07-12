@@ -118,7 +118,9 @@ export const Settings: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center justify-end w-full lg:w-auto">
-            <span className="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full font-medium">Member since: 7/3/2025</span>
+            <span className="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full font-medium">
+              {user?.created_at ? `Member since: ${new Date(user.created_at).toLocaleDateString()}` : 'Member since: -'}
+            </span>
           </div>
         </div>
       </div>

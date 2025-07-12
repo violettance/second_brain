@@ -4,9 +4,10 @@ import { useProjects } from '../../hooks/useProjects';
 
 interface CreateProjectModalProps {
   onClose: () => void;
+  onProjectCreated?: () => void;
 }
 
-export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose }) => {
+export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose, onProjectCreated }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#C2B5FC');
@@ -46,9 +47,9 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose 
         name: name.trim(),
         description: description.trim(),
         color,
-        dueDate: dueDate || undefined
+        due_date: dueDate || undefined
       });
-      
+      if (onProjectCreated) onProjectCreated();
       onClose();
     } catch (error) {
       console.error('Error creating project:', error);

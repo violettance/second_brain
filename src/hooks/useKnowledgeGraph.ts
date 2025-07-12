@@ -39,7 +39,7 @@ const useKnowledgeGraph = () => {
     try {
       // Fetch all tag-entity relations for this user
       const { data: rows, error: fetchError } = await supabase
-        .from('v2_entity_tags_view')
+        .from('v3_entity_tags_view')
         .select('*')
         .eq('user_id', user.id);
       if (fetchError) throw fetchError;
@@ -60,12 +60,80 @@ const useKnowledgeGraph = () => {
       const links: GraphEdge[] = [];
 
       // 1. Tag-entity links (notes, projects, etc. <-> tags)
+      // First, collect missing IDs by type
+      const missingShortTermNoteIds = [];
+      const missingLongTermNoteIds = [];
+      const missingProjectIds = [];
+      for (const row of rows) {
+        if ((row.entity_type === 'short_term_note' && !row.title)) {
+          missingShortTermNoteIds.push(row.entity_id);
+        } else if ((row.entity_type === 'long_term_note' && !row.title)) {
+          missingLongTermNoteIds.push(row.entity_id);
+        } else if ((row.entity_type === 'project' && !row.name)) {
+          missingProjectIds.push(row.entity_id);
+        }
+      }
+      // Fetch missing titles/names in bulk
+      let shortTermNotesMap: Record<string, string> = {};
+      let longTermNotesMap: Record<string, string> = {};
+      let projectsMap: Record<string, string> = {};
+      if (missingShortTermNoteIds.length > 0) {
+        const { data } = await supabase.from('short_term_notes').select('id, title').in('id', missingShortTermNoteIds);
+        if (data) {
+          shortTermNotesMap = Object.fromEntries(data.map((n: any) => [n.id, n.title]));
+        }
+      }
+      if (missingLongTermNoteIds.length > 0) {
+        const { data } = await supabase.from('long_term_notes').select('id, title').in('id', missingLongTermNoteIds);
+        if (data) {
+          longTermNotesMap = Object.fromEntries(data.map((n: any) => [n.id, n.title]));
+        }
+      }
+      if (missingProjectIds.length > 0) {
+        const { data } = await supabase.from('projects').select('id, name').in('id', missingProjectIds);
+        if (data) {
+          projectsMap = Object.fromEntries(data.map((n: any) => [n.id, n.name]));
+        }
+      }
       for (const row of rows) {
         // Entity node (note, project, etc.)
         if (!nodeMap[row.entity_id]) {
+          let label = row.entity_type;
+          if (row.entity_type === 'short_term_note') {
+            label = row.title || shortTermNotesMap[row.entity_id] || 'Short Note';
+          } else if (row.entity_type === 'long_term_note') {
+            label = row.title || longTermNotesMap[row.entity_id] || 'Long Note';
+          } else if (row.entity_type === 'project') {
+            label = row.name || projectsMap[row.entity_id];
+            // If still no label, try to fetch from projectsMap again (for task-project links)
+            if (!label && projectsMap[row.entity_id]) {
+              label = projectsMap[row.entity_id];
+            }
+            // If still no label, try to find a task with this project_id and use its project name
+            if (!label && tasks) {
+              const taskWithProject = tasks.find((t: any) => t.project_id === row.entity_id && t.project_name);
+              if (taskWithProject) {
+                label = taskWithProject.project_name;
+              }
+            }
+            // If still no label, fetch from Supabase directly (async update)
+            if (!label) {
+              (async () => {
+                const { data: projectData, error: projectError } = await supabase
+                  .from('projects')
+                  .select('name')
+                  .eq('id', row.entity_id)
+                  .single();
+                if (!projectError && projectData && projectData.name) {
+                  nodeMap[row.entity_id].label = projectData.name;
+                  setData({ nodes: Object.values(nodeMap), links });
+                }
+              })();
+            }
+          }
           nodeMap[row.entity_id] = {
             id: row.entity_id,
-            label: row.entity_type === 'short_term_note' ? 'Short Note' : (row.entity_type === 'long_term_note' ? 'Long Note' : (row.entity_type === 'project' ? 'Project' : row.entity_type)),
+            label,
             type: row.entity_type,
             val: 8,
             color: row.entity_type === 'short_term_note' ? '#f472b6' : (row.entity_type === 'long_term_note' ? '#60a5fa' : (row.entity_type === 'project' ? '#4ade80' : undefined))
@@ -100,9 +168,24 @@ const useKnowledgeGraph = () => {
           }
           // Project node (if not already from tags view)
           if (task.project_id && !nodeMap[task.project_id]) {
+            let projectLabel = projectsMap[task.project_id];
+            // If still no label, fetch from Supabase directly (async update)
+            if (!projectLabel) {
+              (async () => {
+                const { data: projectData, error: projectError } = await supabase
+                  .from('projects')
+                  .select('name')
+                  .eq('id', task.project_id)
+                  .single();
+                if (!projectError && projectData && projectData.name) {
+                  nodeMap[task.project_id].label = projectData.name;
+                  setData({ nodes: Object.values(nodeMap), links });
+                }
+              })();
+            }
             nodeMap[task.project_id] = {
               id: task.project_id,
-              label: 'Project',
+              label: projectLabel || '',
               type: 'project',
               val: 8,
               color: '#4ade80'

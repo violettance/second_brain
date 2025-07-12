@@ -261,18 +261,41 @@ export const useAnalytics = (timeRange: string) => {
     setError(null);
     try {
       // 1. Fetch all needed data in parallel
-      const [shortNotesRes, longNotesRes, tasksRes, subtasksRes] = await Promise.all([
+      const [shortNotesRes, longNotesRes, tasksRes, subtasksRes, connStatsRes] = await Promise.all([
         supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', userId),
         supabase.from('long_term_notes').select('id, tags, note_date').eq('user_id', userId),
         supabase.from('tasks').select('id').eq('user_id', userId),
         supabase.from('subtasks').select('id').in('task_id',
           (await supabase.from('tasks').select('id').eq('user_id', userId)).data?.map((t: any) => t.id) || []
-        )
+        ),
+        supabase.from('v3_user_note_connections_statistics').select('*').eq('user_id', userId).single()
       ]);
+
       const shortNotes = Array.isArray(shortNotesRes.data) ? shortNotesRes.data : [];
       const longNotes = Array.isArray(longNotesRes.data) ? longNotesRes.data : [];
       const tasks = Array.isArray(tasksRes.data) ? tasksRes.data : [];
       const subtasks = Array.isArray(subtasksRes.data) ? subtasksRes.data : [];
+
+      // Connections ve artış yüzdesi hesaplama
+      let connections = 0;
+      let prevConnections = 0;
+      let connectionGrowth = 0;
+      if (connStatsRes?.data) {
+        if (timeRange === '7d') {
+          connections = connStatsRes.data.last_7_days_connections || 0;
+          prevConnections = connStatsRes.data.prev_7_days_connections || 0;
+        } else if (timeRange === '30d') {
+          connections = connStatsRes.data.last_30_days_connections || 0;
+          prevConnections = connStatsRes.data.prev_30_days_connections || 0;
+        } else {
+          connections = connStatsRes.data.all_time_connections || 0;
+        }
+        if (prevConnections > 0) {
+          connectionGrowth = Math.round(((connections - prevConnections) / prevConnections) * 100);
+        } else {
+          connectionGrowth = connections > 0 ? 100 : 0;
+        }
+      }
 
       // 2. totalNotes
       const totalNotes = shortNotes.length + longNotes.length;
@@ -285,9 +308,7 @@ export const useAnalytics = (timeRange: string) => {
       const activeTopics = uniqueTags.length;
       // 4. knowledgeScore
       const knowledgeScore = shortNotes.length * 1 + longNotes.length * 3 + tasks.length * 2 + subtasks.length * 0.5;
-      // 5. connections
-      const connections = 0;
-      // 6. growthRate (bu ay ve geçen ay eklenen not sayısı)
+      // 5. growthRate (bu ay ve geçen ay eklenen not sayısı)
       const now = new Date();
       const thisMonth = now.getMonth();
       const thisYear = now.getFullYear();
@@ -308,7 +329,8 @@ export const useAnalytics = (timeRange: string) => {
         activeTopics,
         knowledgeScore,
         connections,
-        growthRate
+        growthRate,
+        connectionGrowth
       }));
     } catch (err) {
       console.error('Error fetching analytics:', err);

@@ -4,6 +4,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Target, Calendar, CheckCircle } from 'lucide-react';
 import { Project } from '../../types/projects';
 
+const isValidDueDate = (dateStr?: string) => {
+  if (!dateStr) return false;
+  const date = new Date(dateStr);
+  return date.getFullYear() > 1971 && !isNaN(date.getTime());
+};
+
 const ProjectRadar = () => {
   const { user } = useAuth();
   const [activeProject, setActiveProject] = useState<Project | null>(null);
@@ -19,15 +25,15 @@ const ProjectRadar = () => {
         .select('*')
         .eq('user_id', user.id)
         .in('status', ['Active', 'In Progress'])
-        .order('due_date', { ascending: true, nullsFirst: false })
-        .limit(1)
-        .single();
+        .order('due_date', { ascending: true, nullsFirst: false });
 
-      if (error) {
+      if (error || !data) {
         console.log("No focus project found, which is fine.");
         setActiveProject(null);
       } else {
-        setActiveProject(data);
+        // Sadece geçerli due_date'e sahip ilk projeyi bul
+        const validProject = data.find((proj: Project) => isValidDueDate(proj.due_date));
+        setActiveProject(validProject || null);
       }
       setIsLoading(false);
     };
@@ -55,7 +61,7 @@ const ProjectRadar = () => {
     );
   }
 
-  const daysLeft = activeProject.due_date
+  const daysLeft = (activeProject.due_date && isValidDueDate(activeProject.due_date))
     ? Math.ceil((new Date(activeProject.due_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
@@ -74,7 +80,11 @@ const ProjectRadar = () => {
         
         <div className="flex items-center text-sm text-indigo-300">
           <Calendar className="h-4 w-4 mr-2" />
-          <span>Due Date: {new Date(activeProject.due_date!).toLocaleDateString()}</span>
+          {isValidDueDate(activeProject.due_date) ? (
+            <span>Due Date: {new Date(activeProject.due_date!).toLocaleDateString()}</span>
+          ) : (
+            <span className="text-slate-500">No due date</span>
+          )}
           {daysLeft !== null && (
             <span 
               className={`ml-auto font-bold ${
