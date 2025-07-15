@@ -13,6 +13,7 @@ import { Analytics } from './components/analytics/Analytics';
 import { Settings } from './components/settings/Settings';
 import { KnowledgeNetworkPage } from './components/knowledge-network/KnowledgeNetworkPage';
 import { TasksPage } from './components/tasks/TasksPage';
+import { TermsAndConditions } from './components/landing/TermsAndConditions';
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -57,6 +58,7 @@ const AppContent: React.FC = () => {
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/knowledge-network" element={<KnowledgeNetworkPage />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </div>

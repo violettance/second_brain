@@ -16,6 +16,7 @@ import {
 import { PaywallModal } from '../analytics/PaywallModal';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { useAuth } from '../../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 export const Settings: React.FC = () => {
   const [subscription, setSubscription] = useState('free');
@@ -320,6 +321,14 @@ export const Settings: React.FC = () => {
 
         {/* Extra padding at bottom */}
         <div className="h-8"></div>
+      </div>
+      <div className="w-full flex justify-center mt-8 mb-4">
+        <Link
+          to="/terms-and-conditions"
+          className="text-slate-400 hover:text-purple-400 underline text-sm transition-colors"
+        >
+          Terms and Conditions
+        </Link>
       </div>
     </div>
   );
