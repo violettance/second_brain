@@ -10,6 +10,7 @@
         "@google/generative-ai": "^0.24.1",
         "@nivo/calendar": "^0.99.0",
         "@nivo/core": "^0.99.0",
+        "@revenuecat/purchases-js": "^1.10.0",
         "@supabase/supabase-js": "^2.39.0",
         "@types/d3-force": "^3.0.10",
         "@types/react-beautiful-dnd": "^13.1.8",
@@ -218,6 +219,8 @@
     "@react-spring/types": ["@react-spring/types@9.4.5", "", {}, "sha512-mpRIamoHwql0ogxEUh9yr4TP0xU5CWyZxVQeccGkHHF8kPMErtDXJlxyo0lj+telRF35XNihtPTWoflqtyARmg=="],
 
     "@react-spring/web": ["@react-spring/web@9.4.5", "", { "dependencies": { "@react-spring/animated": "~9.4.5", "@react-spring/core": "~9.4.5", "@react-spring/shared": "~9.4.5", "@react-spring/types": "~9.4.5" }, "peerDependencies": { "react": "^16.8.0  || >=17.0.0 || >=18.0.0", "react-dom": "^16.8.0  || >=17.0.0 || >=18.0.0" } }, "sha512-NGAkOtKmOzDEctL7MzRlQGv24sRce++0xAY7KlcxmeVkR7LRSGkoXHaIfm9ObzxPMcPHQYQhf3+X9jepIFNHQA=="],
+
+    "@revenuecat/purchases-js": ["@revenuecat/purchases-js@1.10.0", "", {}, "sha512-WqVBieyJKTa7FYkVddDUqWDCUP2aOiJDIyFdq3hdRqLZ8Orow3TmE0DqEn4HIO2cZsuyCWRapYmRZ4gRr5KMxw=="],
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.19", "", {}, "sha512-3FL3mnMbPu0muGOCaKAhhFEYmqv9eTfPSJRJmANrCwtgK8VuxpsZDGK+m0LYAGoyO8+0j5uRe4PeyPDK1yA/hA=="],
 
