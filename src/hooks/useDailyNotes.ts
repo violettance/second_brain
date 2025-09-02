@@ -11,6 +11,19 @@ let mockNotesStorage: DailyNote[] = [
     title: 'Daily Reflection - Today',
     content: 'Today I learned about the importance of building a second brain. The concept of connecting ideas and creating a knowledge network is fascinating.',
     tags: ['reflection', 'learning', 'knowledge'],
+    references: [
+      {
+        id: '1',
+        type: 'book',
+        raw_input: 'Tiago Forte, Building a Second Brain, 2022, Atria Books',
+        formatted: 'Forte, T. (2022). *Building a Second Brain*. Atria Books.',
+        author: 'Tiago Forte',
+        title: 'Building a Second Brain',
+        year: '2022',
+        publisher: 'Atria Books',
+        created_at: new Date().toISOString()
+      }
+    ],
     note_date: (() => {
       const now = new Date();
       return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -25,6 +38,7 @@ let mockNotesStorage: DailyNote[] = [
     title: 'React Best Practices',
     content: 'Key principles for writing maintainable React code: component composition, proper state management, and effective use of hooks.',
     tags: ['react', 'programming', 'best-practices'],
+    references: [],
     note_date: (() => {
       const yesterday = new Date(Date.now() - 86400000);
       return `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
@@ -39,6 +53,7 @@ let mockNotesStorage: DailyNote[] = [
     title: 'Meeting Notes - Team Sync',
     content: 'Discussed project roadmap and upcoming features. Need to focus on user experience improvements.',
     tags: ['meeting', 'team', 'roadmap'],
+    references: [],
     note_date: (() => {
       const twoDaysAgo = new Date(Date.now() - 172800000);
       return `${twoDaysAgo.getFullYear()}-${String(twoDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(twoDaysAgo.getDate()).padStart(2, '0')}`;
@@ -169,6 +184,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
     title: string;
     content: string;
     tags: string[];
+    references?: any[];
     memoryType: 'short-term' | 'long-term';
     noteDate: Date;
   }) => {
@@ -188,6 +204,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
           title: noteData.title,
           content: noteData.content,
           tags: noteData.tags,
+          references: noteData.references || [],
           note_date: (() => {
             const date = noteData.noteDate;
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -209,7 +226,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
         throw new Error('Supabase client is not available');
       }
       
-      const { title, content, tags, memoryType, noteDate } = noteData;
+      const { title, content, tags, references, memoryType, noteDate } = noteData;
       // Use local date to avoid timezone issues
       const note_date = `${noteDate.getFullYear()}-${String(noteDate.getMonth() + 1).padStart(2, '0')}-${String(noteDate.getDate()).padStart(2, '0')}`;
       
@@ -224,6 +241,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
             title,
             content,
             tags,
+            references: references || [],
             note_date
           })
           .select()
@@ -245,6 +263,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
             title,
             content,
             tags,
+            references: references || [],
             note_date
           })
           .select()
@@ -273,6 +292,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
     title?: string;
     content?: string;
     tags?: string[];
+    references?: any[];
     memory_type?: 'short-term' | 'long-term';
   }) => {
     if (!user) throw new Error('Kullanıcı yok!');
@@ -332,6 +352,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
           title: updates.title || currentNote.title,
           content: updates.content || currentNote.content,
           tags: updates.tags || currentNote.tags,
+          references: updates.references || currentNote.references || [],
           note_date: currentNote.note_date
         };
         
