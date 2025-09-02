@@ -21,8 +21,9 @@ import {
   Loader2
 } from 'lucide-react';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
-import { DailyNote } from '../../types/database';
+import { DailyNote, Reference } from '../../types/database';
 import { generateTags } from '../../lib/gemini';
+import { ReferenceInput } from './ReferenceInput';
 
 interface NoteEditorProps {
   selectedDate: Date;
@@ -43,6 +44,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   const [content, setContent] = useState(existingNote?.content || '');
   const [memoryType, setMemoryType] = useState<'short-term' | 'long-term'>(existingNote?.memory_type || defaultMemoryType || 'short-term');
   const [tags, setTags] = useState<string[]>(existingNote?.tags || []);
+  const [references, setReferences] = useState<Reference[]>(existingNote?.references || []);
   const [currentTag, setCurrentTag] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,13 +112,15 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           title,
           content,
           tags,
-          memory_type: memoryType
+          memory_type: memoryType,
+          references
         });
       } else {
         await saveNote({
           title,
           content,
           tags,
+          references,
           memoryType,
           noteDate: selectedDate
         });
@@ -467,6 +471,12 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
               </div>
             )}
           </div>
+          
+          {/* References */}
+          <ReferenceInput
+            references={references}
+            onReferencesChange={setReferences}
+          />
           
           {/* Error Message */}
           {error && (

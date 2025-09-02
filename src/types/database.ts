@@ -158,6 +158,7 @@ export interface Database {
           archived_at: string | null;
           created_at: string;
           updated_at: string;
+          references: Reference[];
         };
         Insert: {
           id?: string;
@@ -169,6 +170,7 @@ export interface Database {
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          references?: Reference[];
         };
         Update: {
           id?: string;
@@ -180,6 +182,7 @@ export interface Database {
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          references?: Reference[];
         };
       };
       long_term_notes: {
@@ -193,6 +196,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           importance_score: number;
+          references: Reference[];
         };
         Insert: {
           id?: string;
@@ -204,6 +208,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           importance_score?: number;
+          references?: Reference[];
         };
         Update: {
           id?: string;
@@ -215,10 +220,24 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           importance_score?: number;
+          references?: Reference[];
         };
       };
     };
   };
+}
+
+export interface Reference {
+  id: string;
+  type: 'book' | 'article' | 'website' | 'video' | 'personal' | 'other';
+  raw_input: string;
+  formatted: string;
+  author?: string;
+  title?: string;
+  year?: string;
+  publisher?: string;
+  url?: string;
+  created_at: string;
 }
 
 export interface DailyNote {
@@ -232,6 +251,7 @@ export interface DailyNote {
   archived_at?: string | null;
   created_at: string;
   updated_at: string;
+  references?: Reference[];
 }
 
 export interface Profile {
