@@ -13,10 +13,9 @@ import {
   Check,
   X
 } from 'lucide-react';
-import { PaywallModal } from '../analytics/PaywallModal';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { useAuth } from '../../contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const Settings: React.FC = () => {
   const [subscription, setSubscription] = useState('free');
@@ -31,10 +30,10 @@ export const Settings: React.FC = () => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
 
   const { user } = useAuth();
   const { shortTermNotes, longTermNotes } = useMemoryNotes();
+  const navigate = useNavigate();
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -52,7 +51,7 @@ export const Settings: React.FC = () => {
 
   const handleSubscriptionChange = (newPlan: string) => {
     if (newPlan === 'pro') {
-      setShowPaywall(true);
+      navigate('/pricing');
       return;
     }
     setSubscription(newPlan);
@@ -193,17 +192,7 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         </div>
-        {showPaywall && (
-          <PaywallModal 
-            onClose={() => setShowPaywall(false)}
-            onUpgrade={() => {
-              setShowPaywall(false);
-              setSubscription('pro');
-              // In real app, this would trigger payment flow
-              console.log('Starting payment flow...');
-            }}
-          />
-        )}
+
 
         {/* Appearance */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
@@ -323,12 +312,26 @@ export const Settings: React.FC = () => {
         <div className="h-8"></div>
       </div>
       <div className="w-full flex justify-center mt-8 mb-4">
-        <Link
-          to="/terms-and-conditions"
-          className="text-slate-400 hover:text-purple-400 underline text-sm transition-colors"
-        >
-          Terms and Conditions
-        </Link>
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+          <Link
+            to="/terms-and-conditions"
+            className="text-slate-400 hover:text-purple-400 underline transition-colors"
+          >
+            Terms & Conditions
+          </Link>
+          <Link
+            to="/privacy-policy"
+            className="text-slate-400 hover:text-purple-400 underline transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          <a
+            href="mailto:productora.analytics@gmail.com"
+            className="text-slate-400 hover:text-purple-400 underline transition-colors"
+          >
+            Support
+          </a>
+        </div>
       </div>
     </div>
   );

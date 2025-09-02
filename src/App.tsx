@@ -14,6 +14,8 @@ import { Settings } from './components/settings/Settings';
 import { KnowledgeNetworkPage } from './components/knowledge-network/KnowledgeNetworkPage';
 import { TasksPage } from './components/tasks/TasksPage';
 import { TermsAndConditions } from './components/landing/TermsAndConditions';
+import { PrivacyPolicy } from './components/landing/PrivacyPolicy';
+import { PricingModal } from './components/landing/PricingModal';
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -59,6 +61,8 @@ const AppContent: React.FC = () => {
             <Route path="/settings" element={<Settings />} />
             <Route path="/knowledge-network" element={<KnowledgeNetworkPage />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/pricing" element={<PricingModal />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </div>
