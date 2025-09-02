@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -14,7 +14,6 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { PaywallModal } from '../analytics/PaywallModal';
 
 interface SidebarProps {
   currentPage: string;
@@ -33,13 +32,12 @@ const menuItems = [
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentPage }) => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
 
   const handleUpgradeClick = () => {
-    setShowPaywall(true);
-    // In real app, this would integrate with RevenueCat
-    console.log('Upgrade Now clicked - integrate with RevenueCat');
+    navigate('/pricing');
+    setIsMobileMenuOpen(false); // Close mobile menu if open
   };
 
   return (
@@ -130,16 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage }) => {
         </div>
       </div>
 
-      {showPaywall && (
-        <PaywallModal 
-          onClose={() => setShowPaywall(false)}
-          onUpgrade={() => {
-            setShowPaywall(false);
-            // In real app, this would trigger RevenueCat payment flow
-            console.log('Starting payment flow...');
-          }}
-        />
-      )}
+
     </>
   );
 };

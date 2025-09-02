@@ -299,15 +299,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
       {/* Footer */}
       <footer className="relative z-10 border-t border-slate-800 py-8 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0">
-                <img src="/logo.png" alt="Second Brain Logo" className="h-12 w-12 lg:h-14 lg:w-14 rounded-lg" />
+          <div className="flex flex-col space-y-6">
+            {/* Top Section */}
+            <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <img src="/logo.png" alt="Second Brain Logo" className="h-12 w-12 lg:h-14 lg:w-14 rounded-lg" />
+                </div>
+                <span className="text-lg lg:text-xl font-bold text-white">Second Brain</span>
               </div>
-              <span className="text-lg lg:text-xl font-bold text-white">Second Brain</span>
+              
+              {/* Navigation Links */}
+              <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+                <a href="/pricing" className="text-slate-400 hover:text-white transition-colors">
+                  Pricing
+                </a>
+                <a href="/terms-and-conditions" className="text-slate-400 hover:text-white transition-colors">
+                  Terms & Conditions
+                </a>
+                <a href="/privacy-policy" className="text-slate-400 hover:text-white transition-colors">
+                  Privacy Policy
+                </a>
+                <a href="mailto:productora.analytics@gmail.com" className="text-slate-400 hover:text-white transition-colors">
+                  Support
+                </a>
+              </div>
             </div>
-            <div className="text-slate-400 text-sm text-center md:text-left">
-              © 2025 Second Brain. All rights reserved.
+            
+            {/* Bottom Section */}
+            <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 pt-4 border-t border-slate-800">
+              <div className="text-slate-400 text-sm text-center md:text-left">
+                © 2025 Productora LLC. All rights reserved.
+              </div>
+              <div className="text-slate-500 text-xs text-center md:text-right">
+                Payment processing by Paddle.com
+              </div>
             </div>
           </div>
         </div>

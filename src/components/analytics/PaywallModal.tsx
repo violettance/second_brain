@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { X, Sparkles, Brain, Target, TrendingUp, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface PaywallModalProps {
   onClose: () => void;
