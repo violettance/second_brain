@@ -16,10 +16,13 @@ import {
   Image,
   Code,
   Trash2,
-  Plus
+  Plus,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
 import { DailyNote } from '../../types/database';
+import { generateTags } from '../../lib/gemini';
 
 interface NoteEditorProps {
   selectedDate: Date;
@@ -43,6 +46,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   const [currentTag, setCurrentTag] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const { saveNote, updateNote } = useDailyNotes(selectedDate);
@@ -145,6 +150,34 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleGenerateAITags = async () => {
+    if (!title.trim() && !content.trim()) {
+      setError('Please add a title or content to generate tags');
+      return;
+    }
+
+    setIsGeneratingTags(true);
+    setError(null);
+
+    try {
+      const aiTags = await generateTags({ title, content });
+      // Filter out tags that are already added and auto-add them to tags
+      const newTags = aiTags.filter(tag => !tags.includes(tag));
+      setTags([...tags, ...newTags]);
+      setSuggestedTags(newTags);
+    } catch (err) {
+      console.error('Error generating tags:', err);
+      setError('Failed to generate AI tags. Please try again.');
+    } finally {
+      setIsGeneratingTags(false);
+    }
+  };
+
+  const handleRemoveSuggestedTag = (tag: string) => {
+    setSuggestedTags(suggestedTags.filter(t => t !== tag));
+    setTags(tags.filter(t => t !== tag));
   };
 
   const insertText = (before: string, after: string = '') => {
@@ -368,8 +401,47 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
               >
                 <Plus className="h-4 w-4 text-slate-400" />
               </button>
+              <button
+                onClick={handleGenerateAITags}
+                disabled={isGeneratingTags || (!title.trim() && !content.trim())}
+                className="flex items-center space-x-1 p-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Generate AI Tags"
+              >
+                {isGeneratingTags ? (
+                  <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-purple-400" />
+                )}
+              </button>
             </div>
             
+            {/* AI Suggested Tags */}
+            {suggestedTags.length > 0 && (
+              <div className="mt-3">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-purple-400" />
+                  <span className="text-sm font-medium text-purple-400">AI Added Tags (click X to remove)</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {suggestedTags.map((tag) => (
+                    <div 
+                      key={tag}
+                      className="flex items-center space-x-1 px-2 py-1 bg-purple-600/10 border border-purple-500/30 text-purple-300 rounded-md text-xs"
+                    >
+                      <span>{tag}</span>
+                      <button
+                        onClick={() => handleRemoveSuggestedTag(tag)}
+                        className="hover:bg-purple-600/20 rounded-full p-0.5"
+                        title="Remove tag"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Tags List */}
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
