@@ -18,7 +18,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   const [tagInput, setTagInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
-  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [aiAddedTags, setAiAddedTags] = useState<string[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const { saveNote } = useMemoryNotes();
@@ -55,20 +55,17 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     }
   };
 
-  const handleGenerateAITags = async () => {
+  const handleGenerateTags = async () => {
     if (!title.trim() && !content.trim()) {
       alert('Please add a title or content to generate tags');
       return;
     }
-
     setIsGeneratingTags(true);
-
     try {
-      const aiTags = await generateTags({ title, content });
-      // Filter out tags that are already added and auto-add them to tags
-      const newTags = aiTags.filter(tag => !tags.includes(tag));
-      setTags([...tags, ...newTags]);
-      setSuggestedTags(newTags);
+      const newAiTags = await generateTags({ title: title.trim(), content: content.trim() });
+      const uniqueNewTags = newAiTags.filter(tag => !tags.includes(tag));
+      setTags([...tags, ...uniqueNewTags]);
+      setAiAddedTags([...aiAddedTags, ...uniqueNewTags]);
     } catch (err) {
       console.error('Error generating tags:', err);
       alert('Failed to generate AI tags. Please try again.');
@@ -77,9 +74,9 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     }
   };
 
-  const handleRemoveSuggestedTag = (tag: string) => {
-    setSuggestedTags(suggestedTags.filter(t => t !== tag));
-    setTags(tags.filter(t => t !== tag));
+  const handleRemoveAiTag = (tagToRemove: string) => {
+    setTags(currentTags => currentTags.filter(tag => tag !== tagToRemove));
+    setAiAddedTags(currentAiTags => currentAiTags.filter(tag => tag !== tagToRemove));
   };
 
   const handleSave = async () => {
@@ -213,34 +210,34 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                   Add
                 </button>
                 <button
-                  onClick={handleGenerateAITags}
+                  onClick={handleGenerateTags}
                   disabled={isGeneratingTags || (!title.trim() && !content.trim())}
-                  className={`flex items-center space-x-1 px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm ${
+                  className={`flex items-center space-x-2 px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm ${
                     memoryType === 'short-term'
                       ? 'bg-orange-500/20 hover:bg-orange-500/30 border-orange-500/30'
                       : 'bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/30'
                   }`}
-                  title="Generate AI Tags"
+                  title="Suggest Tags with AI"
                 >
                   {isGeneratingTags ? (
                     <Loader2 className={`h-4 w-4 animate-spin ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
                   ) : (
                     <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
                   )}
-                  <span className={memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}>AI</span>
+                  <span className={memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}>Suggest Tags with AI</span>
                 </button>
               </div>
               
               {/* AI Suggested Tags */}
-              {suggestedTags.length > 0 && (
+              {aiAddedTags.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
                     <span className={`text-sm font-medium ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`}>AI Added Tags (click X to remove)</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {suggestedTags.map((tag) => (
-                      <div 
+                    {aiAddedTags.map((tag) => (
+                      <div
                         key={tag}
                         className={`flex items-center space-x-1 px-3 py-1 border rounded-lg text-sm ${
                           memoryType === 'short-term'
@@ -250,7 +247,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                       >
                         <span>{tag}</span>
                         <button
-                          onClick={() => handleRemoveSuggestedTag(tag)}
+                          onClick={() => handleRemoveAiTag(tag)}
                           className={`rounded-full p-0.5 ${
                             memoryType === 'short-term' 
                               ? 'hover:bg-orange-500/20' 
@@ -266,9 +263,9 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                 </div>
               )}
 
-              {tags.length > 0 && (
+              {tags.filter(t => !aiAddedTags.includes(t)).length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
+                  {tags.filter(t => !aiAddedTags.includes(t)).map((tag) => (
                     <span
                       key={tag}
                       className="flex items-center space-x-1 px-3 py-1 rounded-full text-sm"

@@ -7,6 +7,7 @@ interface User extends Profile {}
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isPro: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -18,11 +19,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isPro, setIsPro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
+    const updateUserStatus = (profile: User | null) => {
+      setUser(profile);
+      if (profile && profile.subscription_plan && profile.subscription_plan !== 'free') {
+        setIsPro(true);
+      } else {
+        setIsPro(false);
+      }
+    };
+
     const initializeAuth = async () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const sessionUser = sessionData?.session?.user;
@@ -34,10 +45,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .eq('id', sessionUser.id)
           .single();
 
-        if (profile) setUser(profile);
+        if (profile) updateUserStatus(profile);
       }
 
-      setIsLoading(false); // 🔴 en kritik satır bu!
+      setIsLoading(false);
     };
 
     initializeAuth();
@@ -50,10 +61,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .eq('id', session.user.id)
           .single()
           .then(({ data: profile }) => {
-            if (profile) setUser(profile);
+            if (profile) updateUserStatus(profile);
           });
       } else {
-        setUser(null);
+        updateUserStatus(null);
       }
     });
 
@@ -100,10 +111,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setIsPro(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, error, success }}>
+    <AuthContext.Provider value={{ user, isLoading, isPro, login, register, logout, error, success }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,10 +1,47 @@
-import React, { useState } from 'react';
-import { Brain, Plus, Search, Filter, Edit3, Trash2, Calendar, Tag, MoreHorizontal, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Brain, Plus, Search, Filter, Edit3, Trash2, Calendar, Tag, MoreHorizontal, Star, Sparkles, Crown, Loader2, X, ArrowRight } from 'lucide-react';
 import { CreateMemoryModal } from './CreateMemoryModal';
 import { NotePreviewModal } from '../dailyNotes/NotePreviewModal';
 import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
+import { useAuth } from '../../contexts/AuthContext';
+import { generateLongTermInsights } from '../../lib/gemini';
+
+// Helper component to parse and render the AI analysis
+const ParsedAnalysis = ({ text }: { text: string }) => {
+  // Split the text into sections based on the emojis, keeping the emojis
+  const sections = text.split(/(?=🔗|📈|🚀|🤔)/).filter(s => s.trim() !== '');
+
+  return (
+    <div className="space-y-4">
+      {sections.map((section, index) => {
+        const lines = section.trim().split('\n');
+        const title = lines[0];
+        const bullets = lines.slice(1).filter(line => line.trim().startsWith('•'));
+
+        return (
+          <div key={index} className="p-4 bg-slate-700/30 rounded-lg border border-slate-600/50">
+            <h3 className="font-semibold text-purple-300 mb-3 text-base">{title}</h3>
+            {bullets.length > 0 ? (
+              <ul className="space-y-2">
+                {bullets.map((bullet, i) => (
+                  <li key={i} className="text-slate-300 text-sm leading-relaxed flex items-start">
+                    <span className="mr-2 mt-1 text-purple-400 text-xs">◆</span>
+                    <span>{bullet.replace('•', '').trim()}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-slate-400 text-sm">{lines.slice(1).join('\n')}</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export const LongTermMemory: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -15,6 +52,40 @@ export const LongTermMemory: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const { longTermNotes, isLoading, deleteNote, refetch } = useMemoryNotes();
+  const { user } = useAuth();
+  const [showAiInsights, setShowAiInsights] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Daily Caching for AI Insights
+  useEffect(() => {
+    if (!user || (user as any).subscription_plan !== 'pro' || !longTermNotes || longTermNotes.length === 0) {
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const cacheKey = `aiInsights_long_term_${user.id}_${today}`;
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      setAiAnalysis(cachedData);
+    } else {
+      const fetchInsights = async () => {
+        setAiLoading(true);
+        try {
+          const analysis = await generateLongTermInsights(longTermNotes);
+          setAiAnalysis(analysis);
+          localStorage.setItem(cacheKey, analysis); // <-- Düzeltme: JSON.stringify kaldırıldı
+        } catch (error) {
+          console.error("Failed to fetch long-term AI insights:", error);
+          setAiAnalysis('Failed to generate AI analysis.');
+        } finally {
+          setAiLoading(false);
+        }
+      };
+      fetchInsights();
+    }
+  }, [user, longTermNotes]);
 
   const filteredAndSortedNotes = longTermNotes
     .filter(note =>
@@ -86,14 +157,36 @@ export const LongTermMemory: React.FC = () => {
               Permanent knowledge base for important information
             </p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
-            style={{ background: '#C2B5FC' }}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add Note</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            {longTermNotes && longTermNotes.length > 0 && (
+              <button
+                onClick={() => {
+                  if ((user as any)?.subscription_plan === 'pro') {
+                    setShowAiInsights(!showAiInsights);
+                  } else {
+                    setShowAiInsights(true);
+                  }
+                }}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm border ${
+                  (user as any)?.subscription_plan === 'pro'
+                    ? 'bg-slate-700/50 text-slate-200 hover:bg-slate-700 border-slate-600/80'
+                    : 'bg-transparent text-slate-500 border-slate-700/80 cursor-pointer opacity-70 hover:opacity-100'
+                }`}
+                title={(user as any)?.subscription_plan === 'pro' ? 'Toggle AI Analysis' : 'Upgrade to unlock'}
+              >
+                <Crown className={`h-4 w-4 ${(user as any)?.subscription_plan === 'pro' ? 'text-yellow-400' : 'text-slate-500'}`} />
+                <span className="hidden lg:inline">AI Insights</span>
+              </button>
+            )}
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
+              style={{ background: '#C2B5FC' }}
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Note</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -294,6 +387,68 @@ export const LongTermMemory: React.FC = () => {
           onSave={handleCloseEditor}
         />
       )}
+
+      {/* AI Insights Slide Panel */}
+      <div className={`fixed top-0 right-0 h-full w-80 lg:w-96 bg-slate-800/95 backdrop-blur-sm border-l border-slate-700/50 transform transition-transform duration-300 ease-in-out z-50 ${showAiInsights ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex flex-col h-full">
+          {/* Panel Header */}
+          <div className="p-6 border-b border-slate-700/50">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                  <Sparkles className="h-6 w-6" style={{ color: '#C2B5FC' }} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">AI Knowledge Analysis</h2>
+                  <p className="text-slate-400 text-sm">Uncovering deep insights</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAiInsights(false)} className="p-2 hover:bg-slate-600 rounded-lg transition-colors" title="Close panel">
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+          </div>
+          {/* Panel Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {(user as any)?.subscription_plan === 'pro' ? (
+              <div>
+                {aiLoading ? (
+                  <div className="flex items-center justify-center h-40">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-purple-400 mx-auto mb-3" />
+                      <p className="text-slate-400">Analyzing your knowledge base...</p>
+                    </div>
+                  </div>
+                ) : aiAnalysis ? (
+                  <>
+                    <ParsedAnalysis text={aiAnalysis} />
+                    <div className="text-xs text-slate-500 text-center mt-4">
+                      <p>Insights are automatically refreshed once every 24 hours.</p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Sparkles className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+                    <p className="text-slate-400">Not enough notes for analysis.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="mb-6"><Crown className="h-16 w-16 text-purple-400 mx-auto" /></div>
+                <h3 className="text-lg font-bold text-white mb-3">Unlock Deep Knowledge Analysis</h3>
+                <p className="text-slate-400 text-sm mb-6 leading-relaxed">Upgrade to Pro to uncover hidden connections, emerging patterns, and strategic next steps from your permanent knowledge base.</p>
+                <Link to="/pricing">
+                  <button className="w-full px-4 py-3 bg-purple-500 text-white rounded-lg font-semibold transition-colors hover:bg-purple-600">Upgrade to Pro</button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Overlay for mobile when panel is open */}
+      {showAiInsights && <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setShowAiInsights(false)} />}
     </div>
   );
 };

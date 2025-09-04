@@ -261,4 +261,5 @@ export interface Profile {
   avatar_url?: string;
   created_at: string;
   updated_at: string;
+  subscription_plan: string;
 }
