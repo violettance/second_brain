@@ -49,7 +49,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
-  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [aiAddedTags, setAiAddedTags] = useState<string[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const { saveNote, updateNote } = useDailyNotes(selectedDate);
@@ -166,11 +166,10 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
     setError(null);
 
     try {
-      const aiTags = await generateTags({ title, content });
-      // Filter out tags that are already added and auto-add them to tags
-      const newTags = aiTags.filter(tag => !tags.includes(tag));
-      setTags([...tags, ...newTags]);
-      setSuggestedTags(newTags);
+      const newAiTags = await generateTags({ title, content });
+      const uniqueNewTags = newAiTags.filter(tag => !tags.includes(tag));
+      setTags([...tags, ...uniqueNewTags]);
+      setAiAddedTags([...aiAddedTags, ...uniqueNewTags]);
     } catch (err) {
       console.error('Error generating tags:', err);
       setError('Failed to generate AI tags. Please try again.');
@@ -179,9 +178,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
     }
   };
 
-  const handleRemoveSuggestedTag = (tag: string) => {
-    setSuggestedTags(suggestedTags.filter(t => t !== tag));
-    setTags(tags.filter(t => t !== tag));
+  const handleRemoveAiTag = (tagToRemove: string) => {
+    setTags(currentTags => currentTags.filter(tag => tag !== tagToRemove));
+    setAiAddedTags(currentAiTags => currentAiTags.filter(tag => tag !== tagToRemove));
   };
 
   const insertText = (before: string, after: string = '') => {
@@ -408,34 +407,47 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
               <button
                 onClick={handleGenerateAITags}
                 disabled={isGeneratingTags || (!title.trim() && !content.trim())}
-                className="flex items-center space-x-1 p-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Generate AI Tags"
+                className={`flex items-center space-x-2 px-3 py-2 border rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm ${
+                  memoryType === 'short-term'
+                    ? 'bg-orange-500/20 hover:bg-orange-500/30 border-orange-500/30 text-orange-400'
+                    : 'bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/30 text-purple-400'
+                }`}
+                title="Suggest Tags with AI"
               >
                 {isGeneratingTags ? (
-                  <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Sparkles className="h-4 w-4 text-purple-400" />
+                  <Sparkles className="h-4 w-4" />
                 )}
+                <span>Suggest Tags with AI</span>
               </button>
             </div>
             
             {/* AI Suggested Tags */}
-            {suggestedTags.length > 0 && (
+            {aiAddedTags.length > 0 && (
               <div className="mt-3">
                 <div className="flex items-center space-x-2 mb-2">
-                  <Sparkles className="h-4 w-4 text-purple-400" />
-                  <span className="text-sm font-medium text-purple-400">AI Added Tags (click X to remove)</span>
+                  <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
+                  <span className={`text-sm font-medium ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`}>AI Added Tags (click X to remove)</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {suggestedTags.map((tag) => (
+                  {aiAddedTags.map((tag) => (
                     <div 
                       key={tag}
-                      className="flex items-center space-x-1 px-2 py-1 bg-purple-600/10 border border-purple-500/30 text-purple-300 rounded-md text-xs"
+                      className={`flex items-center space-x-1 px-2 py-1 border rounded-md text-xs ${
+                        memoryType === 'short-term'
+                          ? 'bg-orange-500/10 border-orange-500/30 text-orange-300'
+                          : 'bg-purple-600/10 border-purple-500/30 text-purple-300'
+                      }`}
                     >
                       <span>{tag}</span>
                       <button
-                        onClick={() => handleRemoveSuggestedTag(tag)}
-                        className="hover:bg-purple-600/20 rounded-full p-0.5"
+                        onClick={() => handleRemoveAiTag(tag)}
+                        className={`hover:bg-purple-600/20 rounded-full p-0.5 ${
+                            memoryType === 'short-term' 
+                              ? 'hover:bg-orange-500/20' 
+                              : 'hover:bg-purple-600/20'
+                          }`}
                         title="Remove tag"
                       >
                         <X className="h-3 w-3" />
@@ -447,9 +459,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             )}
 
             {/* Tags List */}
-            {tags.length > 0 && (
+            {tags.filter(t => !aiAddedTags.includes(t)).length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
-                {tags.map((tag) => (
+                {tags.filter(t => !aiAddedTags.includes(t)).map((tag) => (
                   <div 
                     key={tag}
                     className={`flex items-center space-x-1 px-2 py-1 rounded-md text-xs ${

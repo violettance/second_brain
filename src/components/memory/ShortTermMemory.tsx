@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
-import { Clock, Plus, Search, Filter, Archive, Trash2, Brain, Calendar, Tag, MoreHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Clock, Plus, Search, Filter, Archive, Trash2, Brain, Calendar, Tag, MoreHorizontal, Sparkles, Crown, Loader2, X, ArrowRight } from 'lucide-react';
 import { CreateMemoryModal } from './CreateMemoryModal';
 import { NotePreviewModal } from '../dailyNotes/NotePreviewModal';
 import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
+import { generateAiInsights } from '../../lib/gemini';
+import { useAuth } from '../../contexts/AuthContext';
+
+function simpleHash(str: string): string {
+  let hash = 0, i, chr;
+  if (str.length === 0) return hash.toString();
+  for (i = 0; i < str.length; i++) {
+    chr   = str.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash.toString();
+}
 
 export const ShortTermMemory: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -15,6 +29,41 @@ export const ShortTermMemory: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const { shortTermNotes, isLoading, moveToLongTerm, deleteNote, refetch } = useMemoryNotes();
+  const { user } = useAuth();
+  const [showAiInsights, setShowAiInsights] = useState(false);
+
+  const [aiInsights, setAiInsights] = useState<{ summary: string | null; recommendations: any[] }>({ summary: null, recommendations: [] });
+  const [aiInsightsLoading, setAiInsightsLoading] = useState(false);
+
+  // Daily Caching and AI Insights Logic
+  useEffect(() => {
+    if (!user || (user as any).subscription_plan !== 'pro' || !shortTermNotes || shortTermNotes.length === 0) {
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const cacheKey = `aiInsights_${user.id}_${today}`;
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      setAiInsights(JSON.parse(cachedData));
+    } else {
+      const fetchInsights = async () => {
+        setAiInsightsLoading(true);
+        try {
+          const insights = await generateAiInsights(shortTermNotes);
+          setAiInsights(insights);
+          localStorage.setItem(cacheKey, JSON.stringify(insights));
+        } catch (error) {
+          console.error("Failed to fetch AI insights:", error);
+          setAiInsights({ summary: 'Failed to generate AI insights.', recommendations: [] });
+        } finally {
+          setAiInsightsLoading(false);
+        }
+      };
+      fetchInsights();
+    }
+  }, [user, shortTermNotes]);
 
   const getDaysRemaining = (createdAt: string) => {
     const created = new Date(createdAt);
@@ -96,19 +145,43 @@ export const ShortTermMemory: React.FC = () => {
               Temporary notes that will be archived after 30 days
             </p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
-            style={{ background: '#C2B5FC' }}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add Note</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            {shortTermNotes && shortTermNotes.length > 0 && (
+              <button
+                onClick={() => {
+                  if ((user as any)?.subscription_plan === 'pro') {
+                    setShowAiInsights(!showAiInsights);
+                  } else {
+                    setShowAiInsights(true); // Open panel to show upgrade message
+                  }
+                }}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm border ${
+                  (user as any)?.subscription_plan === 'pro'
+                    ? 'bg-slate-700/50 text-slate-200 hover:bg-slate-700 border-slate-600/80'
+                    : 'bg-transparent text-slate-500 border-slate-700/80 cursor-pointer opacity-70 hover:opacity-100'
+                }`}
+                title={(user as any)?.subscription_plan === 'pro' ? 'Toggle AI Insights' : 'Upgrade to unlock'}
+              >
+                <Crown className={`h-4 w-4 ${(user as any)?.subscription_plan === 'pro' ? 'text-yellow-400' : 'text-slate-500'}`} />
+                <span className="hidden lg:inline">AI Insights</span>
+              </button>
+            )}
+            
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
+              style={{ background: '#C2B5FC' }}
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Note</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="p-4 lg:p-6 space-y-6 bg-slate-900 min-h-full">
+        
         {/* Search and Filter */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
           <div className="relative flex-1 lg:max-w-md">
@@ -274,6 +347,148 @@ export const ShortTermMemory: React.FC = () => {
           defaultMemoryType="short-term"
           onClose={handleCloseEditor}
           onSave={handleCloseEditor}
+        />
+      )}
+
+      {/* AI Insights Slide Panel */}
+      <div className={`fixed top-0 right-0 h-full w-80 lg:w-96 bg-slate-800/95 backdrop-blur-sm border-l border-slate-700/50 transform transition-transform duration-300 ease-in-out z-50 ${
+        showAiInsights ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        <div className="flex flex-col h-full">
+          {/* Panel Header */}
+          <div className="p-6 border-b border-slate-700/50">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg" style={{ background: '#fb923c20' }}>
+                  <Sparkles className="h-6 w-6 text-orange-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">AI Insights</h2>
+                  <p className="text-slate-400 text-sm">
+                    Analyzing {shortTermNotes?.length || 0} notes • Smart patterns & recommendations
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAiInsights(false)}
+                className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                title="Close panel"
+              >
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+            
+            {(user as any)?.subscription_plan === 'pro' && (
+              <div className="flex items-center space-x-2 text-xs text-orange-400">
+                <Crown className="h-4 w-4" />
+                <span>Pro Feature Active</span>
+              </div>
+            )}
+          </div>
+
+          {/* Panel Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {(user as any)?.subscription_plan === 'pro' ? (
+              <div>
+                {aiInsightsLoading ? (
+                  <div className="flex items-center justify-center h-32">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-orange-400 mx-auto mb-3" />
+                      <p className="text-slate-400">Generating AI insights...</p>
+                    </div>
+                  </div>
+                ) : aiInsights.summary ? (
+                  <div>
+                    <div className="mb-4 p-4 bg-slate-700/30 rounded-lg">
+                      <h3 className="text-sm font-semibold text-orange-400 mb-2 flex items-center">
+                        <Brain className="h-4 w-4 mr-2" />
+                        Analysis Summary
+                      </h3>
+                      <div className="text-white whitespace-pre-line text-sm leading-relaxed">
+                        {aiInsights.summary}
+                      </div>
+                    </div>
+                    
+                    {/* Long-term Recommendations */}
+                    {/* The original longTermRecommendations state and useEffect are removed */}
+                    {/* The new aiInsights.recommendations is used here */}
+                    {aiInsights.recommendations.length > 0 ? (
+                      <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                        <h3 className="text-sm font-semibold text-green-400 mb-3 flex items-center">
+                          <Archive className="h-4 w-4 mr-2" />
+                          Long-term Memory Suggestions
+                        </h3>
+                        <div className="space-y-3">
+                          {aiInsights.recommendations.map((rec, index) => (
+                            <div key={index} className="flex items-start justify-between p-3 bg-slate-700/30 rounded-lg">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-white text-sm font-medium truncate">{rec.note.title}</p>
+                                <p className="text-slate-400 text-xs mt-1">{rec.reason}</p>
+                              </div>
+                              <button
+                                onClick={() => moveToLongTerm(rec.note.id)}
+                                className="ml-3 px-3 py-1 bg-green-500 text-white text-xs rounded-md hover:bg-green-600 transition-colors flex-shrink-0"
+                                title="Move to Long-term Memory"
+                              >
+                                Move
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                    
+                    <div className="text-xs text-slate-500 text-center mt-4">
+                      <p>Insights are automatically refreshed once every 24 hours.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Sparkles className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+                    <p className="text-slate-400">No sufficient notes for analysis.</p>
+                    <p className="text-slate-500 text-sm mt-2">Add more thoughts to get AI insights</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="mb-6">
+                  <div className="relative inline-block">
+                    <Crown className="h-16 w-16 text-orange-400 mx-auto" />
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                      <Sparkles className="h-3 w-3 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-3">Unlock AI Insights</h3>
+                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                  Get personalized insights, patterns, and recommendations from your short-term thoughts with advanced AI analysis.
+                </p>
+                <div className="space-y-3">
+                  <Link to="/pricing">
+                    <button 
+                      className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg font-semibold transition-colors hover:bg-orange-600"
+                    >
+                      Upgrade to Pro
+                    </button>
+                  </Link>
+                  <div className="text-xs text-slate-500 space-y-1">
+                    <p>✨ Smart pattern recognition</p>
+                    <p>🧠 Knowledge gap analysis</p>
+                    <p>📊 Personalized recommendations</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Overlay for mobile when panel is open */}
+      {showAiInsights && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setShowAiInsights(false)}
         />
       )}
     </div>

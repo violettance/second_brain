@@ -14,17 +14,165 @@ type NoteForTagging = {
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
-export async function generateGeminiSummary(notes: ShortTermNote[]): Promise<string> {
-  if (!notes || notes.length === 0) return 'Not enough notes.';
-  const prompt = `Below are a user's short-term notes. These represent temporary ideas and thoughts in the user's mind. For each note, write an insight starting with: The note titled "...". List each insight as a bullet point (use •). At the end, provide a general recommendation for the user based on these notes. Respond only in clear English. Example format:\n\n• The note titled "..." ...\n• The note titled "..." ...\n\nRecommendation: ...\n\nNotes:\n${notes.map((n) => `Title: ${n.title}\nContent: ${n.content}\nTags: ${(n.tags || []).join(', ')}`).join('\n\n')}`;
+export async function generateAiInsights(notes: ShortTermNote[]): Promise<{ summary: string; recommendations: { note: ShortTermNote; reason: string }[] }> {
+  const fallbackResponse = { summary: 'AI insight could not be generated.', recommendations: [] };
+
+  if (!notes || notes.length === 0) {
+    return { summary: 'Not enough notes for analysis.', recommendations: [] };
+  }
+
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error('VITE_GEMINI_API_KEY is not set');
+    return { summary: 'AI service not configured.', recommendations: [] };
+  }
+
+  const noteCount = notes.length;
+  const maxNotesToAnalyze = 15;
+  const notesToAnalyze = noteCount > maxNotesToAnalyze ? notes.slice(0, maxNotesToAnalyze) : notes;
+
+  let summaryInstructions = '';
+  if (noteCount <= 5) {
+    summaryInstructions = `
+    - **For each note**, provide a brief insight (max 1 sentence per note).
+    - Start each insight with "• The note titled '...'"
+    - After the insights, give one overall recommendation.
+    - Example Format:
+      "summary": "• The note titled '...' suggests...\\n• The note titled '...' indicates...\\n\\nRecommendation: You seem to be focusing on..."
+    `;
+  } else {
+    summaryInstructions = `
+    - Identify key themes, patterns, and the user's current focus.
+    - The summary MUST be a single string containing these headers followed by their content: '🧠 Main Themes:', '📝 Current Focus:', and '💡 Recommendation:'.
+    - Use newline characters (\\n) to separate the sections.
+    - Keep the entire summary under 150 words.
+    `;
+  }
+
+  const prompt = `
+    Analyze these ${notesToAnalyze.length} short-term notes based on the following instructions.
+
+    ### Instructions ###
+    1.  **Create a concise summary:**
+        ${summaryInstructions}
+
+    2.  **Identify up to 5 notes that should be moved to long-term memory:**
+        - Criteria: Important concepts, reference info, project ideas, lasting value.
+        - For each, provide a brief reason (max 25 words).
+
+    ### Output Format ###
+    Respond with a single, valid JSON object in this exact format. Do not include any other text, markdown, or code fences.
+    {
+      "summary": "For >5 notes, format like this: '🧠 Main Themes: ...\\n📝 Current Focus: ...\\n💡 Recommendation: ...' | For <=5 notes, format like this: '• The note titled ...\\n• The note titled ...\\n\\nRecommendation: ...'",
+      "recommendations": [
+        {
+          "title": "Exact note title to recommend",
+          "reason": "Brief reason for long-term storage."
+        }
+      ]
+    }
+
+    ### Notes to Analyze ###
+    ${notesToAnalyze.map((n, idx) => `${idx + 1}. Title: "${n.title}"\nContent: ${n.content.substring(0, 150)}...`).join('\n\n')}
+  `;
+
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // Clean and parse the JSON response
+    const jsonMatch = text.match(/{[\s\S]*}/);
+    if (!jsonMatch) {
+      console.error('Gemini response did not contain valid JSON.', text);
+      return fallbackResponse;
+    }
+
+    const parsedData = JSON.parse(jsonMatch[0]);
+    
+    // Validate the parsed data structure and match notes
+    if (typeof parsedData.summary === 'string' && Array.isArray(parsedData.recommendations)) {
+       const finalRecommendations = parsedData.recommendations
+        .map((rec: any) => {
+            const note = notes.find(n => n.title === rec.title);
+            return note ? { note, reason: rec.reason } : null;
+        })
+        .filter(Boolean);
+        
+        return { summary: parsedData.summary, recommendations: finalRecommendations };
+    } else {
+      console.error('Parsed JSON has an invalid structure:', parsedData);
+      return fallbackResponse;
+    }
+
+  } catch (e: any) {
+    console.error('Gemini AI Insights Error:', e);
+    return fallbackResponse;
+  }
+}
+
+export async function generateLongTermInsights(notes: ShortTermNote[]): Promise<string> {
+  const fallbackResponse = 'AI analysis could not be generated.';
+
+  if (!notes || notes.length === 0) {
+    return 'Not enough notes for a deep analysis.';
+  }
+
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error('VITE_GEMINI_API_KEY is not set');
+    return 'AI service not configured.';
+  }
+
+  const noteCount = notes.length;
+  const maxNotesToAnalyze = 20; // Long-term can handle a bit more context
+  const notesToAnalyze = noteCount > maxNotesToAnalyze ? notes.slice(0, maxNotesToAnalyze) : notes;
+
+  const prompt = `
+    As a knowledge synthesis assistant, analyze the user's long-term memory notes to uncover deeper connections and strategic next steps.
+
+    ### Analysis Sections ###
+    Based on the provided notes, generate insights for the following four sections:
+
+    1.  **🔗 Hidden Connections:** Identify non-obvious relationships, thematic links, or causal chains between different notes. How do ideas from different domains intersect?
+    2.  **📈 Emerging Patterns:** What are the overarching themes, recurring questions, or mental models that appear across multiple notes? What is the user subconsciously focusing on?
+    3.  **🚀 Strategic Next Step:** Based on the connections and patterns, what is a single, logical, and valuable next step for the user to take? This could be a new project, a research topic, or a question to explore.
+    4.  **🤔 Potential Blind Spot:** What is a missing piece, an unasked question, or a potential contradiction that the user might be overlooking based on their notes?
+
+    ### Output Format ###
+    - Respond with a clear, well-structured analysis. Do not use introductory/concluding remarks.
+    - Use the exact emoji and header for each of the four sections.
+    - Under each header, provide insights as a bulleted list using '•'.
+    - When referencing specific notes, use their exact titles in single quotes (e.g., 'Reading Notes: Atomic Habits').
+    - Do not use markdown for bolding.
+
+    ### Example Response Structure ###
+    🔗 Hidden Connections
+    • The insight about the connection between 'Note Title A' and 'Note Title B'.
+
+    📈 Emerging Patterns
+    • The pattern of 'XYZ' is emerging across several notes.
+
+    🚀 Strategic Next Step
+    • Based on the theme of 'ABC', the next step should be to...
+
+    🤔 Potential Blind Spot
+    • The user might be overlooking the implications of '...' on their '...' project.
+
+
+    ### Notes to Analyze ###
+    ${notesToAnalyze.map((n, idx) => `${idx + 1}. Title: "${n.title}"\nContent: ${n.content.substring(0, 200)}...`).join('\n\n')}
+  `;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
   } catch (e: any) {
-    console.error('Gemini Error:', e);
-    return 'AI insight could not be generated.';
+    console.error('Gemini Long-Term Insights Error:', e);
+    return fallbackResponse;
   }
 }
 
@@ -71,7 +219,7 @@ Note Content: ${note.content}
 Tags:`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const tagsText = response.text().trim();
