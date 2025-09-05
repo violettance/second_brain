@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, Plus, Search, Filter, Edit3, Trash2, Calendar, Tag, MoreHorizontal, Star, Sparkles, Crown, Loader2, X, ArrowRight } from 'lucide-react';
+import { Brain, Plus, Search, Edit3, Trash2, Calendar, Tag, Star, Sparkles, Crown, Loader2, X } from 'lucide-react';
 import { CreateMemoryModal } from './CreateMemoryModal';
 import { NotePreviewModal } from '../dailyNotes/NotePreviewModal';
 import { NoteEditor } from '../dailyNotes/NoteEditor';
@@ -115,6 +115,16 @@ export const LongTermMemory: React.FC = () => {
   const handleNoteClick = (note: DailyNote) => {
     setPreviewNote(note);
     setShowPreview(true);
+  };
+
+  const handleNoteUpdate = (updatedNote: DailyNote) => {
+    // This is a bit of a hack to force a re-render. 
+    // In a real app, this state would likely be managed by the useMemoryNotes hook.
+    // Forcing a local state update to reflect the change immediately.
+    // A better approach would be to update the cache in useMemoryNotes hook.
+    // Let's assume for now the hook's cache will be eventually consistent.
+    longTermNotes.map(n => n.id === updatedNote.id ? updatedNote : n);
+    setPreviewNote(updatedNote); // Update the note in the preview modal as well
   };
 
   const handleClosePreview = () => {
@@ -374,6 +384,8 @@ export const LongTermMemory: React.FC = () => {
           note={previewNote}
           onClose={handleClosePreview}
           onEdit={handleEditFromPreview}
+          onUpdateNote={handleNoteUpdate}
+          refetchNotes={refetch}
         />
       )}
 
