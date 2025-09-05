@@ -311,7 +311,8 @@ export const useDailyNotes = (selectedDate?: Date) => {
         const updatedNote: DailyNote = {
           ...mockNotesStorage[noteIndex],
           ...updates,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          generated_mermaid: null // Clear diagram when content is updated
         };
         
         // Update shared mock storage
@@ -353,7 +354,8 @@ export const useDailyNotes = (selectedDate?: Date) => {
           content: updates.content || currentNote.content,
           tags: updates.tags || currentNote.tags,
           references: updates.references || currentNote.references || [],
-          note_date: currentNote.note_date
+          note_date: currentNote.note_date,
+          generated_mermaid: null // Clear diagram when memory type changes
         };
         
         let newNote: DailyNote;
@@ -389,7 +391,10 @@ export const useDailyNotes = (selectedDate?: Date) => {
         
         const { data, error } = await supabase
           .from(tableName)
-          .update(otherUpdates)
+          .update({
+            ...otherUpdates,
+            generated_mermaid: null // Clear diagram when content is updated
+          })
           .eq('id', noteId)
           .select()
           .single();

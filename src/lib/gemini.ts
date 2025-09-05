@@ -176,6 +176,93 @@ export async function generateLongTermInsights(notes: ShortTermNote[]): Promise<
   }
 }
 
+export async function generateMermaidFromNote(noteTitle: string, noteContent: string): Promise<string> {
+  if (!noteContent) {
+    return '';
+  }
+
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+
+  const prompt = `
+    Analyze the following note's title and content. Your task is to identify the core concepts, entities, and their relationships, and then represent them as the MOST APPROPRIATE Mermaid.js diagram type.
+
+    **Choose the BEST diagram type for this content:**
+    - **graph/flowchart**: For concepts, ideas, processes, decision flows, hierarchies
+    - **mindmap**: For brainstorming, connected ideas, knowledge mapping
+    - **timeline**: For chronological events, historical information, project phases
+    - **pie**: For statistics, percentages, proportional data
+    - **gitgraph**: For software development, version control, branching concepts
+    - **sequence**: For interactions, conversations, step-by-step processes
+    - **class**: For object-oriented concepts, relationships, inheritance
+    - **state**: For states, transitions, status changes
+    - **journey**: For user experiences, customer journeys, workflows
+
+    **Instructions:**
+    1.  FIRST analyze the content and decide which diagram type fits BEST
+    2.  The output must be ONLY the Mermaid code (no \`\`\`mermaid wrapper, just the raw code)
+    3.  Use ONLY English characters (A-Z, a-z, 0-9, spaces, hyphens) in node IDs and labels
+    4.  Keep labels SHORT and SIMPLE (max 20 characters each)
+    5.  Use node IDs like A, B, C or Node1, Node2, etc.
+    6.  Include 5-12 meaningful elements (nodes, branches, states, etc.)
+    7.  Make connections that show real relationships from the note content
+    8.  If content is too simple, return empty string
+    9.  AVOID special characters: àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ, parentheses (), brackets [], curly braces {}
+
+    **Note Title:** "${noteTitle}"
+    **Note Content:**
+    ---
+    ${noteContent}
+    ---
+
+    **Examples by type:**
+    Graph: graph TD; A[Main Topic] --> B[Subtopic 1]; A --> C[Subtopic 2]; B --> D[Detail];
+    Mindmap: mindmap; root((Main Idea)); A[Branch 1]; B[Branch 2]; A1[Sub-branch];
+    Timeline: timeline; title Project Timeline; 2023-01 : Start; 2023-06 : Milestone; 2023-12 : End;
+    Pie: pie title Distribution; Category A : 45; Category B : 30; Category C : 25;
+    `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    console.log('Gemini AI response:', text);
+
+    // Clean up the response - should be direct Mermaid code now
+    const cleanCode = text.trim();
+    
+    // Check if it looks like valid Mermaid code
+    const mermaidStartPatterns = [
+      'graph ', 'flowchart ', 'mindmap', 'timeline', 'pie ', 'gitgraph',
+      'sequenceDiagram', 'classDiagram', 'stateDiagram', 'journey'
+    ];
+    
+    const isValidMermaid = mermaidStartPatterns.some(pattern => 
+      cleanCode.toLowerCase().startsWith(pattern.toLowerCase())
+    );
+    
+    if (isValidMermaid && cleanCode.length > 10) {
+      console.log('Generated Mermaid code:', cleanCode);
+      return cleanCode;
+    }
+    
+    // Fallback: try to extract from code block if AI wrapped it anyway
+    const mermaidCode = text.match(/```mermaid([\s\S]*?)```/);
+    if (mermaidCode && mermaidCode[1]) {
+      const extractedCode = mermaidCode[1].trim();
+      console.log('Extracted from code block:', extractedCode);
+      return extractedCode;
+    }
+    
+    console.log('No valid Mermaid diagram found in response');
+    return ''; // Return empty if no valid diagram is found
+
+  } catch (error) {
+    console.error('Error generating Mermaid diagram from note:', error);
+    return ''; // Return empty on error
+  }
+}
+
 export async function generateTags(note: NoteForTagging): Promise<string[]> {
   if (!note.title.trim() && !note.content.trim()) {
     return [];
