@@ -18,12 +18,16 @@ import {
   Trash2,
   Plus,
   Sparkles,
-  Loader2
+  Loader2,
+  Crown
 } from 'lucide-react';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
 import { DailyNote, Reference } from '../../types/database';
 import { generateTags } from '../../lib/gemini';
 import { ReferenceInput } from './ReferenceInput';
+import { CompactVoiceRecorder } from '../CompactVoiceRecorder';
+import { PaywallModal } from '../analytics/PaywallModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface NoteEditorProps {
   selectedDate: Date;
@@ -50,9 +54,11 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
   const [aiAddedTags, setAiAddedTags] = useState<string[]>([]);
+  const [showPaywall, setShowPaywall] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const { saveNote, updateNote } = useDailyNotes(selectedDate);
+  const { isPro } = useAuth();
 
   useEffect(() => {
     // Focus the title input when the modal opens
@@ -65,6 +71,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Don't close if paywall is open
+      if (showPaywall) return;
+      
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
       }
@@ -95,7 +104,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClose, content]);
+  }, [onClose, content, showPaywall]);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -202,6 +211,15 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
     }, 0);
   };
 
+  const handleVoiceTextUpdate = (newVoiceText: string) => {
+    // Simply append the new text - the voice recorder only sends incremental changes
+    setContent(prevContent => prevContent + newVoiceText);
+  };
+
+  const handleUpgradeClick = () => {
+    setShowPaywall(true);
+  };
+
   const handleBold = () => insertText('**', '**');
   const handleItalic = () => insertText('*', '*');
   const handleCode = () => insertText('`', '`');
@@ -250,12 +268,28 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           <h2 className="text-lg font-medium text-white">
             {existingNote ? 'Edit Note' : 'New Note'}
           </h2>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-slate-700 rounded-md transition-colors"
-          >
-            <X className="h-5 w-5 text-slate-400" />
-          </button>
+          
+          <div className="flex items-center space-x-3">
+            {/* Voice Recording - Compact */}
+            <div className="flex items-center">
+              <CompactVoiceRecorder
+                onTextUpdate={handleVoiceTextUpdate}
+                isProUser={isPro}
+                onUpgradeClick={handleUpgradeClick}
+                theme={memoryType}
+                enableAI={false} // Disabled for faster real-time dictation
+                recordingTimeout={15} // 15 seconds timeout for longer dictation
+                language="en-US" // TODO: Get from app-wide language settings
+              />
+            </div>
+            
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-slate-700 rounded-md transition-colors"
+            >
+              <X className="h-5 w-5 text-slate-400" />
+            </button>
+          </div>
         </div>
         
         {/* Content */}
@@ -522,6 +556,19 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* Paywall Modal */}
+      {showPaywall && (
+        <PaywallModal
+          feature="voice-recording"
+          onClose={() => setShowPaywall(false)}
+          onUpgrade={() => {
+            // TODO: Implement upgrade logic
+            console.log('Upgrade clicked');
+            setShowPaywall(false);
+          }}
+        />
+      )}
     </div>
   );
 };
