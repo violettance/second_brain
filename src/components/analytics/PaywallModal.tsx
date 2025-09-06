@@ -1,31 +1,62 @@
 import React, { useRef, useEffect } from 'react';
-import { X, Sparkles, Brain, Target, TrendingUp, Zap } from 'lucide-react';
+import { X, Sparkles, Brain, Target, TrendingUp, Zap, Mic } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface PaywallModalProps {
   onClose: () => void;
   onUpgrade: () => void;
+  feature?: 'voice-recording' | 'analytics' | 'general';
 }
 
-export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }) => {
+export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade, feature = 'general' }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        event.stopPropagation();
         onClose();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    // Use capture phase to handle event before it bubbles
+    document.addEventListener('mousedown', handleClickOutside, true);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside, true);
     };
   }, [onClose]);
 
+  const getFeatureContent = () => {
+    switch (feature) {
+      case 'voice-recording':
+        return {
+          icon: <Mic className="h-8 w-8 text-slate-900" />,
+          title: 'Voice Recording Pro Feature',
+          subtitle: 'Transform your thoughts into notes with AI-powered voice recording',
+          description: 'Speak naturally and let AI convert your speech to perfectly formatted notes with real-time transcription and intelligent text enhancement.'
+        };
+      case 'analytics':
+        return {
+          icon: <TrendingUp className="h-8 w-8 text-slate-900" />,
+          title: 'Advanced Analytics Pro',
+          subtitle: 'Unlock deep insights into your learning patterns',
+          description: 'Get detailed analytics about your knowledge growth and learning behavior.'
+        };
+      default:
+        return {
+          icon: <Sparkles className="h-8 w-8 text-slate-900" />,
+          title: 'Upgrade to Pro',
+          subtitle: 'Unlock unlimited notes and advanced AI features',
+          description: 'Access all premium features for enhanced productivity.'
+        };
+    }
+  };
+
+  const featureContent = getFeatureContent();
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
       <div 
         ref={modalRef}
         className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-xl max-h-[75vh] flex flex-col"
@@ -42,13 +73,13 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
           
           <div className="flex items-center justify-center mb-2">
             <div className="p-3 rounded-full" style={{ background: '#C2B5FC' }}>
-              <Sparkles className="h-8 w-8 text-slate-900" />
+              {featureContent.icon}
             </div>
           </div>
           
-          <h2 className="text-2xl font-bold text-white mb-1">Upgrade to Pro</h2>
+          <h2 className="text-2xl font-bold text-white mb-1">{featureContent.title}</h2>
           <p className="text-slate-300 text-base">
-            Unlock unlimited notes and advanced AI features
+            {featureContent.subtitle}
           </p>
         </div>
 
@@ -56,45 +87,91 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ onClose, onUpgrade }
         <div className="p-4 overflow-y-auto">
           {/* Features Grid - More compact */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-            <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
-              <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                <Brain className="h-4 w-4" style={{ color: '#C2B5FC' }} />
-              </div>
-              <div>
-                <h3 className="text-white font-semibold text-xs">Knowledge Gap Analysis</h3>
-                <p className="text-slate-400 text-xs">Identify missing connections</p>
-              </div>
-            </div>
+            {feature === 'voice-recording' ? (
+              <>
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <Mic className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">Real-time Transcription</h3>
+                    <p className="text-slate-400 text-xs">Instant speech-to-text conversion</p>
+                  </div>
+                </div>
 
-            <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
-              <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                <Target className="h-4 w-4" style={{ color: '#C2B5FC' }} />
-              </div>
-              <div>
-                <h3 className="text-white font-semibold text-xs">Personalized Recommendations</h3>
-                <p className="text-slate-400 text-xs">AI-curated content</p>
-              </div>
-            </div>
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <Sparkles className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">AI Text Enhancement</h3>
+                    <p className="text-slate-400 text-xs">Grammar & structure improvement</p>
+                  </div>
+                </div>
 
-            <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
-              <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                <TrendingUp className="h-4 w-4" style={{ color: '#C2B5FC' }} />
-              </div>
-              <div>
-                <h3 className="text-white font-semibold text-xs">Learning Patterns</h3>
-                <p className="text-slate-400 text-xs">Optimize learning times</p>
-              </div>
-            </div>
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <Brain className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">Smart Auto-tagging</h3>
+                    <p className="text-slate-400 text-xs">AI suggests relevant tags</p>
+                  </div>
+                </div>
 
-            <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
-              <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
-                <Zap className="h-4 w-4" style={{ color: '#C2B5FC' }} />
-              </div>
-              <div>
-                <h3 className="text-white font-semibold text-xs">Smart Connections</h3>
-                <p className="text-slate-400 text-xs">Auto-discover concepts</p>
-              </div>
-            </div>
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <Zap className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">Multi-language Support</h3>
+                    <p className="text-slate-400 text-xs">Turkish & English recognition</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <Brain className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">Knowledge Gap Analysis</h3>
+                    <p className="text-slate-400 text-xs">Identify missing connections</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <Target className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">Personalized Recommendations</h3>
+                    <p className="text-slate-400 text-xs">AI-curated content</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <TrendingUp className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">Learning Patterns</h3>
+                    <p className="text-slate-400 text-xs">Optimize learning times</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-2 p-3 bg-slate-700/30 rounded-lg">
+                  <div className="p-1.5 rounded-lg" style={{ background: '#C2B5FC20' }}>
+                    <Zap className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-xs">Smart Connections</h3>
+                    <p className="text-slate-400 text-xs">Auto-discover concepts</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Pricing - More compact */}

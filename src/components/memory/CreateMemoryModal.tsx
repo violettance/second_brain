@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Save, Clock, Brain, Tag, Type, List, Hash, Quote, Code, Sparkles, Loader2, Plus } from 'lucide-react';
+import { X, Save, Clock, Brain, Tag, Type, List, Hash, Quote, Code, Sparkles, Loader2, Plus, Crown } from 'lucide-react';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { generateTags } from '../../lib/gemini';
+import { CompactVoiceRecorder } from '../CompactVoiceRecorder';
+import { PaywallModal } from '../analytics/PaywallModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface CreateMemoryModalProps {
   memoryType: 'short-term' | 'long-term';
@@ -19,13 +22,18 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
   const [aiAddedTags, setAiAddedTags] = useState<string[]>([]);
+  const [showPaywall, setShowPaywall] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const { saveNote } = useMemoryNotes();
+  const { isPro } = useAuth();
 
   // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Don't close if paywall is open
+      if (showPaywall) return;
+      
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
       }
@@ -35,7 +43,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, showPaywall]);
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -103,6 +111,15 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     }
   };
 
+  const handleVoiceTextUpdate = (newVoiceText: string) => {
+    // Simply append the new text - the voice recorder only sends incremental changes
+    setContent(prevContent => prevContent + newVoiceText);
+  };
+
+  const handleUpgradeClick = () => {
+    setShowPaywall(true);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div 
@@ -131,12 +148,28 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 lg:h-6 lg:w-6 text-slate-400" />
-          </button>
+          
+          <div className="flex items-center space-x-3">
+            {/* Voice Recording - Compact */}
+            <div className="flex items-center">
+              <CompactVoiceRecorder
+                onTextUpdate={handleVoiceTextUpdate}
+                isProUser={isPro}
+                onUpgradeClick={handleUpgradeClick}
+                theme={memoryType}
+                enableAI={false} // Disabled for faster real-time dictation
+                recordingTimeout={15} // 15 seconds timeout for longer dictation
+                language="en-US" // TODO: Get from app-wide language settings
+              />
+            </div>
+            
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 lg:h-6 lg:w-6 text-slate-400" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -339,6 +372,19 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* Paywall Modal */}
+      {showPaywall && (
+        <PaywallModal
+          feature="voice-recording"
+          onClose={() => setShowPaywall(false)}
+          onUpgrade={() => {
+            // TODO: Implement upgrade logic
+            console.log('Upgrade clicked');
+            setShowPaywall(false);
+          }}
+        />
+      )}
     </div>
   );
 };

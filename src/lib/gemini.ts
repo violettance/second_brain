@@ -323,4 +323,68 @@ Tags:`;
     console.error('Gemini Tag Generation Error:', e);
     return [];
   }
+}
+
+export async function enhanceSpeechText(rawSpeechText: string): Promise<string> {
+  if (!rawSpeechText.trim()) {
+    return rawSpeechText;
+  }
+
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error('VITE_GEMINI_API_KEY is not set');
+    return rawSpeechText; // Return original text if API key is missing
+  }
+
+  // Detect language from the speech text
+  const text = rawSpeechText.toLowerCase();
+  const isTurkish = /[çğıöşü]/.test(text) || 
+    /\b(ve|ile|için|olan|olarak|bu|şu|o|bir|birkaç|çok|az|büyük|küçük|iyi|kötü|güzel|çirkin|hızlı|yavaş|kolay|zor|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on)\b/.test(text);
+
+  const prompt = isTurkish ?
+    `Aşağıdaki ses tanıma metnini iyileştir. Bu metin sesli olarak söylenmiş ve ses tanıma sistemi tarafından yazıya dönüştürülmüştür.
+
+Görevlerin:
+1. Noktalama işaretlerini ekle (virgül, nokta, soru işareti, ünlem)
+2. Büyük/küçük harf kullanımını düzelt
+3. Açık dilbilgisi hatalarını düzelt
+4. Cümle yapısını iyileştir
+5. Anlamı koruyarak daha akıcı hale getir
+6. Gereksiz tekrarları temizle
+7. Sadece düzeltilmiş metni döndür, açıklama ekleme
+
+Ham ses metni:
+"${rawSpeechText}"
+
+İyileştirilmiş metin:` :
+    `Improve the following speech recognition text. This text was spoken aloud and converted to text by a speech recognition system.
+
+Your tasks:
+1. Add proper punctuation (commas, periods, question marks, exclamation points)
+2. Fix capitalization
+3. Correct obvious grammar errors
+4. Improve sentence structure
+5. Make it more fluent while preserving the meaning
+6. Remove unnecessary repetitions
+7. Return only the corrected text, no explanations
+
+Raw speech text:
+"${rawSpeechText}"
+
+Enhanced text:`;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const enhancedText = response.text().trim();
+    
+    // Remove any quotes that AI might have added
+    const cleanedText = enhancedText.replace(/^["'`]|["'`]$/g, '');
+    
+    return cleanedText || rawSpeechText; // Fallback to original if enhancement fails
+  } catch (e: any) {
+    console.error('Gemini Speech Enhancement Error:', e);
+    return rawSpeechText; // Return original text on error
+  }
 } 
