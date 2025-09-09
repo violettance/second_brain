@@ -262,7 +262,7 @@ export const useAnalytics = (timeRange: string) => {
     try {
       // 1. Fetch all needed data in parallel
       const [shortNotesRes, longNotesRes, tasksRes, subtasksRes, connStatsRes] = await Promise.all([
-        supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', userId),
+        supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', userId).is('archived_at', null),
         supabase.from('long_term_notes').select('id, tags, note_date').eq('user_id', userId),
         supabase.from('tasks').select('id').eq('user_id', userId),
         supabase.from('subtasks').select('id').in('task_id',
