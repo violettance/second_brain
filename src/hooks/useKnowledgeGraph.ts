@@ -48,6 +48,20 @@ const useKnowledgeGraph = () => {
         return;
       }
 
+      // Filter out archived short-term notes
+      const { data: archivedNotes } = await supabase
+        .from('short_term_notes')
+        .select('id')
+        .eq('user_id', user.id)
+        .not('archived_at', 'is', null);
+      
+      const archivedNoteIds = new Set(archivedNotes?.map(note => note.id) || []);
+      
+      // Filter rows to exclude archived short-term notes
+      const activeRows = rows.filter(row => 
+        !(row.entity_type === 'short_term_note' && archivedNoteIds.has(row.entity_id))
+      );
+
       // Fetch all tasks for this user
       const { data: tasks, error: taskError } = await supabase
         .from('tasks')
@@ -64,7 +78,7 @@ const useKnowledgeGraph = () => {
       const missingShortTermNoteIds = [];
       const missingLongTermNoteIds = [];
       const missingProjectIds = [];
-      for (const row of rows) {
+      for (const row of activeRows) {
         if ((row.entity_type === 'short_term_note' && !row.title)) {
           missingShortTermNoteIds.push(row.entity_id);
         } else if ((row.entity_type === 'long_term_note' && !row.title)) {
@@ -95,7 +109,7 @@ const useKnowledgeGraph = () => {
           projectsMap = Object.fromEntries(data.map((n: any) => [n.id, n.name]));
         }
       }
-      for (const row of rows) {
+      for (const row of activeRows) {
         // Entity node (note, project, etc.)
         if (!nodeMap[row.entity_id]) {
           let label = row.entity_type;
