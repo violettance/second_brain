@@ -76,7 +76,13 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       setAiAddedTags([...aiAddedTags, ...uniqueNewTags]);
     } catch (err) {
       console.error('Error generating tags:', err);
-      alert('Failed to generate AI tags. Please try again.');
+      if (err instanceof Error && err.message === 'MISSING_GEMINI_API_KEY') {
+        alert('AI tagging requires configuration. Add VITE_GEMINI_API_KEY to your environment and reload.');
+      } else if (err instanceof Error && err.message === 'SERVICE_OVERLOADED') {
+        alert('AI service is overloaded. Please try again in a moment.');
+      } else {
+        alert('Failed to generate AI tags. Please try again.');
+      }
     } finally {
       setIsGeneratingTags(false);
     }

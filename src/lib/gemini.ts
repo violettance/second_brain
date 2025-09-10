@@ -14,6 +14,32 @@ type NoteForTagging = {
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
+function isOverloadedError(e: any): boolean {
+  const msg = typeof e === 'string' ? e : (e?.message || e?.toString?.() || '');
+  return /\b503\b|Service Unavailable|model is overloaded/i.test(msg);
+}
+
+async function retry<T>(fn: () => Promise<T>, attempts = 3, backoffMs = 500): Promise<T> {
+  let lastErr: any;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      if (isOverloadedError(e) && i < attempts - 1) {
+        await new Promise(res => setTimeout(res, backoffMs * Math.pow(2, i)));
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastErr;
+}
+
+function getModelNameWithFallback(preferred: string, fallback: string, useFallback: boolean): string {
+  return useFallback ? fallback : preferred;
+}
+
 export async function generateAiInsights(notes: ShortTermNote[]): Promise<{ summary: string; recommendations: { note: ShortTermNote; reason: string }[] }> {
   const fallbackResponse = { summary: 'AI insight could not be generated.', recommendations: [] };
 
@@ -77,8 +103,23 @@ export async function generateAiInsights(notes: ShortTermNote[]): Promise<{ summ
   `;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-    const result = await model.generateContent(prompt);
+    let useFallback = false;
+    const call = async () => {
+      const modelName = getModelNameWithFallback('gemini-2.5-pro', 'gemini-2.5-flash', useFallback);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      return await retry(() => model.generateContent(prompt));
+    };
+    let result;
+    try {
+      result = await call();
+    } catch (e) {
+      if (isOverloadedError(e)) {
+        useFallback = true;
+        result = await call();
+      } else {
+        throw e;
+      }
+    }
     const response = await result.response;
     const text = response.text();
     
@@ -166,11 +207,30 @@ export async function generateLongTermInsights(notes: ShortTermNote[]): Promise<
   `;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-    const result = await model.generateContent(prompt);
+    let useFallback = false;
+    const call = async () => {
+      const modelName = getModelNameWithFallback('gemini-2.5-pro', 'gemini-2.5-flash', useFallback);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      return await retry(() => model.generateContent(prompt));
+    };
+    let result;
+    try {
+      result = await call();
+    } catch (e) {
+      if (isOverloadedError(e)) {
+        useFallback = true;
+        result = await call();
+      } else {
+        throw e;
+      }
+    }
     const response = await result.response;
     return response.text();
   } catch (e: any) {
+    if (isOverloadedError(e)) {
+      console.error('Gemini Long-Term Insights Overloaded:', e);
+      return 'Service is temporarily overloaded. Please try again later.';
+    }
     console.error('Gemini Long-Term Insights Error:', e);
     return fallbackResponse;
   }
@@ -222,7 +282,23 @@ export async function generateMermaidFromNote(noteTitle: string, noteContent: st
     `;
 
   try {
-    const result = await model.generateContent(prompt);
+    let useFallback = false;
+    const call = async () => {
+      const modelName = getModelNameWithFallback('gemini-2.5-pro', 'gemini-2.5-flash', useFallback);
+      const m = genAI.getGenerativeModel({ model: modelName });
+      return await retry(() => m.generateContent(prompt));
+    };
+    let result;
+    try {
+      result = await call();
+    } catch (e) {
+      if (isOverloadedError(e)) {
+        useFallback = true;
+        result = await call();
+      } else {
+        throw e;
+      }
+    }
     const response = await result.response;
     const text = response.text();
 
@@ -258,14 +334,25 @@ export async function generateMermaidFromNote(noteTitle: string, noteContent: st
     return ''; // Return empty if no valid diagram is found
 
   } catch (error) {
+    if (isOverloadedError(error)) {
+      console.error('Mermaid generation overloaded:', error);
+      // Signal caller to show friendly message
+      throw new Error('SERVICE_OVERLOADED');
+    }
     console.error('Error generating Mermaid diagram from note:', error);
-    return ''; // Return empty on error
+    return ''; // Return empty on other errors
   }
 }
 
 export async function generateTags(note: NoteForTagging): Promise<string[]> {
   if (!note.title.trim() && !note.content.trim()) {
     return [];
+  }
+  
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    // Throw a specific error so UI can surface a helpful message
+    throw new Error('MISSING_GEMINI_API_KEY');
   }
   
   // Detect language from the note content
@@ -306,8 +393,23 @@ Note Content: ${note.content}
 Tags:`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-    const result = await model.generateContent(prompt);
+    let useFallback = false;
+    const call = async () => {
+      const modelName = getModelNameWithFallback('gemini-2.5-pro', 'gemini-2.5-flash', useFallback);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      return await retry(() => model.generateContent(prompt));
+    };
+    let result;
+    try {
+      result = await call();
+    } catch (e) {
+      if (isOverloadedError(e)) {
+        useFallback = true;
+        result = await call();
+      } else {
+        throw e;
+      }
+    }
     const response = await result.response;
     const tagsText = response.text().trim();
     
@@ -320,6 +422,10 @@ Tags:`;
     
     return tags;
   } catch (e: any) {
+    if (isOverloadedError(e)) {
+      console.error('Gemini Tag Generation Overloaded:', e);
+      throw new Error('SERVICE_OVERLOADED');
+    }
     console.error('Gemini Tag Generation Error:', e);
     return [];
   }
@@ -374,8 +480,23 @@ Raw speech text:
 Enhanced text:`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-    const result = await model.generateContent(prompt);
+    let useFallback = false;
+    const call = async () => {
+      const modelName = getModelNameWithFallback('gemini-2.5-pro', 'gemini-2.5-flash', useFallback);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      return await retry(() => model.generateContent(prompt));
+    };
+    let result;
+    try {
+      result = await call();
+    } catch (e) {
+      if (isOverloadedError(e)) {
+        useFallback = true;
+        result = await call();
+      } else {
+        throw e;
+      }
+    }
     const response = await result.response;
     const enhancedText = response.text().trim();
     
