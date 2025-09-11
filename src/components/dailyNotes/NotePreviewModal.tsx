@@ -3,7 +3,7 @@ import { X, Edit3, Clock, Brain, Calendar, Tag, Sparkles, Loader2, Crown } from 
 import { DailyNote } from '../../types/database';
 import { NoteRenderer } from './NoteRenderer';
 import { useAuth } from '../../contexts/AuthContext';
-import { generateMermaidFromNote } from '../../lib/gemini';
+import { generateMermaidFromNote } from '../../lib/aiProxy';
 import { supabase } from '../../lib/supabase';
 import { PaywallModal } from '../analytics/PaywallModal'; // Assuming this exists
 

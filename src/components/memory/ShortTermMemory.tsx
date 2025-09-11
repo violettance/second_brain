@@ -6,7 +6,7 @@ import { NotePreviewModal } from '../dailyNotes/NotePreviewModal';
 import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
-import { generateAiInsights } from '../../lib/gemini';
+import { generateAiInsights } from '../../lib/aiProxy';
 import { useAuth } from '../../contexts/AuthContext';
 
 function simpleHash(str: string): string {
@@ -35,34 +35,54 @@ export const ShortTermMemory: React.FC = () => {
   const [aiInsights, setAiInsights] = useState<{ summary: string | null; recommendations: any[] }>({ summary: null, recommendations: [] });
   const [aiInsightsLoading, setAiInsightsLoading] = useState(false);
 
-  // Daily Caching and AI Insights Logic
+  // 24h Caching and AI Insights Logic with content checksum
   useEffect(() => {
     if (!user || (user as any).subscription_plan !== 'pro' || !shortTermNotes || shortTermNotes.length === 0) {
       return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const cacheKey = `aiInsights_${user.id}_${today}`;
-    const cachedData = localStorage.getItem(cacheKey);
+    const cacheKey = `aiInsights_short_term_${user.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    const now = Date.now();
+    const TTL_MS = 24 * 60 * 60 * 1000; // 24h
+    const checksum = simpleHash(JSON.stringify(shortTermNotes.map(n => ({ t: n.title, c: (n as any).content }))));
 
-    if (cachedData) {
-      setAiInsights(JSON.parse(cachedData));
-    } else {
-      const fetchInsights = async () => {
-        setAiInsightsLoading(true);
-        try {
-          const insights = await generateAiInsights(shortTermNotes);
-          setAiInsights(insights);
-          localStorage.setItem(cacheKey, JSON.stringify(insights));
-        } catch (error) {
-          console.error("Failed to fetch AI insights:", error);
-          setAiInsights({ summary: 'Failed to generate AI insights.', recommendations: [] });
-        } finally {
-          setAiInsightsLoading(false);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        // Use cached result if still within 24h, regardless of content changes
+        if (parsed?.timestamp && (now - parsed.timestamp) < TTL_MS && parsed?.data) {
+          setAiInsights(parsed.data);
+          return;
         }
-      };
-      fetchInsights();
+      } catch {}
     }
+
+    const fetchInsights = async () => {
+      setAiInsightsLoading(true);
+      try {
+        // Rate gate: block other AI calls for ~20s to avoid 429
+        const gateUntil = Date.now() + 20000;
+        localStorage.setItem('ai_rate_gate_until', String(gateUntil));
+        // Try once; if failure text, wait 10s and retry once
+        let insights = await generateAiInsights(shortTermNotes);
+        if (insights.summary === 'AI insight could not be generated.') {
+          await new Promise(res => setTimeout(res, 10000));
+          insights = await generateAiInsights(shortTermNotes);
+        }
+        setAiInsights(insights);
+        // Only cache successful results
+        if (insights.summary && insights.summary !== 'AI insight could not be generated.') {
+          localStorage.setItem(cacheKey, JSON.stringify({ timestamp: now, checksum, data: insights }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch AI insights:", error);
+        setAiInsights({ summary: 'Failed to generate AI insights.', recommendations: [] });
+      } finally {
+        setAiInsightsLoading(false);
+      }
+    };
+    fetchInsights();
   }, [user, shortTermNotes]);
 
   const getDaysRemaining = (createdAt: string) => {

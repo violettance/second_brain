@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
 import { DailyNote, Reference } from '../../types/database';
-import { generateTags } from '../../lib/gemini';
+import { generateTags } from '../../lib/aiProxy';
 import { ReferenceInput } from './ReferenceInput';
 import { CompactVoiceRecorder } from '../CompactVoiceRecorder';
 import { PaywallModal } from '../analytics/PaywallModal';

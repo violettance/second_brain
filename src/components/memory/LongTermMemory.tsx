@@ -7,7 +7,7 @@ import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
 import { useAuth } from '../../contexts/AuthContext';
-import { generateLongTermInsights } from '../../lib/gemini';
+import { generateLongTermInsights } from '../../lib/aiProxy';
 
 // Helper component to parse and render the AI analysis
 const ParsedAnalysis = ({ text }: { text: string }) => {
@@ -57,34 +57,78 @@ export const LongTermMemory: React.FC = () => {
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Daily Caching for AI Insights
+  // 24h Caching for AI Insights with content checksum
   useEffect(() => {
     if (!user || (user as any).subscription_plan !== 'pro' || !longTermNotes || longTermNotes.length === 0) {
       return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const cacheKey = `aiInsights_long_term_${user.id}_${today}`;
-    const cachedData = localStorage.getItem(cacheKey);
+    const cacheKey = `aiInsights_long_term_${user.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    const now = Date.now();
+    const TTL_MS = 24 * 60 * 60 * 1000; // 24h
+    const checksum = (() => {
+      try { return btoa(unescape(encodeURIComponent(JSON.stringify(longTermNotes.map(n => ({ t: n.title, c: n.content })))))); } catch { return '' }
+    })();
 
-    if (cachedData) {
-      setAiAnalysis(cachedData);
-    } else {
-      const fetchInsights = async () => {
-        setAiLoading(true);
-        try {
-          const analysis = await generateLongTermInsights(longTermNotes);
-          setAiAnalysis(analysis);
-          localStorage.setItem(cacheKey, analysis); // <-- Düzeltme: JSON.stringify kaldırıldı
-        } catch (error) {
-          console.error("Failed to fetch long-term AI insights:", error);
-          setAiAnalysis('Failed to generate AI analysis.');
-        } finally {
-          setAiLoading(false);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        // Use cached result if still within 24h, regardless of content changes
+        if (parsed?.timestamp && (now - parsed.timestamp) < TTL_MS && parsed?.data) {
+          setAiAnalysis(parsed.data);
+          return;
         }
-      };
-      fetchInsights();
+      } catch {}
     }
+
+    const scheduleRetry = (delayMs: number) => {
+      const at = Date.now() + delayMs;
+      localStorage.setItem('ai_long_term_retry_at', String(at));
+      setAiAnalysis('Analyzing all notes... this may take up to a minute.');
+      setTimeout(() => {
+        // Clear flag and trigger a new run by updating a dummy state via storage event pattern
+        localStorage.removeItem('ai_long_term_retry_at');
+        void fetchInsights();
+      }, delayMs);
+    };
+
+    const fetchInsights = async () => {
+      setAiLoading(true);
+      try {
+        // If short-term just triggered, respect a simple client-side rate gate
+        const gate = Number(localStorage.getItem('ai_rate_gate_until') || '0');
+        const nowMs = Date.now();
+        if (gate && gate > nowMs) {
+          await new Promise(res => setTimeout(res, Math.min(gate - nowMs, 20000)));
+        }
+        // Respect queued retry if exists
+        const retryAt = Number(localStorage.getItem('ai_long_term_retry_at') || '0');
+        if (retryAt && retryAt > Date.now()) {
+          await new Promise(res => setTimeout(res, Math.min(retryAt - Date.now(), 60000)));
+        }
+        let analysis = await generateLongTermInsights(longTermNotes);
+        if (analysis === 'AI analysis could not be generated.') {
+          // single retry after 10s to ride out quota window
+          await new Promise(res => setTimeout(res, 10000));
+          analysis = await generateLongTermInsights(longTermNotes);
+        }
+        if (analysis === 'AI analysis could not be generated.') {
+          // Queue for later to avoid quota collisions
+          scheduleRetry(60000);
+        } else {
+          setAiAnalysis(analysis);
+          localStorage.setItem(cacheKey, JSON.stringify({ timestamp: now, checksum, data: analysis }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch long-term AI insights:", error);
+        // Queue on error as well
+        scheduleRetry(60000);
+      } finally {
+        setAiLoading(false);
+      }
+    };
+    fetchInsights();
   }, [user, longTermNotes]);
 
   const filteredAndSortedNotes = longTermNotes

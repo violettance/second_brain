@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Save, Clock, Brain, Tag, Type, List, Hash, Quote, Code, Sparkles, Loader2, Plus, Crown } from 'lucide-react';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
-import { generateTags } from '../../lib/gemini';
+import { generateTags } from '../../lib/aiProxy';
 import { CompactVoiceRecorder } from '../CompactVoiceRecorder';
 import { PaywallModal } from '../analytics/PaywallModal';
 import { useAuth } from '../../contexts/AuthContext';
