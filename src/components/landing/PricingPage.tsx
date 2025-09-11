@@ -26,7 +26,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '$9.99',
+    price: '$9',
     period: 'per month',
     description: 'For polymaths building their second brain',
     features: [
