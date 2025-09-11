@@ -181,7 +181,13 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       setAiAddedTags([...aiAddedTags, ...uniqueNewTags]);
     } catch (err) {
       console.error('Error generating tags:', err);
-      setError('Failed to generate AI tags. Please try again.');
+      if (err instanceof Error && err.message === 'MISSING_GEMINI_API_KEY') {
+        setError('AI tagging requires configuration. Add VITE_GEMINI_API_KEY to your environment and reload.');
+      } else if (err instanceof Error && err.message === 'SERVICE_OVERLOADED') {
+        setError('AI service is overloaded. Please try again in a moment.');
+      } else {
+        setError('Failed to generate AI tags. Please try again.');
+      }
     } finally {
       setIsGeneratingTags(false);
     }
@@ -212,8 +218,77 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   };
 
   const handleVoiceTextUpdate = (newVoiceText: string) => {
-    // Simply append the new text - the voice recorder only sends incremental changes
-    setContent(prevContent => prevContent + newVoiceText);
+    const textarea = document.getElementById('note-content') as HTMLTextAreaElement | null;
+    if (!textarea) {
+      setContent(prev => prev + newVoiceText);
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    const before = content.substring(0, start);
+    const after = content.substring(end);
+
+    // Determine if caret is inside a fenced code block and whether it's a mermaid block
+    const fenceRegex = /^```.*$/gm;
+    let insideFence = false;
+    let insideMermaid = false;
+    let lastFenceIndex = -1;
+    let match: RegExpExecArray | null;
+    while ((match = fenceRegex.exec(content)) !== null) {
+      const fencePos = match.index;
+      if (fencePos <= start) {
+        lastFenceIndex = fencePos;
+        insideFence = !insideFence; // toggle on each fence encountered before caret
+        const fenceLine = match[0];
+        if (insideFence && /```mermaid\s*$/i.test(fenceLine)) {
+          insideMermaid = true;
+        }
+      } else {
+        break;
+      }
+    }
+
+    // If inside any fence, ensure separation with blank lines
+    let textToInsert = newVoiceText;
+    if (insideFence) {
+      const needsLeading = before.endsWith('\n') ? '' : (before.endsWith('\n\n') ? '' : '\n\n');
+      const needsTrailing = after.startsWith('\n') ? '' : (after.startsWith('\n\n') ? '' : '\n');
+      textToInsert = `${needsLeading}${newVoiceText}${needsTrailing}`;
+    }
+
+    // If specifically inside a mermaid block, try to insert outside if a closing fence exists after caret
+    if (insideMermaid) {
+      const afterText = content.substring(start);
+      const closingIdxRel = afterText.indexOf('\n```');
+      if (closingIdxRel !== -1) {
+        const closingAbs = start + closingIdxRel + 4; // position after "```" newline
+        const beforeBlock = content.substring(0, closingAbs);
+        const afterBlock = content.substring(closingAbs);
+        const sepBefore = beforeBlock.endsWith('\n\n') ? '' : (beforeBlock.endsWith('\n') ? '\n' : '\n\n');
+        const sepAfter = afterBlock.startsWith('\n') ? '' : '\n';
+        const newText = beforeBlock + sepBefore + newVoiceText + sepAfter + afterBlock;
+        setContent(newText);
+        // Reposition caret after inserted text
+        setTimeout(() => {
+          textarea.focus();
+          const pos = (beforeBlock + sepBefore + newVoiceText).length;
+          textarea.selectionStart = pos;
+          textarea.selectionEnd = pos;
+        }, 0);
+        return;
+      }
+    }
+
+    const newContent = before + textToInsert + after;
+    setContent(newContent);
+    setTimeout(() => {
+      textarea.focus();
+      const pos = (before + textToInsert).length;
+      textarea.selectionStart = pos;
+      textarea.selectionEnd = pos;
+    }, 0);
   };
 
   const handleUpgradeClick = () => {

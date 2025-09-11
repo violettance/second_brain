@@ -65,7 +65,13 @@ export const NotePreviewModal: React.FC<NotePreviewModalProps> = ({ note, onClos
         console.log('No Mermaid code generated');
       }
     } catch (error) {
-      console.error("Failed to generate or save Mermaid diagram", error);
+      if (error instanceof Error && error.message === 'SERVICE_OVERLOADED') {
+        console.error('Mermaid generation overloaded:', error);
+        alert('AI diagram service is overloaded. Please try again shortly.');
+      } else {
+        console.error("Failed to generate or save Mermaid diagram", error);
+        alert('Failed to generate diagram. Please try again.');
+      }
     } finally {
       setIsGenerating(false);
     }
