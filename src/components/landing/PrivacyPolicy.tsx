@@ -3,7 +3,7 @@ import React from 'react';
 const sections = [
   {
     title: '1. Introduction',
-    content: `This Privacy Policy describes how Productora LLC ("we," "us," or "our") collects, uses, and protects your personal information when you use Second Brain, our knowledge management application. We are committed to protecting your privacy and complying with applicable data protection laws, including the General Data Protection Regulation (GDPR).`
+    content: `This Privacy Policy describes how Second Brain ("we," "us," or "our") collects, uses, and protects your personal information when you use Second Brain, our knowledge management application. We are committed to protecting your privacy and complying with applicable data protection laws, including the General Data Protection Regulation (GDPR).`
   },
   {
     title: '2. Information We Collect',
@@ -128,7 +128,7 @@ You can control cookies through your browser settings, but disabling certain coo
     content: `If you have any questions about this Privacy Policy or how we handle your personal information, please contact us:
 
 Email: productora.analytics@gmail.com
-Company: Productora LLC
+Company: Second Brain
 
 For data protection inquiries specifically, you may also contact our Data Protection Officer at: productora.analytics@gmail.com`
   }
@@ -138,10 +138,7 @@ export const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center py-10 px-4 overflow-y-auto">
       <div className="w-full max-w-3xl bg-slate-800 rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-center text-white">Privacy Policy</h1>
-        <p className="text-slate-400 text-center mb-8">
-          Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+        <h1 className="text-3xl lg:text-4xl font-bold mb-8 text-center text-white">Privacy Policy</h1>
         <div className="space-y-8">
           {sections.map((section, idx) => (
             <div key={idx}>
@@ -151,7 +148,7 @@ export const PrivacyPolicy: React.FC = () => {
           ))}
         </div>
         <div className="mt-10 text-xs text-slate-400 text-center">
-          &copy; {new Date().getFullYear()} Productora LLC. All rights reserved.
+          &copy; {new Date().getFullYear()} Second Brain. All rights reserved.
         </div>
       </div>
     </div>

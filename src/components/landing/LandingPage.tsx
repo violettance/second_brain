@@ -28,6 +28,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
       
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
+        {/* Logo */}
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
             <img src="/logo.png" alt="Second Brain Logo" className="h-14 w-14 lg:h-16 lg:w-16 rounded-lg" />
@@ -35,7 +36,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
           <span className="text-xl lg:text-2xl font-bold text-white">Second Brain</span>
         </div>
         
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - Center */}
+        <div className="hidden md:flex items-center space-x-8">
+          <a
+            href="/our-pricing"
+            className="text-slate-300 hover:text-white transition-colors font-medium"
+          >
+            Pricing
+          </a>
+          <a
+            href="/privacy-policy"
+            className="text-slate-300 hover:text-white transition-colors font-medium"
+          >
+            Privacy
+          </a>
+          <a
+            href="/terms-and-conditions"
+            className="text-slate-300 hover:text-white transition-colors font-medium"
+          >
+            Terms
+          </a>
+        </div>
+
+        {/* Desktop CTA Button - Right */}
         <div className="hidden md:block">
           <button
             onClick={onGoToApp}
@@ -58,7 +81,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 md:hidden">
-            <div className="p-4">
+            <div className="p-4 space-y-4">
+              <a
+                href="/our-pricing"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-slate-300 hover:text-white transition-colors font-medium text-center py-2"
+              >
+                Pricing
+              </a>
+              <a
+                href="/privacy-policy"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-slate-300 hover:text-white transition-colors font-medium text-center py-2"
+              >
+                Privacy
+              </a>
+              <a
+                href="/terms-and-conditions"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-slate-300 hover:text-white transition-colors font-medium text-center py-2"
+              >
+                Terms
+              </a>
               <button
                 onClick={() => {
                   onGoToApp();
@@ -134,7 +178,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
         <div className="text-center mb-12 lg:mb-16">
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 lg:mb-6">
             Powerful Features for
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, #10b981, #C2B5FC)` }}> Knowledge Workers</span>
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, #10b981, #C2B5FC)` }}> Polymaths</span>
           </h2>
           <p className="text-lg lg:text-xl text-slate-300 max-w-3xl mx-auto px-4">
             Everything you need to capture, connect, and cultivate your ideas into a thriving knowledge ecosystem.
@@ -142,29 +186,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Feature 1 */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="p-3 rounded-xl w-fit mb-4 lg:mb-6" style={{ backgroundColor: '#C2B5FC20' }}>
-              <Brain className="h-6 w-6 lg:h-8 lg:w-8" style={{ color: '#C2B5FC' }} />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">AI-Powered Insights</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Discover hidden connections and generate insights automatically as your knowledge base grows.
-            </p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="p-3 rounded-xl w-fit mb-4 lg:mb-6" style={{ backgroundColor: '#C2B5FC20' }}>
-              <Network className="h-6 w-6 lg:h-8 lg:w-8" style={{ color: '#C2B5FC' }} />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Knowledge Graph</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Visualize relationships between your notes and ideas in an interactive network graph.
-            </p>
-          </div>
-
-          {/* Feature 3 */}
+          {/* Feature 1 - Daily Notes */}
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
             <div className="bg-green-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
               <BookOpen className="h-6 w-6 lg:h-8 lg:w-8 text-green-400" />
@@ -175,36 +197,91 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
             </p>
           </div>
 
-          {/* Feature 4 */}
+          {/* Feature 2 - Voice Recording */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
+            <div className="bg-blue-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
+              <Zap className="h-6 w-6 lg:h-8 lg:w-8 text-blue-400" />
+            </div>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Voice Recording</h3>
+            <p className="text-slate-300 leading-relaxed">
+              Record your thoughts instantly with voice-to-text transcription and automatic note creation.
+            </p>
+          </div>
+
+          {/* Feature 3 - Knowledge Graph */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
+            <div className="p-3 rounded-xl w-fit mb-4 lg:mb-6" style={{ backgroundColor: '#C2B5FC20' }}>
+              <Network className="h-6 w-6 lg:h-8 lg:w-8" style={{ color: '#C2B5FC' }} />
+            </div>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Knowledge Graph</h3>
+            <p className="text-slate-300 leading-relaxed">
+              Visualize relationships between your notes and ideas in an interactive network graph.
+            </p>
+          </div>
+
+          {/* Feature 4 - Smart Diagrams */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
+            <div className="bg-purple-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
+              <Brain className="h-6 w-6 lg:h-8 lg:w-8 text-purple-400" />
+            </div>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Smart Diagrams</h3>
+            <p className="text-slate-300 leading-relaxed">
+              Generate Mermaid diagrams from your notes to visualize complex ideas and processes.
+            </p>
+          </div>
+
+          {/* Feature 5 - Daily Insights */}
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
             <div className="bg-orange-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Search className="h-6 w-6 lg:h-8 lg:w-8 text-orange-400" />
+              <Sparkles className="h-6 w-6 lg:h-8 lg:w-8 text-orange-400" />
             </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Smart Search</h3>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Daily Insights</h3>
             <p className="text-slate-300 leading-relaxed">
-              Find exactly what you're looking for with semantic search and intelligent filtering.
+              Get AI-powered insights and patterns from your daily notes to discover hidden connections.
             </p>
           </div>
 
-          {/* Feature 5 */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-red-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Zap className="h-6 w-6 lg:h-8 lg:w-8 text-red-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Quick Capture</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Instantly capture ideas with templates, shortcuts, and seamless mobile integration.
-            </p>
-          </div>
-
-          {/* Feature 6 */}
+          {/* Feature 6 - Connection Discovery */}
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
             <div className="bg-pink-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Shield className="h-6 w-6 lg:h-8 lg:w-8 text-pink-400" />
+              <Search className="h-6 w-6 lg:h-8 lg:w-8 text-pink-400" />
             </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Privacy First</h3>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Connection Discovery</h3>
             <p className="text-slate-300 leading-relaxed">
-              Your thoughts are yours. End-to-end encryption ensures your knowledge stays private.
+              AI automatically discovers and suggests connections between your ideas and notes.
+            </p>
+          </div>
+
+          {/* Feature 7 - AI Tagging */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
+            <div className="bg-indigo-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
+              <Brain className="h-6 w-6 lg:h-8 lg:w-8 text-indigo-400" />
+            </div>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">AI-Powered Tagging</h3>
+            <p className="text-slate-300 leading-relaxed">
+              Automatically tag and categorize your notes with intelligent AI-powered suggestions.
+            </p>
+          </div>
+
+          {/* Feature 8 - Memory System */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
+            <div className="bg-teal-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
+              <Users className="h-6 w-6 lg:h-8 lg:w-8 text-teal-400" />
+            </div>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Memory System</h3>
+            <p className="text-slate-300 leading-relaxed">
+              Short-term and long-term memory storage with automatic archiving and connection discovery.
+            </p>
+          </div>
+
+          {/* Feature 9 - Analytics Dashboard */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
+            <div className="bg-red-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
+              <Shield className="h-6 w-6 lg:h-8 lg:w-8 text-red-400" />
+            </div>
+            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Analytics Dashboard</h3>
+            <p className="text-slate-300 leading-relaxed">
+              Track your knowledge growth with insights, patterns, and productivity analytics.
             </p>
           </div>
         </div>
@@ -215,7 +292,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
         <div className="text-center mb-12 lg:mb-16">
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 lg:mb-6">
             Loved by
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, #C2B5FC, #A78BFA)` }}> Knowledge Workers</span>
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, #C2B5FC, #A78BFA)` }}> Polymaths</span>
           </h2>
         </div>
 
@@ -283,7 +360,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
             Ready to Build Your Second Brain?
           </h2>
           <p className="text-lg lg:text-xl text-slate-300 mb-6 lg:mb-8 max-w-2xl mx-auto">
-            Join thousands of knowledge workers who have transformed their thinking with Second Brain.
+            Join thousands of polymaths who have transformed their thinking with Second Brain.
           </p>
           <button
             onClick={onGoToApp}
@@ -311,7 +388,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
               
               {/* Navigation Links */}
               <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-                <a href="/pricing" className="text-slate-400 hover:text-white transition-colors">
+                <a href="/our-pricing" className="text-slate-400 hover:text-white transition-colors">
                   Pricing
                 </a>
                 <a href="/terms-and-conditions" className="text-slate-400 hover:text-white transition-colors">
@@ -329,7 +406,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
             {/* Bottom Section */}
             <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 pt-4 border-t border-slate-800">
               <div className="text-slate-400 text-sm text-center md:text-left">
-                © 2025 Productora LLC. All rights reserved.
+                © 2025 Second Brain. All rights reserved.
               </div>
               <div className="text-slate-500 text-xs text-center md:text-right">
                 Payment processing by Paddle.com

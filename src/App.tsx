@@ -16,6 +16,7 @@ import { TasksPage } from './components/tasks/TasksPage';
 import { TermsAndConditions } from './components/landing/TermsAndConditions';
 import { PrivacyPolicy } from './components/landing/PrivacyPolicy';
 import { PricingModal } from './components/landing/PricingModal';
+import PricingPage from './components/landing/PricingPage';
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -33,6 +34,17 @@ const AppContent: React.FC = () => {
       <div className="flex h-screen items-center justify-center text-white">
         Loading...
       </div>
+    );
+  }
+
+  // Public pages that don't require authentication
+  if (location.pathname === '/privacy-policy' || location.pathname === '/terms-and-conditions' || location.pathname === '/our-pricing') {
+    return (
+      <Routes>
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/our-pricing" element={<PricingPage />} />
+      </Routes>
     );
   }
 

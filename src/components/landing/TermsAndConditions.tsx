@@ -3,7 +3,7 @@ import React from 'react';
 const sections = [
   {
     title: '1. Company Information',
-    content: `Second Brain is operated by Productora LLC. These Terms and Conditions constitute a legal agreement between you and Productora LLC ("we," "us," or "our") regarding your use of the Second Brain knowledge management application and related services.`
+    content: `Second Brain is operated by Second Brain. These Terms and Conditions constitute a legal agreement between you and Second Brain ("we," "us," or "our") regarding your use of the Second Brain knowledge management application and related services.`
   },
   {
     title: '2. Payment Processing',
@@ -27,7 +27,7 @@ const sections = [
   },
   {
     title: '7. Intellectual Property',
-    content: `All content, trademarks, logos, and other intellectual property displayed on Second Brain are the property of Productora LLC or its licensors. You may not reproduce, distribute, modify, or create derivative works from any material on Second Brain without express written permission from Productora LLC.`
+    content: `All content, trademarks, logos, and other intellectual property displayed on Second Brain are the property of Second Brain or its licensors. You may not reproduce, distribute, modify, or create derivative works from any material on Second Brain without express written permission from Second Brain.`
   },
   {
     title: '8. User Obligations',
@@ -39,20 +39,20 @@ const sections = [
   },
   {
     title: '10. Limitation of Liability',
-    content: `Second Brain and its content are provided "as is" without warranties of any kind, either express or implied. We do not warrant that Second Brain will be uninterrupted or error-free. In no event shall Productora LLC be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in connection with your use of Second Brain.`
+    content: `Second Brain and its content are provided "as is" without warranties of any kind, either express or implied. We do not warrant that Second Brain will be uninterrupted or error-free. In no event shall Second Brain be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in connection with your use of Second Brain.`
   },
   {
     title: '11. Contact Information',
     content: `For customer support, billing inquiries, or general questions about Second Brain, please contact us at:
     
 Email: productora.analytics@gmail.com
-Company: Productora LLC
+Company: Second Brain
 
 For payment and billing support, please contact Paddle.com directly.`
   },
   {
     title: '12. Governing Law',
-    content: `These Terms and Conditions are governed by and construed in accordance with the laws of the United States. Any disputes arising from these Terms shall be resolved in the courts of competent jurisdiction in the United States.`
+    content: `These Terms and Conditions are governed by and construed in accordance with applicable local laws. Any disputes arising from these Terms shall be resolved through appropriate legal channels in accordance with your jurisdiction.`
   }
 ];
 
