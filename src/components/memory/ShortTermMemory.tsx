@@ -6,7 +6,7 @@ import { NotePreviewModal } from '../dailyNotes/NotePreviewModal';
 import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
-import { generateAiInsights } from '../../lib/gemini';
+import { generateAiInsights } from '../../lib/aiProxy';
 import { useAuth } from '../../contexts/AuthContext';
 
 function simpleHash(str: string): string {

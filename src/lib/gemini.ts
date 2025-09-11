@@ -1,3 +1,8 @@
+/*
+// DEPRECATED: This file is no longer used. All AI functionality has been moved to Supabase Edge Functions.
+// The functions are now called through src/lib/aiProxy.ts which uses supabase.functions.invoke()
+// This file is kept for reference but completely commented out to prevent any accidental usage.
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Not tipini tanımla (minimum alanlar)
@@ -508,4 +513,5 @@ Enhanced text:`;
     console.error('Gemini Speech Enhancement Error:', e);
     return rawSpeechText; // Return original text on error
   }
-} 
+}
+*/

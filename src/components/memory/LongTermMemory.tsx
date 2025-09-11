@@ -7,7 +7,7 @@ import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
 import { useAuth } from '../../contexts/AuthContext';
-import { generateLongTermInsights } from '../../lib/gemini';
+import { generateLongTermInsights } from '../../lib/aiProxy';
 
 // Helper component to parse and render the AI analysis
 const ParsedAnalysis = ({ text }: { text: string }) => {

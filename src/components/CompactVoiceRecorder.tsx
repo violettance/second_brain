@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Crown, Loader2, Sparkles, AlertCircle } from 'lucide-react';
-import { enhanceSpeechText } from '../lib/gemini';
+import { enhanceSpeechText } from '../lib/aiProxy';
 
 interface CompactVoiceRecorderProps {
   onTextUpdate: (text: string) => void;
