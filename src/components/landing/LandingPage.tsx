@@ -29,12 +29,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
         {/* Logo */}
-        <div className="flex items-center space-x-3">
+        <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
           <div className="flex-shrink-0">
             <img src="/logo.png" alt="Second Brain Logo" className="h-14 w-14 lg:h-16 lg:w-16 rounded-lg" />
           </div>
           <span className="text-xl lg:text-2xl font-bold text-white">Second Brain</span>
-        </div>
+        </a>
         
         {/* Desktop Navigation - Center */}
         <div className="hidden md:flex items-center space-x-8">

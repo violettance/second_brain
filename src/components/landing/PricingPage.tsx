@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 const plans = [
   {
@@ -63,25 +64,32 @@ export const PricingPage: React.FC = () => {
     window.location.href = 'mailto:productora.analytics@gmail.com?subject=Enterprise Pricing Inquiry';
   };
 
+  const handleGoToApp = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
-      {/* Header */}
-      <div className="relative z-10 border-b border-slate-800 py-6">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img src="/logo.png" alt="Second Brain Logo" className="h-10 w-10 rounded-lg" />
-              <span className="text-xl font-bold text-white">Second Brain</span>
-            </div>
-            <button
-              onClick={() => navigate('/')}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              Go to App →
-            </button>
+      {/* Navigation */}
+      <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
+        {/* Logo */}
+        <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <div className="flex-shrink-0">
+            <img src="/logo.png" alt="Second Brain Logo" className="h-14 w-14 lg:h-16 lg:w-16 rounded-lg" />
           </div>
-        </div>
-      </div>
+          <span className="text-xl lg:text-2xl font-bold text-white">Second Brain</span>
+        </a>
+        
+        {/* Go to App Button */}
+        <button
+          onClick={handleGoToApp}
+          className="flex items-center space-x-2 px-4 lg:px-6 py-2 lg:py-3 text-slate-900 rounded-xl font-semibold hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
+          style={{ background: '#C2B5FC' }}
+        >
+          <span>Go to App</span>
+          <ArrowRight className="h-4 w-4" />
+        </button>
+      </nav>
 
       {/* Main Content */}
       <div className="relative z-10 py-16 lg:py-24">
