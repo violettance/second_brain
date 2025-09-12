@@ -1,14 +1,14 @@
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 const DEFAULT_REDACTIONS: Array<RegExp> = [
-  /bearer\s+[a-z0-9._-]+/i,
-  /api[_-]?key\s*[:=]\s*[a-z0-9-_]{10,}/i,
-  /password\s*[:=]\s*[^\s"']+/i,
-  /secret\s*[:=]\s*[^\s"']+/i,
-  /access[_-]?token\s*[:=]\s*[a-z0-9._-]+/i,
-  /refresh[_-]?token\s*[:=]\s*[a-z0-9._-]+/i,
-  /authorization:\s*[^\n\r]+/i,
-  /set-cookie:[^\n\r]+/i,
+  /bearer\s+[a-z0-9._-]+/gi,
+  /api[_-]?key\s*[:=]\s*[a-z0-9-_]{10,}/gi,
+  /password\s*[:=]\s*[^\s"']+/gi,
+  /secret\s*[:=]\s*[^\s"']+/gi,
+  /access[_-]?token\s*[:=]\s*[a-z0-9._-]+/gi,
+  /refresh[_-]?token\s*[:=]\s*[a-z0-9._-]+/gi,
+  /authorization:\s*[^\n\r]+/gi,
+  /set-cookie:[^\n\r]+/gi,
 ];
 
 function scrubPII(input: unknown, extraRedactions: Array<RegExp> = []): unknown {
