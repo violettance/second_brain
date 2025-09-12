@@ -1,124 +1,110 @@
 # Datadog Integration Guide
 
-## 🚀 Setup Instructions
+## Overview
+This project includes comprehensive error handling and logging with Datadog RUM (Real User Monitoring) integration.
 
-### 1. Cursor Extension Installation
-1. Open Extensions view: `Shift + Cmd/Ctrl + X`
-2. Search for "datadog"
-3. Install the official Datadog extension
+## Setup
 
-### 2. MCP Server Activation
-1. Open Cursor Settings: `Shift + Cmd/Ctrl + J`
-2. Go to **MCP Tools** tab
-3. Find **Datadog server** and enable it
-4. Available tools will be displayed
+### 1. Environment Variables
+Add these to your `.env.local` file:
 
-### 3. Environment Variables
-Create `.env.local` file:
 ```bash
 # Datadog Configuration
 VITE_DATADOG_ENABLED=true
-VITE_DATADOG_APP_ID=your_app_id_here
-VITE_DATADOG_CLIENT_TOKEN=your_client_token_here
-VITE_DATADOG_SITE=datadoghq.eu
-
-# App Configuration
+VITE_DATADOG_APP_ID=your_application_id
+VITE_DATADOG_CLIENT_TOKEN=your_client_token
+VITE_DATADOG_SITE=datadoghq.com
 VITE_APP_NAME=second-brain-web
-VITE_APP_VERSION=0.1.0
+VITE_APP_VERSION=0.0.0
 ```
 
-### 4. Source Code Integration
-1. Upload source maps to Datadog:
-   ```bash
-   bun run build
-   # Source maps will be generated in dist/assets/
-   ```
+### 2. Build with Source Maps
+For production deployment with Datadog source map support:
 
-2. Configure repository in Datadog:
-   - Go to **APM > Settings > Source Code Integration**
-   - Add your repository URL
-   - Upload source maps
+```bash
+# Standard build
+bun run build
 
-## 🔧 Features Enabled
+# Build with Datadog source map upload
+bun run build:datadog
+```
 
-### ✅ Log Annotations
-- See log volume directly in code
-- Click annotations to view logs in Datadog
-- Search logs from IDE: Right-click text → **Datadog > Search Logs**
+The `build:datadog` command will:
+1. Build the application
+2. Upload source maps to Datadog for better error tracking
 
-### ✅ Code Insights
-- Runtime errors from Error Tracking
-- Security vulnerabilities from Code Security
-- Flaky tests from Test Optimization
-- View in **Code Insights** sidebar
+## Features
 
-### ✅ Static Code Analysis
-- Security and quality checks
-- Real-time analysis as you code
-- Configuration in `static-analysis.datadog.yml`
+### Error Handling
+- **Centralized Logger**: PII-safe logging with `src/lib/logger.ts`
+- **React Error Boundary**: Catches component errors gracefully
+- **Global Error Listeners**: Captures unhandled errors and promise rejections
+- **Datadog Integration**: All errors are sent to Datadog RUM
 
-### ✅ Exception Replay
-- Inspect production stack traces
-- View variable values at runtime
-- Navigate through production code
+### Logging
+- **Log Levels**: debug, info, warn, error
+- **PII Scrubbing**: Automatically removes sensitive information
+- **Console Management**: Production builds strip console.log statements
+- **Datadog Logs**: Forward logs to Datadog for analysis
 
-### ✅ View in IDE
-- Direct links from Datadog to source files
-- Jump to specific lines from error traces
+### Monitoring
+- **Real User Monitoring (RUM)**: Track user interactions and performance
+- **Session Replay**: Record user sessions for debugging
+- **React Router Integration**: Track page navigation and route performance
+- **Source Map Integration**: Better error stack traces in Datadog
 
-## 🛠️ Available MCP Tools
+## Usage
 
-Once MCP server is enabled, you'll have access to:
+### Logger
+```typescript
+import { logger } from './lib/logger';
 
-- **Log Search**: Search Datadog logs from Cursor
-- **Error Tracking**: View and analyze errors
-- **Performance Monitoring**: Check app performance
-- **Security Insights**: Review security findings
-- **Test Results**: Analyze test performance
+// Log messages
+logger.info('User logged in', { userId: '123' });
+logger.error('API call failed', { error: error.message, endpoint: '/api/users' });
+logger.warn('Deprecated feature used', { feature: 'old-api' });
+```
 
-## 📊 Monitoring Features
+### Error Boundary
+The `ErrorBoundary` component automatically catches React errors and sends them to Datadog.
 
-### Real User Monitoring (RUM)
-- User interactions tracking
-- Page load performance
-- Session replay (20% sampling)
-- Error tracking with source maps
+### Datadog Actions
+```typescript
+import { datadogRum } from '@datadog/browser-rum';
 
-### Log Management
-- Centralized logging with PII masking
-- Console logs forwarded to Datadog
-- Error logs with context
+// Track custom actions
+datadogRum.addAction('user-action', { action: 'button-click', page: 'dashboard' });
+```
 
-### Error Tracking
-- JavaScript errors with stack traces
-- Source code integration
-- Exception replay capability
+## Security
 
-## 🔍 Debugging Workflow
+### PII Protection
+- All logs are automatically scrubbed for PII
+- User input is masked in Datadog by default
+- API keys are handled server-side only
 
-1. **Error occurs in production**
-2. **View in Datadog** → Click "View in Cursor"
-3. **Exception Replay** → Inspect variable values
-4. **Code Insights** → See related issues
-5. **Fix in Chat** → Generate AI prompts for fixes
+### Console Management
+- Production builds remove console.log statements
+- Only error and warn logs are preserved
+- ESLint warns about console usage in development
 
-## 📝 Configuration Files
+## Troubleshooting
 
-- `static-analysis.datadog.yml` - Static analysis rules
-- `.datadog/sourcemap.json` - Source map configuration
+### Source Maps
+If you see "Source map not found" errors in Datadog:
+1. Ensure you're using `bun run build:datadog` for production
+2. Check that `VITE_APP_VERSION` matches your package.json version
+3. Verify Datadog credentials are correct
+
+### Datadog Not Loading
+1. Check environment variables are set correctly
+2. Verify `VITE_DATADOG_ENABLED=true`
+3. Check browser console for initialization errors
+
+## Files
+
+- `src/lib/logger.ts` - Centralized logging system
 - `src/monitoring.ts` - Datadog initialization
-- `src/lib/logger.ts` - Centralized logging
-
-## 🚨 Security Notes
-
-- PII masking enabled in logger
-- User input masked in session replay
-- Secrets redacted from logs
-- Console logs stripped in production
-
-## 📞 Support
-
-- Datadog Extension Issues: [GitHub Repository](https://github.com/datadog/datadog-vscode-extension)
-- Email: team-ide-integration@datadoghq.com
-- Documentation: [Datadog IDE Plugins](https://docs.datadoghq.com/developers/ide_plugins/vscode/?tab=cursor)
-
+- `src/components/ErrorBoundary.tsx` - React error boundary
+- `.datadog/sourcemap.json` - Source map configuration
+- `vite.config.ts` - Build configuration with console stripping
