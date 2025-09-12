@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 import { Database } from '../../types/database';
 import { KanbanBoard } from './KanbanBoard';
 import { TaskDetailPanel } from './TaskDetailPanel';
@@ -43,13 +44,13 @@ export const TasksPage: React.FC = () => {
       const [projectResult, tasksResult] = await Promise.all([projectPromise, tasksPromise]);
       
       if (projectResult.error) {
-        console.error('Error fetching project name:', projectResult.error);
+        logger.error('Error fetching project name', { error: projectResult.error.message });
       } else if (projectResult.data) {
         setProjectName(projectResult.data.name);
       }
 
       if (tasksResult.error) {
-        console.error('Error fetching tasks:', tasksResult.error);
+        logger.error('Error fetching tasks', { error: tasksResult.error.message });
       } else if (tasksResult.data) {
         setTasks(tasksResult.data);
       }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Save, FolderOpen } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
+import { logger } from '../../lib/logger';
 
 interface CreateProjectModalProps {
   onClose: () => void;
@@ -52,7 +53,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose,
       if (onProjectCreated) onProjectCreated();
       onClose();
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project', { error: error.message });
       alert('Failed to create project. Please try again.');
     } finally {
       setIsSaving(false);

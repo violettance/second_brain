@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Crown, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { enhanceSpeechText } from '../lib/aiProxy';
+import { logger } from '../lib/logger';
 
 interface CompactVoiceRecorderProps {
   onTextUpdate: (text: string) => void;
@@ -160,7 +161,11 @@ export const CompactVoiceRecorder: React.FC<CompactVoiceRecorderProps> = ({
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('Speech recognition error:', event.error);
+      logger.error('Speech recognition failed', {
+        error: event.error,
+        errorType: event.type,
+        component: 'CompactVoiceRecorder'
+      });
       setError(`Speech recognition error: ${event.error}`);
       setIsListening(false);
     };
@@ -194,7 +199,11 @@ export const CompactVoiceRecorder: React.FC<CompactVoiceRecorderProps> = ({
       onTextUpdate(enhancedText);
       setTranscriptText(enhancedText);
     } catch (err) {
-      console.error('Error enhancing text:', err);
+      logger.error('Failed to enhance speech text', {
+        error: err,
+        originalText: text.substring(0, 100) + '...',
+        component: 'CompactVoiceRecorder'
+      });
       // Fallback to original text
       onTextUpdate(text);
     } finally {

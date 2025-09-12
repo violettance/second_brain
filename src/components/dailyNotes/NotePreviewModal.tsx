@@ -5,6 +5,7 @@ import { NoteRenderer } from './NoteRenderer';
 import { useAuth } from '../../contexts/AuthContext';
 import { generateMermaidFromNote } from '../../lib/aiProxy';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 import { PaywallModal } from '../analytics/PaywallModal'; // Assuming this exists
 
 interface NotePreviewModalProps {
@@ -41,9 +42,9 @@ export const NotePreviewModal: React.FC<NotePreviewModalProps> = ({ note, onClos
 
     setIsGenerating(true);
     try {
-      console.log('Starting diagram generation for:', note.title);
+      logger.info('Starting diagram generation', { noteTitle: note.title });
       const mermaidCode = await generateMermaidFromNote(note.title, note.content);
-      console.log('Generated Mermaid code:', mermaidCode);
+      logger.debug('Generated Mermaid code', { mermaidCode });
       
       if (mermaidCode) {
         const { data, error } = await supabase
@@ -56,20 +57,20 @@ export const NotePreviewModal: React.FC<NotePreviewModalProps> = ({ note, onClos
         if (error) throw error;
         
         if (data) {
-          console.log('Successfully saved diagram to database');
+          logger.info('Successfully saved diagram to database');
           const updatedNote = data as DailyNote;
           onUpdateNote(updatedNote); // Update parent state immediately
           refetchNotes(); // Refetch list to ensure consistency
         }
       } else {
-        console.log('No Mermaid code generated');
+        logger.warn('No Mermaid code generated');
       }
     } catch (error) {
       if (error instanceof Error && error.message === 'SERVICE_OVERLOADED') {
-        console.error('Mermaid generation overloaded:', error);
+        logger.error('Mermaid generation overloaded', { error: error.message });
         alert('AI diagram service is overloaded. Please try again shortly.');
       } else {
-        console.error("Failed to generate or save Mermaid diagram", error);
+        logger.error("Failed to generate or save Mermaid diagram", { error: error.message });
         alert('Failed to generate diagram. Please try again.');
       }
     } finally {

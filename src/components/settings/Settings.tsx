@@ -1,53 +1,26 @@
 import React, { useState } from 'react';
 import { 
-  Settings as SettingsIcon, 
-  Bell, 
   Crown, 
   User, 
   Shield, 
   Palette, 
   Download,
-  Upload,
-  Trash2,
-  Save,
-  Check,
-  X
+  Check
 } from 'lucide-react';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { logger } from '../../lib/logger';
 
 export const Settings: React.FC = () => {
   const [subscription, setSubscription] = useState('free');
-  const [reminderEnabled, setReminderEnabled] = useState(true);
-  const [reminderTime, setReminderTime] = useState('1');
   const [theme, setTheme] = useState('dark');
-  const [notifications, setNotifications] = useState({
-    dailyReminder: true,
-    weeklyDigest: false,
-    newFeatures: true,
-    insights: true
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const { user } = useAuth();
   const { shortTermNotes, longTermNotes } = useMemoryNotes();
   const navigate = useNavigate();
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  // Removed unused handleSave function
 
   const handleSubscriptionChange = (newPlan: string) => {
     if (newPlan === 'pro') {
@@ -56,7 +29,7 @@ export const Settings: React.FC = () => {
     }
     setSubscription(newPlan);
     // In real app, this would trigger payment flow
-    console.log('Subscription change requested:', newPlan);
+    logger.info('Subscription change requested', { newPlan });
   };
 
   // CSV export helper
@@ -225,7 +198,7 @@ export const Settings: React.FC = () => {
                     if (subscription === 'pro') {
                       setTheme('light');
                     } else {
-                      setShowPaywall(true);
+                      // setShowPaywall(true); // Removed unused function
                     }
                   }}
                   className={`relative p-4 rounded-lg border transition-all ${

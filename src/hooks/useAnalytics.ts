@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 
 interface AnalyticsData {
   totalNotes: number;
@@ -333,7 +334,7 @@ export const useAnalytics = (timeRange: string) => {
         connectionGrowth
       }));
     } catch (err) {
-      console.error('Error fetching analytics:', err);
+      logger.error('Error fetching analytics', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to fetch analytics');
     } finally {
       setIsLoading(false);
@@ -373,7 +374,7 @@ export const useAnalytics = (timeRange: string) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Export failed:', err);
+      logger.error('Export failed', { error: err.message });
       throw err;
     }
   };

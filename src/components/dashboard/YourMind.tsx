@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 import { useAuth } from '../../contexts/AuthContext';
 import { BrainCircuit } from 'lucide-react';
 
@@ -20,20 +21,25 @@ const YourMind = () => {
             if (!user) return;
             setIsLoading(true);
 
-            const [tagsResponse, distributionResponse] = await Promise.all([
-                supabase.from('v2_top_tags_view').select('tag, usage_count').eq('user_id', user.id).limit(3),
-                supabase.from('v2_analytics_memory_distribution').select('st_7, lt_7, st_30, lt_30, st_all, lt_all').eq('user_id', user.id).single()
-            ]);
+            try {
+                const [tagsResponse, distributionResponse] = await Promise.all([
+                    supabase.from('v2_top_tags_view').select('tag, usage_count').eq('user_id', user.id).limit(3),
+                    supabase.from('v2_analytics_memory_distribution_bars').select('st_7, lt_7, st_30, lt_30, st_all, lt_all').eq('user_id', user.id).single()
+                ]);
 
             if (tagsResponse.error) {
-                console.error('Error fetching top tags:', tagsResponse.error);
+                logger.error('Failed to fetch top tags', { error: tagsResponse.error });
                 setTopTags([]);
             } else if (tagsResponse.data) {
                 setTopTags(tagsResponse.data.map((item: { tag: string; usage_count: number }) => ({ tag: item.tag, usage_count: item.usage_count })));
             }
 
             if (distributionResponse.error) {
-                console.error('Error fetching memory distribution:', distributionResponse.error);
+                logger.error('Failed to fetch memory distribution', { 
+                    error: distributionResponse.error,
+                    userId: user.id,
+                    table: 'v2_analytics_memory_distribution_bars'
+                });
                 setNoteCounts(null);
             } else if (distributionResponse.data) {
                 const data = distributionResponse.data;
@@ -43,8 +49,18 @@ const YourMind = () => {
                     allTime: { short: data.st_all ?? 0, long: data.lt_all ?? 0 },
                 });
             }
-
-            setIsLoading(false);
+            } catch (error) {
+                logger.error('Failed to fetch dashboard data', { 
+                    error, 
+                    userId: user.id,
+                    component: 'YourMind'
+                });
+                // Set fallback values
+                setTopTags([]);
+                setNoteCounts(null);
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         fetchData();

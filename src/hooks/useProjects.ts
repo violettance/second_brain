@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Project, Task } from '../types/projects';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 
 // Mock data for demo
 const MOCK_PROJECTS: Project[] = [
@@ -140,7 +141,7 @@ export const useProjects = () => {
     try {
       // If Supabase isn't configured, use mock data
       if (!isSupabaseConfigured()) {
-        console.warn('Supabase not configured, using mock data. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+        logger.warn('Supabase not configured, using mock data. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
         setProjects(MOCK_PROJECTS);
@@ -196,7 +197,7 @@ export const useProjects = () => {
 
       setProjects(projectsWithCounts);
     } catch (err) {
-      console.error('Error fetching projects:', err);
+      logger.error('Error fetching projects', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to fetch projects');
       // Fallback to mock data on error
       setProjects(MOCK_PROJECTS);
@@ -281,7 +282,7 @@ export const useProjects = () => {
       setProjects(prev => [newProject, ...prev]);
       return newProject;
     } catch (err) {
-      console.error('Error creating project:', err);
+      logger.error('Error creating project', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to create project');
       throw err;
     } finally {
@@ -345,7 +346,7 @@ export const useProjects = () => {
           : p
       ));
     } catch (err) {
-      console.error('Error updating project:', err);
+      logger.error('Error updating project', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to update project');
       throw err;
     } finally {
@@ -393,7 +394,7 @@ export const useProjects = () => {
       // Refetch projects to update the list
       await fetchProjects();
     } catch (err) {
-      console.error('Error deleting project:', err);
+      logger.error('Error deleting project', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to delete project');
       throw err;
     } finally {
@@ -477,7 +478,7 @@ export const useProjectData = (projectId: string) => {
       };
       setProject(projectWithCounts);
     } catch (err) {
-      console.error('Error fetching project:', err);
+      logger.error('Error fetching project', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to fetch project details');
       setProject(null);
     } finally {
@@ -529,7 +530,7 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
             .from('subtasks')
             .select('*')
             .eq('task_id', task.id);
-          if (subtasksError) console.error('Error fetching subtasks:', subtasksError);
+          if (subtasksError) logger.error('Error fetching subtasks', { error: subtasksError.message });
           return {
             ...task,
             id: task.id,
@@ -550,7 +551,7 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
       
       setTasks(tasksWithSubtasks);
     } catch (err) {
-      console.error('Error fetching tasks:', err);
+      logger.error('Error fetching tasks', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to fetch tasks');
       setTasks([]);
     } finally {
@@ -614,7 +615,7 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
       await fetchTasks();
       onTaskChange();
     } catch (err) {
-      console.error('Error creating task:', err);
+      logger.error('Error creating task', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to create task');
     }
   };
@@ -645,7 +646,7 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
       await fetchTasks();
       onTaskChange();
     } catch (err) {
-      console.error('Error updating task:', err);
+      logger.error('Error updating task', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to update task');
     }
   };
@@ -675,7 +676,7 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
       await fetchTasks();
       onTaskChange();
     } catch (err) {
-      console.error('Error deleting task:', err);
+      logger.error('Error deleting task', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to delete task');
     }
   };

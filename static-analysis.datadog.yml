@@ -1,0 +1,38 @@
+# Datadog Static Code Analysis Configuration
+# This file enables static analysis for your codebase
+
+rulesets:
+  - %!s(<nil>)
+    # Rules to enforce
+
+# Enable analysis for these languages
+languages:
+  - typescript
+  - javascript
+  - react
+
+# Exclude these patterns from analysis
+exclude:
+  - "node_modules/**"
+  - "dist/**"
+  - "build/**"
+  - "*.test.*"
+  - "*.spec.*"
+
+# Security rules
+security:
+  enabled: true
+  rules:
+    - "no-hardcoded-secrets"
+    - "no-unsafe-eval"
+    - "no-unsafe-regex"
+
+# Code quality rules
+quality:
+  enabled: true
+  rules:
+    - "no-console-log"
+    - "no-debugger"
+    - "no-unused-vars"
+    - "no-unreachable-code"
+

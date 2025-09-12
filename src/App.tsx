@@ -17,6 +17,7 @@ import { TermsAndConditions } from './components/landing/TermsAndConditions';
 import { PrivacyPolicy } from './components/landing/PrivacyPolicy';
 import { PricingModal } from './components/landing/PricingModal';
 import PricingPage from './components/landing/PricingPage';
+import { datadogRum } from "@datadog/browser-rum";
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -27,6 +28,11 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     if (user) setShowLanding(false);
   }, [user]);
+
+  // Test için Datadog action ekle
+  useEffect(() => {
+    datadogRum.addAction("test-action", { foo: "bar" });
+  }, []);
 
   // Kullanıcının oturum durumu henüz belli değilse loading göster
   if (isLoading) {

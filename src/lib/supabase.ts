@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from './logger';
 import { Database } from '../types/database';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -19,10 +20,10 @@ if (supabaseUrl && supabaseAnonKey) {
       }
     });
   } catch (error) {
-    console.error('Failed to create Supabase client:', error);
+    logger.error('Failed to create Supabase client', { error: error.message });
   }
 } else {
-  console.warn('Supabase not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+  logger.warn('Supabase not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
 }
 
 export const supabase = supabaseClient;

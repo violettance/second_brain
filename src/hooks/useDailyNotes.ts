@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { DailyNote } from '../types/database';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 
 // In-memory storage for mock data (shared across all hook instances)
 let mockNotesStorage: DailyNote[] = [
@@ -104,7 +105,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
     try {
       // If Supabase isn't configured, use mock data
       if (!isSupabaseConfigured()) {
-        console.warn('Supabase not configured, using mock data. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+        logger.warn('Supabase not configured, using mock data. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
         
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -173,7 +174,11 @@ export const useDailyNotes = (selectedDate?: Date) => {
       
       setNotes(allNotes);
     } catch (err) {
-      console.error('Error fetching notes:', err);
+      logger.error('Failed to fetch daily notes', {
+        error: err,
+        userId: user?.id,
+        memoryType
+      });
       setError(err instanceof Error ? err.message : 'Failed to fetch notes');
     } finally {
       setIsLoading(false);
@@ -281,7 +286,15 @@ export const useDailyNotes = (selectedDate?: Date) => {
       // Refetch notes to reflect the new addition
       await fetchNotes(selectedDate);
     } catch (err) {
-      console.error('Error saving note:', err);
+      logger.error('Failed to save daily note', {
+        error: err,
+        noteData: {
+          title: noteData.title,
+          memoryType: noteData.memoryType,
+          tagsCount: noteData.tags.length
+        },
+        userId: user?.id
+      });
       setError(err instanceof Error ? err.message : 'Failed to save note');
     } finally {
       setIsLoading(false);
@@ -406,7 +419,12 @@ export const useDailyNotes = (selectedDate?: Date) => {
       await fetchNotes(selectedDate);
 
     } catch (err) {
-      console.error('Error updating note:', err);
+      logger.error('Failed to update daily note', {
+        error: err,
+        noteId,
+        updates: Object.keys(updates),
+        userId: user?.id
+      });
       setError(err instanceof Error ? err.message : 'Failed to update note');
     } finally {
       setIsLoading(false);
@@ -453,7 +471,12 @@ export const useDailyNotes = (selectedDate?: Date) => {
       // Refetch notes to reflect the deletion
       await fetchNotes(selectedDate);
     } catch (err) {
-      console.error('Error deleting note:', err);
+      logger.error('Failed to delete daily note', {
+        error: err,
+        noteId,
+        memoryType,
+        userId: user?.id
+      });
       setError(err instanceof Error ? err.message : 'Failed to delete note');
     } finally {
       setIsLoading(false);

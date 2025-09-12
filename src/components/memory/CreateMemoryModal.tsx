@@ -5,6 +5,7 @@ import { generateTags } from '../../lib/aiProxy';
 import { CompactVoiceRecorder } from '../CompactVoiceRecorder';
 import { PaywallModal } from '../analytics/PaywallModal';
 import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '../../lib/logger';
 
 interface CreateMemoryModalProps {
   memoryType: 'short-term' | 'long-term';
@@ -75,7 +76,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       setTags([...tags, ...uniqueNewTags]);
       setAiAddedTags([...aiAddedTags, ...uniqueNewTags]);
     } catch (err) {
-      console.error('Error generating tags:', err);
+      logger.error('Error generating tags', { error: err.message });
       if (err instanceof Error && err.message === 'MISSING_GEMINI_API_KEY') {
         alert('AI tagging requires configuration. Add VITE_GEMINI_API_KEY to your environment and reload.');
       } else if (err instanceof Error && err.message === 'SERVICE_OVERLOADED') {
@@ -110,7 +111,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       
       onClose();
     } catch (error) {
-      console.error('Error saving note:', error);
+      logger.error('Error saving note', { error: error.message });
       alert('Failed to save note. Please try again.');
     } finally {
       setIsSaving(false);
@@ -386,7 +387,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
           onClose={() => setShowPaywall(false)}
           onUpgrade={() => {
             // TODO: Implement upgrade logic
-            console.log('Upgrade clicked');
+            logger.info('Upgrade clicked', { component: 'CreateMemoryModal' });
             setShowPaywall(false);
           }}
         />

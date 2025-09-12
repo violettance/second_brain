@@ -1,5 +1,6 @@
 import React, { useEffect, useId } from 'react';
 import mermaid from 'mermaid';
+import { logger } from '../../lib/logger';
 
 interface NoteRendererProps {
   content: string;
@@ -61,12 +62,12 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ content }) => {
                 for (const element of elements) {
                   if (element.textContent) {
                     const diagramCode = element.textContent.trim();
-                    console.log('Rendering Mermaid diagram:', diagramCode);
+                    logger.info('Rendering Mermaid diagram', { diagramCode: diagramCode.substring(0, 100) + '...' });
                     try {
                       const { svg } = await mermaid.render(`diagram-${id}-${Date.now()}`, diagramCode);
                       element.innerHTML = svg;
                     } catch (renderError) {
-                      console.error('Mermaid render error:', renderError);
+                      logger.error('Mermaid render error', { error: renderError.message });
                       element.innerHTML = `<div class="text-red-400 text-sm p-4 border border-red-400/30 rounded bg-red-900/20">
                         <strong>Diagram Error:</strong><br/>
                         <pre class="mt-2 text-xs overflow-auto">${diagramCode}</pre>
@@ -76,7 +77,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ content }) => {
                 }
             }
         } catch (e) {
-            console.error("Error processing mermaid diagrams:", e);
+            logger.error("Error processing mermaid diagrams", { error: e.message });
         }
     }, 100);
 

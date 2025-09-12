@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PaywallModal } from '../analytics/PaywallModal';
+import { logger } from '../../lib/logger';
 
 export const PricingModal: React.FC = () => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export const PricingModal: React.FC = () => {
 
   const handleUpgrade = () => {
     // In a real implementation, this would trigger Paddle checkout
-    console.log('Paddle checkout would open here for Pro subscription');
+    logger.info('Paddle checkout would open here for Pro subscription');
     alert('Paddle checkout would open here for Pro subscription');
   };
 

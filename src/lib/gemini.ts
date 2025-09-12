@@ -4,6 +4,7 @@
 // This file is kept for reference but completely commented out to prevent any accidental usage.
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { logger } from './logger';
 
 // Not tipini tanımla (minimum alanlar)
 type ShortTermNote = {
@@ -54,7 +55,7 @@ export async function generateAiInsights(notes: ShortTermNote[]): Promise<{ summ
 
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
-    console.error('VITE_GEMINI_API_KEY is not set');
+    logger.error('Gemini API key not configured', { service: 'gemini-insights' });
     return { summary: 'AI service not configured.', recommendations: [] };
   }
 
@@ -131,7 +132,10 @@ export async function generateAiInsights(notes: ShortTermNote[]): Promise<{ summ
     // Clean and parse the JSON response
     const jsonMatch = text.match(/{[\s\S]*}/);
     if (!jsonMatch) {
-      console.error('Gemini response did not contain valid JSON.', text);
+      logger.error('Gemini response invalid JSON', { 
+        responseLength: text.length,
+        service: 'gemini-insights'
+      });
       return fallbackResponse;
     }
 
@@ -148,12 +152,19 @@ export async function generateAiInsights(notes: ShortTermNote[]): Promise<{ summ
         
         return { summary: parsedData.summary, recommendations: finalRecommendations };
     } else {
-      console.error('Parsed JSON has an invalid structure:', parsedData);
+      logger.error('Gemini response invalid structure', { 
+        parsedData,
+        service: 'gemini-insights'
+      });
       return fallbackResponse;
     }
 
   } catch (e: any) {
-    console.error('Gemini AI Insights Error:', e);
+    logger.error('Gemini AI insights failed', { 
+      error: e,
+      notesCount: notes.length,
+      service: 'gemini-insights'
+    });
     return fallbackResponse;
   }
 }
@@ -307,7 +318,7 @@ export async function generateMermaidFromNote(noteTitle: string, noteContent: st
     const response = await result.response;
     const text = response.text();
 
-    console.log('Gemini AI response:', text);
+    logger.debug('Gemini AI response received', { responseLength: text.length });
 
     // Clean up the response - should be direct Mermaid code now
     const cleanCode = text.trim();
@@ -323,7 +334,7 @@ export async function generateMermaidFromNote(noteTitle: string, noteContent: st
     );
     
     if (isValidMermaid && cleanCode.length > 10) {
-      console.log('Generated Mermaid code:', cleanCode);
+      logger.debug('Generated Mermaid code', { codeLength: cleanCode.length });
       return cleanCode;
     }
     
@@ -331,11 +342,11 @@ export async function generateMermaidFromNote(noteTitle: string, noteContent: st
     const mermaidCode = text.match(/```mermaid([\s\S]*?)```/);
     if (mermaidCode && mermaidCode[1]) {
       const extractedCode = mermaidCode[1].trim();
-      console.log('Extracted from code block:', extractedCode);
+      logger.debug('Extracted Mermaid from code block', { codeLength: extractedCode.length });
       return extractedCode;
     }
     
-    console.log('No valid Mermaid diagram found in response');
+    logger.warn('No valid Mermaid diagram found in response', { responseLength: text.length });
     return ''; // Return empty if no valid diagram is found
 
   } catch (error) {

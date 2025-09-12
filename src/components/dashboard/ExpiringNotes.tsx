@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { AlertTriangle, Clock } from 'lucide-react';
 import { DailyNote } from '../../types/database';
+import { logger } from '../../lib/logger';
 
 const ExpiringNotes = () => {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ const ExpiringNotes = () => {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error("Error fetching short-term notes:", error);
+        logger.error("Error fetching short-term notes", { error: error.message });
         setExpiringNotes([]);
       } else {
         // Filter for notes expiring in 5 days or less

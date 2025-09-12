@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
 import { DailyNote } from '../../types/database';
+import { logger } from '../../lib/logger';
 
 interface NotesListProps {
   selectedDate: Date | null;
@@ -69,7 +70,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
         await onRefresh();
       }
     } catch (error) {
-      console.error('Error deleting note:', error);
+      logger.error('Error deleting note', { error: error.message });
     }
   };
 
@@ -83,7 +84,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
         await onRefresh();
       }
     } catch (error) {
-      console.error('Error updating note memory type:', error);
+      logger.error('Error updating note memory type', { error: error.message });
     }
   };
 
@@ -101,7 +102,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
         await onRefresh();
       }
     } catch (error) {
-      console.error('Error starring note:', error);
+      logger.error('Error starring note', { error: error.message });
     }
   };
 
