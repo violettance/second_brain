@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 import useKnowledgeGraph from '../../hooks/useKnowledgeGraph';
-import { Loader2, AlertTriangle, X, Calendar, User, Tag } from 'lucide-react';
+import { Loader2, AlertTriangle, X, Calendar, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 
 const ForceGraph2D = React.lazy(() => import('react-force-graph-2d'));
 
 export const KnowledgeNetworkPage: React.FC = () => {
-  const { user } = useAuth();
   const { data, isLoading, error } = useKnowledgeGraph();
   const [isMounted, setIsMounted] = useState(false);
   const [selectedNode, setSelectedNode] = useState<any>(null);
@@ -68,7 +67,7 @@ export const KnowledgeNetworkPage: React.FC = () => {
         .single();
 
       if (error) {
-        console.error('Error fetching node details:', error);
+        logger.error('Error fetching node details', { error: error.message });
         return null;
       }
 
@@ -86,7 +85,7 @@ export const KnowledgeNetworkPage: React.FC = () => {
 
       return details;
     } catch (err) {
-      console.error('Error in fetchNodeDetails:', err);
+      logger.error('Error in fetchNodeDetails', { error: err instanceof Error ? err.message : 'Unknown error' });
       return null;
     } finally {
       setLoadingDetails(false);
@@ -97,7 +96,7 @@ export const KnowledgeNetworkPage: React.FC = () => {
     // Don't open panel for tags
     if (node.type === 'tag') return;
     
-    console.log('Selected node data:', node);
+    logger.debug('Selected node data', { nodeId: node.id, nodeType: node.type });
     setSelectedNode(node);
     setNodeDetails(null);
     

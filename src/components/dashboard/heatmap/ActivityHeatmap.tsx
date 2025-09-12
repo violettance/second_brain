@@ -2,6 +2,7 @@ import { ResponsiveCalendar } from '@nivo/calendar';
 import { supabase } from '../../../lib/supabase';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
+import { logger } from '../../../lib/logger';
 
 type HeatmapData = {
   day: string;
@@ -25,7 +26,7 @@ export const ActivityHeatmap = () => {
         .lte('note_date', '2025-12-31');
       
       if (error) {
-        console.error('Error fetching heatmap data:', error);
+        logger.error('Error fetching heatmap data', { error: error.message });
         setData([]);
       } else {
         // The query returns { note_date: 'YYYY-MM-DD', total_count: number }

@@ -12,7 +12,8 @@ import { useAnalytics, fetchNotCreationTrends } from '../../hooks/useAnalytics';
 import { supabase } from '../../lib/supabase';
 import { useProjects } from '../../hooks/useProjects';
 import { Task } from '../../types/projects';
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '../../lib/logger';
 
 export const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
@@ -442,13 +443,13 @@ export const Analytics: React.FC = () => {
       await exportData();
       // Show success message
     } catch (error) {
-      console.error('Export failed:', error);
+      logger.error('Export failed', { error: error.message });
     }
   };
 
   const handleUpgrade = () => {
     // In real app, this would integrate with RevenueCat
-    console.log('Upgrade to Pro clicked - integrate with RevenueCat');
+    logger.info('Upgrade to Pro clicked', { component: 'Analytics' });
     setShowPaywall(false);
     // Redirect to payment flow
   };

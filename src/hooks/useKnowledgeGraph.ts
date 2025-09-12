@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 import { useAuth } from '../contexts/AuthContext';
 
 // Define the structure of the graph data based on react-force-graph requirements
@@ -214,7 +215,7 @@ const useKnowledgeGraph = () => {
 
       setData({ nodes: Object.values(nodeMap), links });
     } catch (err) {
-      console.error(err);
+      logger.error('Knowledge graph error', { error: err.message });
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
       setData({ nodes: [], links: [] });
     } finally {

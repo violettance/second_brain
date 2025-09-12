@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 import { useAuth } from '../../contexts/AuthContext';
 import { Target, Calendar, CheckCircle } from 'lucide-react';
 import { Project } from '../../types/projects';
@@ -28,7 +29,7 @@ const ProjectRadar = () => {
         .order('due_date', { ascending: true, nullsFirst: false });
 
       if (error || !data) {
-        console.log("No focus project found, which is fine.");
+        logger.debug("No focus project found, which is fine.");
         setActiveProject(null);
       } else {
         // Sadece geçerli due_date'e sahip ilk projeyi bul

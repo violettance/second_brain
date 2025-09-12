@@ -1,6 +1,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Search, Filter, MoreHorizontal, Calendar, CheckCircle, Edit, Trash2 } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
+import { logger } from '../../lib/logger';
 import { EditProjectModal } from './EditProjectModal';
 
 interface ProjectsListProps {
@@ -57,7 +58,7 @@ export const ProjectsList = forwardRef<ProjectsListRef, ProjectsListProps>(({ on
         await deleteProject(projectId);
         setOpenDropdown(null);
       } catch (error) {
-        console.error('Failed to delete project:', error);
+        logger.error('Failed to delete project', { error: error.message });
       }
     }
   };

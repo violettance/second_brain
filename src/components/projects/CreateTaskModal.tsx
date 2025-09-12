@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Database } from '../../types/database';
+import { logger } from '../../lib/logger';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
 
@@ -40,7 +41,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ projectId, onC
     setIsCreating(false);
 
     if (error) {
-      console.error('Error creating task', error);
+      logger.error('Error creating task', { error: error.message });
       // Handle error UI
     } else if (data) {
       onTaskCreated(data);

@@ -7,6 +7,7 @@ import { NoteEditor } from '../dailyNotes/NoteEditor';
 import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
 import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '../../lib/logger';
 import { generateLongTermInsights } from '../../lib/aiProxy';
 
 // Helper component to parse and render the AI analysis
@@ -121,7 +122,7 @@ export const LongTermMemory: React.FC = () => {
           localStorage.setItem(cacheKey, JSON.stringify({ timestamp: now, checksum, data: analysis }));
         }
       } catch (error) {
-        console.error("Failed to fetch long-term AI insights:", error);
+        logger.error("Failed to fetch long-term AI insights", { error: error instanceof Error ? error.message : 'Unknown error' });
         // Queue on error as well
         scheduleRetry(60000);
       } finally {

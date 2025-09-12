@@ -8,6 +8,7 @@ import { useMemoryNotes } from '../../hooks/useMemoryNotes';
 import { DailyNote } from '../../types/database';
 import { generateAiInsights } from '../../lib/aiProxy';
 import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '../../lib/logger';
 
 function simpleHash(str: string): string {
   let hash = 0, i, chr;
@@ -76,7 +77,7 @@ export const ShortTermMemory: React.FC = () => {
           localStorage.setItem(cacheKey, JSON.stringify({ timestamp: now, checksum, data: insights }));
         }
       } catch (error) {
-        console.error("Failed to fetch AI insights:", error);
+        logger.error("Failed to fetch AI insights", { error: error.message });
         setAiInsights({ summary: 'Failed to generate AI insights.', recommendations: [] });
       } finally {
         setAiInsightsLoading(false);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { DailyNote } from '../types/database';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 
 // Import the shared mock storage and notification system from useDailyNotes
 // This ensures synchronization between memory notes and daily notes
@@ -118,7 +119,7 @@ export const useMemoryNotes = () => {
     try {
       // If Supabase isn't configured, use mock data
       if (!isSupabaseConfigured()) {
-        console.warn('Supabase not configured, using mock data. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
+        logger.warn('Supabase not configured, using mock data. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.');
         
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -164,7 +165,7 @@ export const useMemoryNotes = () => {
       setShortTermNotes(shortTermNotes);
       setLongTermNotes(longTermNotes);
     } catch (err) {
-      console.error('Error fetching notes:', err);
+      logger.error('Error fetching notes', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to fetch notes');
     } finally {
       setIsLoading(false);
@@ -270,7 +271,7 @@ export const useMemoryNotes = () => {
 
       return newNote;
     } catch (err) {
-      console.error('Error saving note:', err);
+      logger.error('Error saving note', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to save note');
       throw err;
     } finally {
@@ -343,7 +344,7 @@ export const useMemoryNotes = () => {
 
       return longTermNote;
     } catch (err) {
-      console.error('Error moving note to long term:', err);
+      logger.error('Error moving note to long term', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to move note');
       throw err;
     } finally {
@@ -394,7 +395,7 @@ export const useMemoryNotes = () => {
       await fetchNotes();
       refetchDailyNotes();
     } catch (err) {
-      console.error('Error deleting note:', err);
+      logger.error('Error deleting note', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to delete note');
     } finally {
       setIsLoading(false);

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logger } from './logger';
 
 type ShortTermNote = {
   title: string;
@@ -24,7 +25,11 @@ export async function generateAiInsights(notes: ShortTermNote[]): Promise<{ summ
     }
     return { summary: 'AI insight could not be generated.', recommendations: [] };
   } catch (e) {
-    console.error('ai-short-term invoke error:', e);
+    logger.error('AI short-term insights failed', {
+      error: e,
+      notesCount: notes.length,
+      service: 'ai-short-term'
+    });
     return { summary: 'AI insight could not be generated.', recommendations: [] };
   }
 }
@@ -37,7 +42,11 @@ export async function generateLongTermInsights(notes: ShortTermNote[]): Promise<
     if (error) throw error;
     return typeof data === 'string' ? data : (data?.text ?? 'AI analysis could not be generated.');
   } catch (e) {
-    console.error('ai-long-term invoke error:', e);
+    logger.error('AI long-term insights failed', {
+      error: e,
+      notesCount: notes.length,
+      service: 'ai-long-term'
+    });
     return 'AI analysis could not be generated.';
   }
 }
@@ -51,7 +60,12 @@ export async function generateMermaidFromNote(noteTitle: string, noteContent: st
     if (error) throw error;
     return typeof data === 'string' ? data : (data?.code ?? '');
   } catch (e) {
-    console.error('ai-mermaid invoke error:', e);
+    logger.error('AI Mermaid generation failed', {
+      error: e,
+      noteTitle,
+      contentLength: noteContent.length,
+      service: 'ai-mermaid'
+    });
     return '';
   }
 }
@@ -69,7 +83,12 @@ export async function generateTags(note: NoteForTagging): Promise<string[]> {
     if (e?.message === 'SERVICE_OVERLOADED') {
       throw new Error('SERVICE_OVERLOADED');
     }
-    console.error('ai-tags invoke error:', e);
+    logger.error('AI tag generation failed', {
+      error: e,
+      noteTitle: note.title,
+      contentLength: note.content.length,
+      service: 'ai-tags'
+    });
     return [];
   }
 }

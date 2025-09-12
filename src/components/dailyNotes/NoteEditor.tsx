@@ -28,6 +28,7 @@ import { ReferenceInput } from './ReferenceInput';
 import { CompactVoiceRecorder } from '../CompactVoiceRecorder';
 import { PaywallModal } from '../analytics/PaywallModal';
 import { useAuth } from '../../contexts/AuthContext';
+import { logger } from '../../lib/logger';
 
 interface NoteEditorProps {
   selectedDate: Date;
@@ -136,11 +137,15 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       }
       onSave();
     } catch (err) {
-      console.error('Error saving note:', err);
-      console.error('NoteEditor - Error type:', typeof err);
-      console.error('NoteEditor - Error constructor:', err?.constructor?.name);
-      console.error('NoteEditor - Error is Error instance:', err instanceof Error);
-      console.error('NoteEditor - Error stringified:', JSON.stringify(err, null, 2));
+      logger.error('Failed to save note', {
+        error: err,
+        noteId: existingNote?.id,
+        title,
+        memoryType,
+        errorType: typeof err,
+        errorConstructor: err?.constructor?.name,
+        isErrorInstance: err instanceof Error
+      });
       setError(`Failed to save note: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
@@ -180,7 +185,11 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       setTags([...tags, ...uniqueNewTags]);
       setAiAddedTags([...aiAddedTags, ...uniqueNewTags]);
     } catch (err) {
-      console.error('Error generating tags:', err);
+      logger.error('Failed to generate AI tags', {
+        error: err,
+        noteTitle: title,
+        noteContent: content.substring(0, 100) + '...'
+      });
       if (err instanceof Error && err.message === 'MISSING_GEMINI_API_KEY') {
         setError('AI tagging requires configuration. Add VITE_GEMINI_API_KEY to your environment and reload.');
       } else if (err instanceof Error && err.message === 'SERVICE_OVERLOADED') {
@@ -639,7 +648,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           onClose={() => setShowPaywall(false)}
           onUpgrade={() => {
             // TODO: Implement upgrade logic
-            console.log('Upgrade clicked');
+            logger.info('User clicked upgrade', { component: 'NoteEditor' });
             setShowPaywall(false);
           }}
         />

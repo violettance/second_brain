@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Database } from '../../types/database';
 import { TaskCard } from './TaskCard';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
 type Columns = Record<Task['status'], {
@@ -104,7 +105,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialTasks, onSelect
         const hasError = results.some(res => res.error);
 
         if (hasError) {
-            console.error("Failed to update tasks in Supabase. Reverting UI changes.");
+            logger.error("Failed to update tasks in Supabase. Reverting UI changes.");
              // Revert optimistic update on error by resetting to initial state
             // (A more robust solution might store pre-drag state, but this is simpler for now)
             const groupedTasks = initialTasks.reduce((acc, task) => {

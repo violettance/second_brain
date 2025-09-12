@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Database } from '../../types/database';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
 type Subtask = Database['public']['Tables']['subtasks']['Row'];
@@ -34,7 +35,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
       .order('created_at');
 
     if (error) {
-      console.error('Error fetching subtasks:', error);
+      logger.error('Error fetching subtasks', { error: error.message });
     } else if (data) {
       setSubtasks(data);
     }
@@ -52,7 +53,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
     setIsSaving(false);
 
     if (error) {
-      console.error('Error updating task:', error);
+      logger.error('Error updating task', { error: error.message });
     } else if (data) {
       onUpdateTask(data);
     }
@@ -72,7 +73,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
       .single();
 
     if (error) {
-      console.error('Error creating subtask:', error);
+      logger.error('Error creating subtask', { error: error.message });
     } else if (data) {
       setSubtasks([...subtasks, data]);
       setNewSubtaskName('');
@@ -88,7 +89,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
       .single();
 
     if (error) {
-      console.error('Error updating subtask:', error);
+      logger.error('Error updating subtask', { error: error.message });
     } else if (data) {
       setSubtasks(subtasks.map(s => s.id === data.id ? data : s));
     }
@@ -100,7 +101,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
       .delete()
       .eq('id', subtaskId);
     if (error) {
-      console.error('Error deleting subtask:', error);
+      logger.error('Error deleting subtask', { error: error.message });
     } else {
       setSubtasks(subtasks.filter(s => s.id !== subtaskId));
     }

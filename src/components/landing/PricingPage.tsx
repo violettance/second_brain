@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '../../lib/logger';
 import { ArrowRight } from 'lucide-react';
 
 const plans = [
@@ -56,7 +57,7 @@ export const PricingPage: React.FC = () => {
 
   const handleUpgrade = () => {
     // In a real implementation, this would trigger Paddle checkout
-    console.log('Paddle checkout would open here for Pro subscription');
+    logger.info('User clicked Pro subscription', { component: 'PricingPage' });
     alert('Paddle checkout would open here for Pro subscription');
   };
 

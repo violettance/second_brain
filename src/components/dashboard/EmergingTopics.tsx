@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Fingerprint } from 'lucide-react';
+import { logger } from '../../lib/logger';
 
 interface NoteDNA {
   topTag: { name: string; count: number } | null;
@@ -45,7 +46,7 @@ const EmergingTopics = () => {
             ]);
 
             if (stTagsData.error) {
-                 console.error("Error fetching note DNA:", stTagsData.error);
+                 logger.error("Error fetching note DNA", { error: stTagsData.error.message });
                  setIsLoading(false);
                  return;
             }
