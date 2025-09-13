@@ -7,7 +7,7 @@ import { CalendarDays, List, Plus, Menu, Clock, Brain, X } from 'lucide-react';
 import { DailyNote } from '../../types/database';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
 
-export const DailyNotes: React.FC = () => {
+export const DailyNotes: React.FC = React.memo(() => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
   const [showEditor, setShowEditor] = useState(false);
@@ -226,4 +226,4 @@ export const DailyNotes: React.FC = () => {
       </div>
     </div>
   );
-};
+});

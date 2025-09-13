@@ -3,6 +3,7 @@ import { Project, Task } from '../types/projects';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
+import { cachedFetch, CACHE_KEYS, CACHE_TTL, invalidateCache } from '../lib/cachedFetch';
 
 // Mock data for demo
 const MOCK_PROJECTS: Project[] = [
@@ -148,54 +149,62 @@ export const useProjects = () => {
         return;
       }
 
-      // Fetch projects from Supabase
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
+      // Use cached fetch for projects data
+      const projectsData = await cachedFetch(
+        CACHE_KEYS.PROJECTS(currentUser.id),
+        async () => {
+          // Fetch projects from Supabase
+          const { data: projectsData, error: projectsError } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false });
 
-      if (projectsError) throw projectsError;
+          if (projectsError) throw projectsError;
 
-      if (!projectsData || projectsData.length === 0) {
-        setProjects([]);
-        return;
-      }
+          if (!projectsData || projectsData.length === 0) {
+            return [];
+          }
 
-      // Fetch task counts for each project
-      const projectIds = projectsData.map((p: any) => p.id);
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('tasks')
-        .select('project_id, status')
-        .in('project_id', projectIds);
+          // Fetch task counts for each project
+          const projectIds = projectsData.map((p: any) => p.id);
+          const { data: tasksData, error: tasksError } = await supabase
+            .from('tasks')
+            .select('project_id, status')
+            .in('project_id', projectIds);
 
-      if (tasksError) throw tasksError;
+          if (tasksError) throw tasksError;
 
-      // Calculate task counts and progress for each project
-      const projectsWithCounts = projectsData.map((project: any) => {
-        const projectTasks = tasksData?.filter((task: any) => task.project_id === project.id) || [];
-        const completedTasks = projectTasks.filter((task: any) => task.status === 'DONE').length;
-        const tasksCount = projectTasks.length;
+          // Calculate task counts and progress for each project
+          const projectsWithCounts = projectsData.map((project: any) => {
+            const projectTasks = tasksData?.filter((task: any) => task.project_id === project.id) || [];
+            const completedTasks = projectTasks.filter((task: any) => task.status === 'DONE').length;
+            const tasksCount = projectTasks.length;
         
-        // Calculate actual progress based on completed tasks, but use existing progress if no tasks
-        const calculatedProgress = tasksCount > 0 ? Math.round((completedTasks / tasksCount) * 100) : project.progress;
+            // Calculate actual progress based on completed tasks, but use existing progress if no tasks
+            const calculatedProgress = tasksCount > 0 ? Math.round((completedTasks / tasksCount) * 100) : project.progress;
 
-        return {
-          id: project.id,
-          name: project.name,
-          description: project.description || '',
-          status: project.status as Project['status'],
-          progress: calculatedProgress,
-          color: project.color,
-          tasksCount,
-          completedTasks,
-          due_date: project.due_date || undefined,
-          createdAt: project.created_at,
-          updatedAt: project.updated_at
-        } as Project;
-      });
+            return {
+              id: project.id,
+              name: project.name,
+              description: project.description || '',
+              status: project.status as Project['status'],
+              progress: calculatedProgress,
+              color: project.color,
+              tasksCount,
+              completedTasks,
+              due_date: project.due_date || undefined,
+              createdAt: project.created_at,
+              updatedAt: project.updated_at
+            } as Project;
+          });
 
-      setProjects(projectsWithCounts);
+          return projectsWithCounts;
+        },
+        CACHE_TTL.MEDIUM // 5 dakika cache
+      );
+
+      setProjects(projectsData);
     } catch (err) {
       logger.error('Error fetching projects', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to fetch projects');
@@ -261,6 +270,9 @@ export const useProjects = () => {
         .single();
 
       if (error) throw error;
+
+      // Invalidate cache for projects
+      invalidateCache(`projects_${currentUser.id}`);
 
       // Refetch projects to update the list
       await fetchProjects();
@@ -612,6 +624,9 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
       
       if (taskError) throw taskError;
       
+      // Invalidate cache for tasks
+      invalidateCache(`tasks_${projectId}`);
+      
       await fetchTasks();
       onTaskChange();
     } catch (err) {
@@ -643,6 +658,9 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
 
       if (error) throw error;
       
+      // Invalidate cache for tasks
+      invalidateCache(`tasks_${projectId}`);
+      
       await fetchTasks();
       onTaskChange();
     } catch (err) {
@@ -672,6 +690,9 @@ export const useProjectTasks = (projectId: string, onTaskChange: () => void) => 
         .eq('id', taskId);
 
       if (taskError) throw taskError;
+      
+      // Invalidate cache for tasks
+      invalidateCache(`tasks_${projectId}`);
       
       await fetchTasks();
       onTaskChange();

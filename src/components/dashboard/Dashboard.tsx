@@ -11,7 +11,7 @@ import ExpiringNotes from './ExpiringNotes';
 import { ActivityHeatmap } from './heatmap/ActivityHeatmap';
 import YourMind from './YourMind';
 
-export const Dashboard: React.FC = () => {
+export const Dashboard: React.FC = React.memo(() => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { analyticsData, isLoading: isLoadingAnalytics } = useAnalytics('all');
@@ -157,6 +157,6 @@ export const Dashboard: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Dashboard;

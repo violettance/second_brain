@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
 import { useAuth } from '../contexts/AuthContext';
+import { cachedFetch, CACHE_KEYS, CACHE_TTL } from '../lib/cachedFetch';
 
 // Define the structure of the graph data based on react-force-graph requirements
 export interface GraphNode {
@@ -93,22 +94,28 @@ const useKnowledgeGraph = () => {
       let longTermNotesMap: Record<string, string> = {};
       let projectsMap: Record<string, string> = {};
       if (missingShortTermNoteIds.length > 0) {
-        const { data } = await supabase.from('short_term_notes').select('id, title').in('id', missingShortTermNoteIds);
-        if (data) {
-          shortTermNotesMap = Object.fromEntries(data.map((n: any) => [n.id, n.title]));
-        }
+        const data = await cachedFetch(
+          `short_term_notes_titles_${missingShortTermNoteIds.join('_')}`,
+          () => supabase.from('short_term_notes').select('id, title').in('id', missingShortTermNoteIds).then(r => r.data || []),
+          CACHE_TTL.LONG
+        );
+        shortTermNotesMap = Object.fromEntries(data.map((n: any) => [n.id, n.title]));
       }
       if (missingLongTermNoteIds.length > 0) {
-        const { data } = await supabase.from('long_term_notes').select('id, title').in('id', missingLongTermNoteIds);
-        if (data) {
-          longTermNotesMap = Object.fromEntries(data.map((n: any) => [n.id, n.title]));
-        }
+        const data = await cachedFetch(
+          `long_term_notes_titles_${missingLongTermNoteIds.join('_')}`,
+          () => supabase.from('long_term_notes').select('id, title').in('id', missingLongTermNoteIds).then(r => r.data || []),
+          CACHE_TTL.LONG
+        );
+        longTermNotesMap = Object.fromEntries(data.map((n: any) => [n.id, n.title]));
       }
       if (missingProjectIds.length > 0) {
-        const { data } = await supabase.from('projects').select('id, name').in('id', missingProjectIds);
-        if (data) {
-          projectsMap = Object.fromEntries(data.map((n: any) => [n.id, n.name]));
-        }
+        const data = await cachedFetch(
+          `projects_titles_${missingProjectIds.join('_')}`,
+          () => supabase.from('projects').select('id, name').in('id', missingProjectIds).then(r => r.data || []),
+          CACHE_TTL.LONG
+        );
+        projectsMap = Object.fromEntries(data.map((n: any) => [n.id, n.name]));
       }
       for (const row of activeRows) {
         // Entity node (note, project, etc.)
