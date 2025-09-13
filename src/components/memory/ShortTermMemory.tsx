@@ -21,7 +21,7 @@ function simpleHash(str: string): string {
   return hash.toString();
 }
 
-export const ShortTermMemory: React.FC = () => {
+export const ShortTermMemory: React.FC = React.memo(() => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewNote, setPreviewNote] = useState<DailyNote | null>(null);
@@ -514,4 +514,4 @@ export const ShortTermMemory: React.FC = () => {
       )}
     </div>
   );
-};
+});

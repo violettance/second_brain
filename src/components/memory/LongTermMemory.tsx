@@ -44,7 +44,7 @@ const ParsedAnalysis = ({ text }: { text: string }) => {
   );
 };
 
-export const LongTermMemory: React.FC = () => {
+export const LongTermMemory: React.FC = React.memo(() => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewNote, setPreviewNote] = useState<DailyNote | null>(null);
@@ -508,4 +508,4 @@ export const LongTermMemory: React.FC = () => {
       {showAiInsights && <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setShowAiInsights(false)} />}
     </div>
   );
-};
+});

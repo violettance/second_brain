@@ -15,7 +15,7 @@ import { Task } from '../../types/projects';
 import { useAuth } from '../../contexts/AuthContext';
 import { logger } from '../../lib/logger';
 
-export const Analytics: React.FC = () => {
+export const Analytics: React.FC = React.memo(() => {
   const [timeRange, setTimeRange] = useState('30d');
   const [showPaywall, setShowPaywall] = useState(false);
   const { analyticsData, isLoading, exportData } = useAnalytics(timeRange);
@@ -805,4 +805,4 @@ export const Analytics: React.FC = () => {
       )}
     </div>
   );
-};
+});

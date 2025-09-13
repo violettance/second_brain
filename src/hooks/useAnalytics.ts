@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
+import { cachedFetch, CACHE_KEYS, CACHE_TTL } from '../lib/cachedFetch';
 
 interface AnalyticsData {
   totalNotes: number;
@@ -260,78 +261,90 @@ export const useAnalytics = (timeRange: string) => {
     const userId = user?.id || demoUserId;
     setIsLoading(true);
     setError(null);
+    
     try {
-      // 1. Fetch all needed data in parallel
-      const [shortNotesRes, longNotesRes, tasksRes, subtasksRes, connStatsRes] = await Promise.all([
-        supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', userId).is('archived_at', null),
-        supabase.from('long_term_notes').select('id, tags, note_date').eq('user_id', userId),
-        supabase.from('tasks').select('id').eq('user_id', userId),
-        supabase.from('subtasks').select('id').in('task_id',
-          (await supabase.from('tasks').select('id').eq('user_id', userId)).data?.map((t: any) => t.id) || []
-        ),
-        supabase.from('v3_user_note_connections_statistics').select('*').eq('user_id', userId).single()
-      ]);
+      // Use cached fetch for analytics data
+      const analyticsData = await cachedFetch(
+        CACHE_KEYS.ANALYTICS(userId, timeRange),
+        async () => {
+          // 1. Fetch all needed data in parallel
+          const [shortNotesRes, longNotesRes, tasksRes, subtasksRes, connStatsRes] = await Promise.all([
+            supabase.from('short_term_notes').select('id, tags, note_date').eq('user_id', userId).is('archived_at', null),
+            supabase.from('long_term_notes').select('id, tags, note_date').eq('user_id', userId),
+            supabase.from('tasks').select('id').eq('user_id', userId),
+            supabase.from('subtasks').select('id').in('task_id',
+              (await supabase.from('tasks').select('id').eq('user_id', userId)).data?.map((t: any) => t.id) || []
+            ),
+            supabase.from('v3_user_note_connections_statistics').select('*').eq('user_id', userId).single()
+          ]);
 
-      const shortNotes = Array.isArray(shortNotesRes.data) ? shortNotesRes.data : [];
-      const longNotes = Array.isArray(longNotesRes.data) ? longNotesRes.data : [];
-      const tasks = Array.isArray(tasksRes.data) ? tasksRes.data : [];
-      const subtasks = Array.isArray(subtasksRes.data) ? subtasksRes.data : [];
+          const shortNotes = Array.isArray(shortNotesRes.data) ? shortNotesRes.data : [];
+          const longNotes = Array.isArray(longNotesRes.data) ? longNotesRes.data : [];
+          const tasks = Array.isArray(tasksRes.data) ? tasksRes.data : [];
+          const subtasks = Array.isArray(subtasksRes.data) ? subtasksRes.data : [];
 
-      // Connections ve artış yüzdesi hesaplama
-      let connections = 0;
-      let prevConnections = 0;
-      let connectionGrowth = 0;
-      if (connStatsRes?.data) {
-        if (timeRange === '7d') {
-          connections = connStatsRes.data.last_7_days_connections || 0;
-          prevConnections = connStatsRes.data.prev_7_days_connections || 0;
-        } else if (timeRange === '30d') {
-          connections = connStatsRes.data.last_30_days_connections || 0;
-          prevConnections = connStatsRes.data.prev_30_days_connections || 0;
-        } else {
-          connections = connStatsRes.data.all_time_connections || 0;
-        }
-        if (prevConnections > 0) {
-          connectionGrowth = Math.round(((connections - prevConnections) / prevConnections) * 100);
-        } else {
-          connectionGrowth = connections > 0 ? 100 : 0;
-        }
-      }
+          // Connections ve artış yüzdesi hesaplama
+          let connections = 0;
+          let prevConnections = 0;
+          let connectionGrowth = 0;
+          if (connStatsRes?.data) {
+            if (timeRange === '7d') {
+              connections = connStatsRes.data.last_7_days_connections || 0;
+              prevConnections = connStatsRes.data.prev_7_days_connections || 0;
+            } else if (timeRange === '30d') {
+              connections = connStatsRes.data.last_30_days_connections || 0;
+              prevConnections = connStatsRes.data.prev_30_days_connections || 0;
+            } else {
+              connections = connStatsRes.data.all_time_connections || 0;
+            }
+            if (prevConnections > 0) {
+              connectionGrowth = Math.round(((connections - prevConnections) / prevConnections) * 100);
+            } else {
+              connectionGrowth = connections > 0 ? 100 : 0;
+            }
+          }
 
-      // 2. totalNotes
-      const totalNotes = shortNotes.length + longNotes.length;
-      // 3. activeTopics (unique tag count)
-      const allTags = [
-        ...shortNotes.flatMap((n: any) => n.tags || []),
-        ...longNotes.flatMap((n: any) => n.tags || [])
-      ];
-      const uniqueTags = Array.from(new Set(allTags));
-      const activeTopics = uniqueTags.length;
-      // 4. knowledgeScore
-      const knowledgeScore = shortNotes.length * 1 + longNotes.length * 3 + tasks.length * 2 + subtasks.length * 0.5;
-      // 5. growthRate (bu ay ve geçen ay eklenen not sayısı)
-      const now = new Date();
-      const thisMonth = now.getMonth();
-      const thisYear = now.getFullYear();
-      const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
-      const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
-      const countInMonth = (notes: any[], month: number, year: number) =>
-        notes.filter(n => {
-          const d = new Date(n.note_date);
-          return d.getMonth() === month && d.getFullYear() === year;
-        }).length;
-      const thisMonthNotes = countInMonth(shortNotes, thisMonth, thisYear) + countInMonth(longNotes, thisMonth, thisYear);
-      const lastMonthNotes = countInMonth(shortNotes, lastMonth, lastMonthYear) + countInMonth(longNotes, lastMonth, lastMonthYear);
-      const growthRate = lastMonthNotes > 0 ? Math.round(((thisMonthNotes - lastMonthNotes) / lastMonthNotes) * 100) : 0;
+          // 2. totalNotes
+          const totalNotes = shortNotes.length + longNotes.length;
+          // 3. activeTopics (unique tag count)
+          const allTags = [
+            ...shortNotes.flatMap((n: any) => n.tags || []),
+            ...longNotes.flatMap((n: any) => n.tags || [])
+          ];
+          const uniqueTags = Array.from(new Set(allTags));
+          const activeTopics = uniqueTags.length;
+          // 4. knowledgeScore
+          const knowledgeScore = shortNotes.length * 1 + longNotes.length * 3 + tasks.length * 2 + subtasks.length * 0.5;
+          // 5. growthRate (bu ay ve geçen ay eklenen not sayısı)
+          const now = new Date();
+          const thisMonth = now.getMonth();
+          const thisYear = now.getFullYear();
+          const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+          const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+          const countInMonth = (notes: any[], month: number, year: number) =>
+            notes.filter(n => {
+              const d = new Date(n.note_date);
+              return d.getMonth() === month && d.getFullYear() === year;
+            }).length;
+          const thisMonthNotes = countInMonth(shortNotes, thisMonth, thisYear) + countInMonth(longNotes, thisMonth, thisYear);
+          const lastMonthNotes = countInMonth(shortNotes, lastMonth, lastMonthYear) + countInMonth(longNotes, lastMonth, lastMonthYear);
+          const growthRate = lastMonthNotes > 0 ? Math.round(((thisMonthNotes - lastMonthNotes) / lastMonthNotes) * 100) : 0;
+
+          return {
+            totalNotes,
+            activeTopics,
+            knowledgeScore,
+            connections,
+            growthRate,
+            connectionGrowth
+          };
+        },
+        CACHE_TTL.MEDIUM // 5 dakika cache
+      );
 
       setAnalyticsData(prev => ({
         ...prev,
-        totalNotes,
-        activeTopics,
-        knowledgeScore,
-        connections,
-        growthRate,
-        connectionGrowth
+        ...analyticsData
       }));
     } catch (err) {
       logger.error('Error fetching analytics', { error: err.message });
@@ -408,17 +421,24 @@ export async function fetchNotCreationTrends(timeRange: string = '30d', userId?:
   } else if (timeRange === 'all') {
     fromDate = null;
   }
-  let query = supabase.from('v2_daily_note_counts').select('note_date, total_count').order('note_date', { ascending: true });
-  if (fromDate) {
-    query = query.gte('note_date', fromDate);
-  }
-  if (userId) {
-    query = query.eq('user_id', userId);
-  }
-  const { data, error } = await query;
-  if (error) throw error;
+  const data = await cachedFetch(
+    `note_creation_trend_${userId}_${timeRange}`,
+    async () => {
+      let query = supabase.from('v2_daily_note_counts').select('note_date, total_count').order('note_date', { ascending: true });
+      if (fromDate) {
+        query = query.gte('note_date', fromDate);
+      }
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    CACHE_TTL.MEDIUM
+  );
   let cumulative = 0;
-  return (data || []).map((d: any) => {
+  return data.map((d: any) => {
     cumulative += d.total_count;
     const dateObj = new Date(d.note_date);
     const label = dateObj.toLocaleString('en-US', { month: 'short', day: 'numeric' });

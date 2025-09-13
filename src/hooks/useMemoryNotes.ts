@@ -3,6 +3,7 @@ import { DailyNote } from '../types/database';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
+import { cachedFetch, CACHE_KEYS, CACHE_TTL, invalidateCache } from '../lib/cachedFetch';
 
 // Import the shared mock storage and notification system from useDailyNotes
 // This ensures synchronization between memory notes and daily notes
@@ -133,37 +134,44 @@ export const useMemoryNotes = () => {
         return;
       }
 
-      // Fetch from Supabase
-      const [shortTermResult, longTermResult] = await Promise.all([
-        supabase
-          .from('short_term_notes')
-          .select('*')
-          .eq('user_id', userId)
-          .is('archived_at', null)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('long_term_notes')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
+      // Use cached fetch for memory notes data
+      const [shortTermNotes, longTermNotes] = await Promise.all([
+        cachedFetch(
+          CACHE_KEYS.MEMORY_NOTES(userId, 'short'),
+          () => supabase
+            .from('short_term_notes')
+            .select('*')
+            .eq('user_id', userId)
+            .is('archived_at', null)
+            .order('created_at', { ascending: false })
+            .then(r => r.data || []),
+          CACHE_TTL.MEDIUM
+        ),
+        cachedFetch(
+          CACHE_KEYS.MEMORY_NOTES(userId, 'long'),
+          () => supabase
+            .from('long_term_notes')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .then(r => r.data || []),
+          CACHE_TTL.MEDIUM
+        )
       ]);
 
-      if (shortTermResult.error) throw shortTermResult.error;
-      if (longTermResult.error) throw longTermResult.error;
+      // Transform to include memory_type
+      const transformedShortTermNotes = shortTermNotes.map((note: any) => ({
+        ...note,
+        memory_type: 'short-term' as const
+      }));
 
-             // Transform to include memory_type
-       const shortTermNotes = (shortTermResult.data || []).map((note: any) => ({
-         ...note,
-         memory_type: 'short-term' as const
-       }));
-
-       const longTermNotes = (longTermResult.data || []).map((note: any) => ({
+      const transformedLongTermNotes = longTermNotes.map((note: any) => ({
          ...note,
          memory_type: 'long-term' as const
        }));
 
-      setShortTermNotes(shortTermNotes);
-      setLongTermNotes(longTermNotes);
+      setShortTermNotes(transformedShortTermNotes);
+      setLongTermNotes(transformedLongTermNotes);
     } catch (err) {
       logger.error('Error fetching notes', { error: err.message });
       setError(err instanceof Error ? err.message : 'Failed to fetch notes');
@@ -264,6 +272,11 @@ export const useMemoryNotes = () => {
           setLongTermNotes(prev => [newNote, ...prev]);
         }
       }
+      
+      // Invalidate cache for memory notes
+      invalidateCache(`memory_short_${user.id}`);
+      invalidateCache(`memory_long_${user.id}`);
+      invalidateCache(`notes_${user.id}`);
       
       // Refetch notes for both memory and daily views
       await fetchNotes();

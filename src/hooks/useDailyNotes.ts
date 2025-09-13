@@ -3,6 +3,7 @@ import { DailyNote } from '../types/database';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
+import { cachedFetch, CACHE_KEYS, CACHE_TTL, invalidateCache } from '../lib/cachedFetch';
 
 // In-memory storage for mock data (shared across all hook instances)
 let mockNotesStorage: DailyNote[] = [
@@ -121,9 +122,6 @@ export const useDailyNotes = (selectedDate?: Date) => {
         setNotes(filteredNotes);
         return;
       }
-      let shortTermNotes = [];
-      let longTermNotes = [];
-      
       // Build base queries
       let shortTermQuery = supabase
         .from('short_term_notes')
@@ -146,29 +144,34 @@ export const useDailyNotes = (selectedDate?: Date) => {
         longTermQuery = longTermQuery.eq('note_date', dateString);
       }
       
-      // Fetch both types of notes
-      const [shortTermResult, longTermResult] = await Promise.all([
-        shortTermQuery,
-        longTermQuery
+      // Use cached fetch for daily notes data
+      const [shortTermNotesData, longTermNotesData] = await Promise.all([
+        cachedFetch(
+          CACHE_KEYS.NOTES(userId, date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : undefined),
+          () => shortTermQuery.then(r => r.data || []),
+          CACHE_TTL.MEDIUM
+        ),
+        cachedFetch(
+          CACHE_KEYS.NOTES(userId, date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : undefined) + '_long',
+          () => longTermQuery.then(r => r.data || []),
+          CACHE_TTL.MEDIUM
+        )
       ]);
       
-      if (shortTermResult.error) throw shortTermResult.error;
-      if (longTermResult.error) throw longTermResult.error;
-      
       // Transform short-term notes to include memory_type
-      shortTermNotes = (shortTermResult.data || []).map((note: any) => ({
+      const transformedShortTermNotes = shortTermNotesData.map((note: any) => ({
         ...note,
         memory_type: 'short-term' as const
       }));
       
       // Transform long-term notes to include memory_type
-      longTermNotes = (longTermResult.data || []).map((note: any) => ({
+      const transformedLongTermNotes = longTermNotesData.map((note: any) => ({
         ...note,
         memory_type: 'long-term' as const
       }));
       
       // Combine and sort all notes
-      const allNotes = [...shortTermNotes, ...longTermNotes].sort(
+      const allNotes = [...transformedShortTermNotes, ...transformedLongTermNotes].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
       
@@ -222,7 +225,10 @@ export const useDailyNotes = (selectedDate?: Date) => {
         // Add to shared mock storage
         mockNotesStorage.unshift(newNote);
         setNotes([...mockNotesStorage]);
-        notifySubscribers(); // <-- Bunu ekledim
+        notifySubscribers();
+        
+        // Invalidate cache for notes
+        invalidateCache(`notes_${user.id}`);
         return;
       }
       
@@ -282,6 +288,9 @@ export const useDailyNotes = (selectedDate?: Date) => {
           memory_type: 'long-term'
         };
       }
+      
+      // Invalidate cache for notes
+      invalidateCache(`notes_${user.id}`);
       
       // Refetch notes to reflect the new addition
       await fetchNotes(selectedDate);

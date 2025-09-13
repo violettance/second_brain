@@ -4,7 +4,7 @@ import { ProjectsList, ProjectsListRef } from './ProjectsList';
 import { CreateProjectModal } from './CreateProjectModal';
 import { Plus } from 'lucide-react';
 
-export const ProjectsPage: React.FC = () => {
+export const ProjectsPage: React.FC = React.memo(() => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const projectsListRef = useRef<ProjectsListRef>(null);
   const navigate = useNavigate();
@@ -49,4 +49,4 @@ export const ProjectsPage: React.FC = () => {
       )}
     </div>
   );
-};
+});
