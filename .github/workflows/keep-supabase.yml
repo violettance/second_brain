@@ -1,0 +1,12 @@
+name: Keep Supabase Awake
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # runs every day at 03:00 UTC
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: curl -s "https://juyzcctqoxypkrcdqahg.supabase.co/rest/v1/" | head -n 20
