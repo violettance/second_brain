@@ -109,7 +109,7 @@ class Logger {
 }
 
 export const logger = new Logger();
-export { scrubPII };
+export { Logger, scrubPII };
 
 
 
