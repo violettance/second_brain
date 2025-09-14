@@ -424,6 +424,10 @@ export const useDailyNotes = (selectedDate?: Date) => {
         if (error) throw error;
       }
       
+      // Invalidate all note and memory caches for this user
+      invalidateCache(`notes_${user.id}`);
+      invalidateCache(`memory_`);
+
       // Refetch notes to reflect the update
       await fetchNotes(selectedDate);
 
@@ -476,6 +480,10 @@ export const useDailyNotes = (selectedDate?: Date) => {
           
         if (error) throw error;
       }
+      
+      // Invalidate all note and memory caches for this user
+      invalidateCache(`notes_${user.id}`);
+      invalidateCache(`memory_`);
       
       // Refetch notes to reflect the deletion
       await fetchNotes(selectedDate);

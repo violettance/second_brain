@@ -352,7 +352,12 @@ export const useMemoryNotes = () => {
         setLongTermNotes(prev => [longTermNote, ...prev]);
       }
 
-      // Immediate sync with daily notes
+      // Invalidate all note and memory caches for this user
+      invalidateCache(`notes_${user.id}`);
+      invalidateCache(`memory_`);
+
+      // Refetch notes for both memory and daily views
+      await fetchNotes();
       await refetchDailyNotes();
 
       return longTermNote;
@@ -403,6 +408,10 @@ export const useMemoryNotes = () => {
           setLongTermNotes(prev => prev.filter(n => n.id !== noteId));
         }
       }
+      
+      // Invalidate all note and memory caches for this user
+      invalidateCache(`notes_${user.id}`);
+      invalidateCache(`memory_`);
       
       // Refetch notes to reflect the deletion
       await fetchNotes();
