@@ -1,0 +1,22 @@
+[test]
+# Test konfigürasyonu
+preload = ["./tests/setup.ts"]
+
+# Test environment variables
+env = [
+  "NODE_ENV=test"
+]
+
+# Test timeout (ms)
+timeout = 10000
+
+# Test patterns
+testMatch = ["tests/**/*.test.ts", "tests/**/*.test.tsx"]
+
+# Coverage settings
+coverage = true
+
+# Mock settings
+mock = {
+  auto = true
+}

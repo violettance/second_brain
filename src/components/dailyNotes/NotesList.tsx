@@ -62,50 +62,6 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
     }
   };
 
-  const handleDeleteNote = async (noteId: string, memoryType: 'short-term' | 'long-term') => {
-    try {
-      await deleteNote(noteId, memoryType);
-      // Refresh notes if callback provided
-      if (onRefresh) {
-        await onRefresh();
-      }
-    } catch (error) {
-      logger.error('Error deleting note', { error: error.message });
-    }
-  };
-
-  const toggleMemoryType = async (note: DailyNote) => {
-    try {
-      const newMemoryType = note.memory_type === 'short-term' ? 'long-term' : 'short-term';
-      await updateNote(note.id, { memory_type: newMemoryType });
-      setShowOptions(null);
-      // Refresh notes if callback provided
-      if (onRefresh) {
-        await onRefresh();
-      }
-    } catch (error) {
-      logger.error('Error updating note memory type', { error: error.message });
-    }
-  };
-
-  const handleStarNote = async (note: DailyNote) => {
-    try {
-      const isStarred = note.tags?.includes('starred') || false;
-      const newTags = isStarred 
-        ? note.tags.filter(tag => tag !== 'starred')
-        : [...(note.tags || []), 'starred'];
-      
-      await updateNote(note.id, { tags: newTags });
-      setShowOptions(null);
-      // Refresh notes if callback provided
-      if (onRefresh) {
-        await onRefresh();
-      }
-    } catch (error) {
-      logger.error('Error starring note', { error: error.message });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
@@ -236,7 +192,19 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                       </button>
                       
                       <button
-                        onClick={() => toggleMemoryType(note)}
+                        onClick={async () => {
+                          try {
+                            const newMemoryType = note.memory_type === 'short-term' ? 'long-term' : 'short-term';                                                                                                        
+                            await updateNote(note.id, { memory_type: newMemoryType });
+                            setShowOptions(null);
+                            // Refresh notes if callback provided
+                            if (onRefresh) {
+                              await onRefresh();
+                            }
+                          } catch (error) {
+                            logger.error('Error updating note memory type', { error: error.message });
+                          }
+                        }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
                       >
                         {note.memory_type === 'short-term' ? (
@@ -253,7 +221,22 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                       </button>
                       
                       <button
-                        onClick={() => handleStarNote(note)}
+                        onClick={async () => {
+                          try {
+                            const isStarred = note.tags?.includes('starred') || false;
+                            const newTags = isStarred 
+                              ? note.tags.filter(tag => tag !== 'starred')
+                              : [...(note.tags || []), 'starred'];
+                            await updateNote(note.id, { tags: newTags });
+                            setShowOptions(null);
+                            // Refresh notes if callback provided
+                            if (onRefresh) {
+                              await onRefresh();
+                            }
+                          } catch (error) {
+                            logger.error('Error starring note', { error: error.message });
+                          }
+                        }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
                       >
                         <Star className={`h-3.5 w-3.5 ${note.tags?.includes('starred') ? 'text-yellow-400' : 'text-slate-400'}`} />
@@ -263,9 +246,17 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                       <div className="border-t border-slate-700 my-1"></div>
                       
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           if (window.confirm('Are you sure you want to delete this item?')) {
-                            handleDeleteNote(note.id, note.memory_type);
+                            try {
+                              await deleteNote(note.id, note.memory_type);
+                              // Refresh notes if callback provided
+                              if (onRefresh) {
+                                await onRefresh();
+                              }
+                            } catch (error) {
+                              logger.error('Error deleting note', { error: error.message });
+                            }
                           }
                           setShowOptions(null);
                         }}
