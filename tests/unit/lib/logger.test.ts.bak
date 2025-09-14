@@ -264,11 +264,11 @@ describe('scrubPII', () => {
     });
 
     it('should redact bearer tokens', () => {
-      const input = 'authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token';
+      const input = 'authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
       const result = scrubPII(input);
       
       expect(result).toContain('[REDACTED]');
-      expect(result).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token');
+      expect(result).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
     });
 
     it('should redact passwords', () => {

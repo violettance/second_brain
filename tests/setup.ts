@@ -4,7 +4,6 @@
 // Global test ayarları
 import { beforeAll, afterAll } from 'bun:test';
 import { Window } from 'happy-dom';
-import '@testing-library/jest-dom';
 
 // Setup HappyDOM environment
 const window = new Window();
