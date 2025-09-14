@@ -264,7 +264,7 @@ describe('scrubPII', () => {
     });
 
     it('should redact bearer tokens', () => {
-      const input = 'authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token';
+      const input = 'authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token.example.token';
       const result = scrubPII(input);
       
       expect(result).toContain('[REDACTED]');
