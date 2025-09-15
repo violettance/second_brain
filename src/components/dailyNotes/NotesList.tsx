@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { 
   Search, 
-  Filter, 
   Edit3, 
   Clock, 
   Brain, 
-  Tag, 
   Calendar,
   MoreHorizontal,
   Trash2,
@@ -21,16 +19,18 @@ interface NotesListProps {
   onDirectEdit?: (note: DailyNote) => void;
   notes?: DailyNote[];
   onRefresh?: () => Promise<void>;
+  updateNoteOverride?: (noteId: string, updates: { title?: string; content?: string; tags?: string[]; references?: any[]; memory_type?: 'short-term' | 'long-term'; }) => Promise<any>;
+  deleteNoteOverride?: (noteId: string, memoryType: 'short-term' | 'long-term') => Promise<void>;
 }
 
-export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, onDirectEdit, notes: propNotes, onRefresh }) => {
+export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, onDirectEdit, notes: propNotes, onRefresh, updateNoteOverride, deleteNoteOverride }) => {
   // Use provided notes or fetch them if not provided (for backward compatibility)
   const hookData = useDailyNotes(propNotes ? undefined : (selectedDate || undefined));
   const notes = propNotes || hookData.notes;
   const isLoading = propNotes ? false : hookData.isLoading;
   const error = propNotes ? null : hookData.error;
-  const deleteNote = hookData.deleteNote;
-  const updateNote = hookData.updateNote;
+  const deleteNote = deleteNoteOverride || hookData.deleteNote;
+  const updateNote = updateNoteOverride || hookData.updateNote;
   const [searchTerm, setSearchTerm] = useState('');
   const [showOptions, setShowOptions] = useState<string | null>(null);
 
@@ -202,7 +202,8 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                               await onRefresh();
                             }
                           } catch (error) {
-                            logger.error('Error updating note memory type', { error: error.message });
+                            const message = error instanceof Error ? error.message : String(error);
+                            logger.error('Error updating note memory type', { error: message });
                           }
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
@@ -234,7 +235,8 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                               await onRefresh();
                             }
                           } catch (error) {
-                            logger.error('Error starring note', { error: error.message });
+                            const message = error instanceof Error ? error.message : String(error);
+                            logger.error('Error starring note', { error: message });
                           }
                         }}
                         className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
@@ -255,7 +257,8 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                                 await onRefresh();
                               }
                             } catch (error) {
-                              logger.error('Error deleting note', { error: error.message });
+                              const message = error instanceof Error ? error.message : String(error);
+                              logger.error('Error deleting note', { error: message });
                             }
                           }
                           setShowOptions(null);
