@@ -18,8 +18,10 @@ export const DailyNotes: React.FC = React.memo(() => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Get all notes (not filtered by date for calendar view) and selected date notes
-  const { notes: allNotes, refetch: refetchAll } = useDailyNotes();
-  const { notes: selectedDateNotes, refetch: refetchSelected } = useDailyNotes(selectedDate);
+  const allNotesHook = useDailyNotes();
+  const selectedDateHook = useDailyNotes(selectedDate);
+  const { notes: allNotes, refetch: refetchAll, updateNote: updateNoteAll, deleteNote: deleteNoteAll } = allNotesHook;
+  const { notes: selectedDateNotes, refetch: refetchSelected, updateNote: updateNoteSelected, deleteNote: deleteNoteSelected } = selectedDateHook;
 
   const handlePreviewNote = (note: DailyNote) => {
     setPreviewNote(note);
@@ -140,6 +142,8 @@ export const DailyNotes: React.FC = React.memo(() => {
                 onDirectEdit={handleEditNote}
                 notes={selectedDateNotes}
                 onRefresh={async () => { await refetchSelected(); await refetchAll(); }}
+                updateNoteOverride={updateNoteSelected}
+                deleteNoteOverride={deleteNoteSelected}
               />
             </div>
             
@@ -200,6 +204,8 @@ export const DailyNotes: React.FC = React.memo(() => {
               onDirectEdit={handleEditNote}
               notes={allNotes}
               onRefresh={refetchAll}
+              updateNoteOverride={updateNoteAll}
+              deleteNoteOverride={deleteNoteAll}
             />
           </div>
         )}

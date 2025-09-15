@@ -275,7 +275,7 @@ export const useAnalytics = (timeRange: string) => {
             supabase.from('subtasks').select('id').in('task_id',
               (await supabase.from('tasks').select('id').eq('user_id', userId)).data?.map((t: any) => t.id) || []
             ),
-            supabase.from('v3_user_note_connections_statistics').select('*').eq('user_id', userId).single()
+            supabase.from('v3_user_note_connections_statistics').select('*').eq('user_id', userId).maybeSingle()
           ]);
 
           const shortNotes = Array.isArray(shortNotesRes.data) ? shortNotesRes.data : [];

@@ -289,10 +289,9 @@ export const useDailyNotes = (selectedDate?: Date) => {
         };
       }
       
-      // Invalidate cache for notes
+      // Optimistic add to UI, then invalidate and refetch
+      setNotes(prev => [newNote, ...prev]);
       invalidateCache(`notes_${user.id}`);
-      
-      // Refetch notes to reflect the new addition
       await fetchNotes(selectedDate);
     } catch (err) {
       logger.error('Failed to save daily note', {
@@ -354,22 +353,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
       
       // If memory type is changing, we need to move the note between tables
       if (newMemoryType && newMemoryType !== currentNote.memory_type) {
-        // Delete from current table
-        if (currentNote.memory_type === 'short-term') {
-          const { error: deleteError } = await supabase
-            .from('short_term_notes')
-            .delete()
-            .eq('id', noteId);
-          if (deleteError) throw deleteError;
-        } else {
-          const { error: deleteError } = await supabase
-            .from('long_term_notes')
-            .delete()
-            .eq('id', noteId);
-          if (deleteError) throw deleteError;
-        }
-        
-        // Create in new table
+        // Create in new table first
         const noteData = {
           user_id: currentNote.user_id,
           title: updates.title || currentNote.title,
@@ -391,6 +375,13 @@ export const useDailyNotes = (selectedDate?: Date) => {
           if (error) throw error;
           if (!data) throw new Error('Failed to move note');
           newNote = { ...data, memory_type: 'short-term' };
+          // After successful insert, remove from long-term (hard delete)
+          const { error: deleteError } = await supabase
+            .from('long_term_notes')
+            .delete()
+            .eq('id', noteId)
+            .eq('user_id', user.id);
+          if (deleteError) throw deleteError;
         } else {
           const { data, error } = await supabase
             .from('long_term_notes')
@@ -400,6 +391,13 @@ export const useDailyNotes = (selectedDate?: Date) => {
           if (error) throw error;
           if (!data) throw new Error('Failed to move note');
           newNote = { ...data, memory_type: 'long-term' };
+          // For short-term, prefer soft-delete (archive) due to common RLS restrictions
+          const { error: archiveError } = await supabase
+            .from('short_term_notes')
+            .update({ archived_at: new Date().toISOString() })
+            .eq('id', noteId)
+            .eq('user_id', user.id);
+          if (archiveError) throw archiveError;
         }
         
         // Update local state
@@ -418,6 +416,7 @@ export const useDailyNotes = (selectedDate?: Date) => {
             generated_mermaid: null // Clear diagram when content is updated
           })
           .eq('id', noteId)
+          .eq('user_id', user.id)
           .select()
           .single();
           

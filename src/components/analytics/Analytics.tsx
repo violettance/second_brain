@@ -52,7 +52,7 @@ export const Analytics: React.FC = React.memo(() => {
       .from('v2_analytics_memory_distribution_bars')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
     if (error || !data) {
       setMemoryBarData([]);
       return;
@@ -232,7 +232,7 @@ export const Analytics: React.FC = React.memo(() => {
         .from('v2_analytics_total_thoughts_change')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       if (error || !data) {
         setTotalThoughts(0);
         setTotalChange(null);
@@ -269,7 +269,7 @@ export const Analytics: React.FC = React.memo(() => {
         .from('analytics_active_topics')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       if (error || !data) {
         setActiveTopics(0);
         setActiveTopicsChange(null);
@@ -310,7 +310,7 @@ export const Analytics: React.FC = React.memo(() => {
         .from('v2_analytics_knowledge_score')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       if (data && !error) {
         let score = 0;
         let prev = null;
