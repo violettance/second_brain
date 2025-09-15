@@ -1,376 +1,116 @@
-# 🧠 Second Brain - Knowledge Management System
+# Second Brain - AI-Powered Knowledge Management
 
-A modern, AI-powered knowledge management application built with React, TypeScript, and Supabase. Transform scattered thoughts into connected knowledge with intelligent note-taking, analytics, and visualization.
+Transform scattered thoughts into connected knowledge with our intelligent note-taking system that grows smarter with every entry. Built for polymaths who want to turn their ideas into powerful, interconnected knowledge.
 
 ![Second Brain Dashboard](public/dashboard.png)
 
-## ✨ Features
+## ✨ Core Features
 
-### 🏠 **Landing & Authentication**
-- Beautiful landing page with feature showcase
-- Secure authentication with Supabase
-- Demo mode for quick exploration
+### 📝 **Intelligent Note Management**
+- **Daily Notes**: Capture daily thoughts and reflections with automatic linking
+- **Short-term Memory**: 30-day evaluation period with auto-archiving
+- **Long-term Memory**: Permanent knowledge base for important insights
+- **Voice Recording**: Instant voice-to-text transcription and note creation
+- **AI-Powered Tagging**: Automatic categorization with intelligent suggestions
 
-### 📝 **Note Management**
-- **Daily Notes**: Capture daily thoughts and reflections
-- **Short-term Memory**: Temporary notes (auto-archive after 30 days)
-- **Long-term Memory**: Permanent knowledge base
-- Rich text editing with formatting tools
-- Tag-based organization system
+### 🔗 **Knowledge Discovery**
+- **Interactive Knowledge Graph**: Visualize relationships between your ideas
+- **Connection Discovery**: AI automatically finds hidden relationships
+- **Pattern Recognition**: Discover trends and insights across your notes
+- **Smart Diagrams**: Generate Mermaid diagrams from your notes
 
-### 📊 **Advanced Analytics**
-- Interactive bubble charts for topic visualization
-- Knowledge growth tracking over time
-- Learning pattern analysis
-- Word clouds and trend visualization
-- AI-powered insights (Pro feature)
+### 📊 **Analytics & Insights**
+- **Analytics Dashboard**: Track your knowledge growth and productivity
+- **Daily Insights**: AI-powered analysis of your short-term notes
+- **Deep AI Analysis**: Advanced insights for your permanent knowledge base
+- **Learning Patterns**: Understand how your thinking evolves
 
-### 🎯 **Project Management**
-- Knowledge domain organization
-- Task and subtask management
-- Progress tracking with visual indicators
-- Kanban-style project boards
+### 🎯 **Project Organization**
+- **Project Management**: Organize knowledge by domains and topics
+- **Task Management**: Break down complex ideas into actionable tasks
+- **Progress Tracking**: Visual indicators for project completion
+- **Kanban Boards**: Drag-and-drop task organization
 
-### 🔗 **Knowledge Graph**
-- Interactive network visualization
-- Semantic connections between notes
-- Relationship strength indicators
-- Filterable by type and date
+### 💎 **Pro Features**
+- **Connection Discovery**: AI finds hidden relationships between ideas
+- **Pattern Recognition & Trends**: Advanced analytics with AI insights
+- **Daily Insights**: Personalized recommendations for short-term notes
+- **Deep AI Analysis**: Comprehensive analysis of your knowledge base
+- **Mermaid Diagram Generation**: Visualize complex ideas and processes
+- **Offline Mode + Sync**: Work anywhere, sync everywhere
+- **Theme Choices**: Customize your experience
 
-### 💎 **Premium Features**
-- AI-powered knowledge gap analysis
-- Personalized learning recommendations
-- Advanced pattern recognition
-- Priority support
 
-## 🏗️ Architecture
+## 💰 Pricing
 
-```mermaid
-graph TB
-    A[React Frontend] --> B[Supabase Backend]
-    A --> C[TypeScript Types]
-    A --> D[Tailwind CSS]
-    
-    B --> E[PostgreSQL Database]
-    B --> F[Row Level Security]
-    B --> G[Real-time Subscriptions]
-    
-    E --> H[Profiles Table]
-    E --> I[Notes Tables]
-    E --> J[Projects & Tasks]
-    E --> K[Analytics Data]
-    E --> L[Knowledge Graph]
-    
-    subgraph "Frontend Components"
-        M[Landing Page]
-        N[Dashboard]
-        O[Note Editor]
-        P[Analytics Charts]
-        Q[Knowledge Graph Viz]
-    end
-    
-    subgraph "Data Flow"
-        R[User Input] --> S[React Hooks]
-        S --> T[Supabase Client]
-        T --> U[Database Operations]
-        U --> V[Real-time Updates]
-    end
-```
+### Free Plan - $0 forever
+Perfect for capturing your first ideas:
+- Daily notes & reflections
+- Short-term memory (30-day auto-archive)
+- Long-term memory storage
+- Basic project management
+- Voice recording & transcription
+- AI-powered tagging system
+- Interactive knowledge graph
+- Limited mermaid diagram generation
+- Analytics dashboard
+- Export capabilities
 
-## 🗄️ Database Schema
+### Pro Plan - $9 per month
+For polymaths building their second brain:
+- Everything in Free
+- Connection discovery
+- Pattern recognition & trends
+- Daily insights for short-term notes
+- Deep AI analysis of your permanent knowledge base
+- Advanced analytics with AI-powered insights
+- Mermaid diagram generation
+- Offline mode + sync
+- Feature request priority
+- Theme choices
 
-```mermaid
-erDiagram
-    profiles ||--o{ short_term_notes : creates
-    profiles ||--o{ long_term_notes : creates
-    profiles ||--o{ projects : owns
-    profiles ||--o{ analytics_data : generates
-    
-    projects ||--o{ tasks : contains
-    tasks ||--o{ subtasks : has
-    
-    profiles ||--o{ note_connections : creates
-    profiles ||--o{ knowledge_graph_nodes : owns
-    profiles ||--o{ knowledge_graph_edges : creates
-    
-    profiles {
-        uuid id PK
-        text name
-        text email
-        text subscription_plan
-        timestamptz created_at
-    }
-    
-    short_term_notes {
-        uuid id PK
-        uuid user_id FK
-        text title
-        text content
-        text[] tags
-        date note_date
-        timestamptz archived_at
-    }
-    
-    long_term_notes {
-        uuid id PK
-        uuid user_id FK
-        text title
-        text content
-        text[] tags
-        integer importance_score
-    }
-    
-    projects {
-        uuid id PK
-        uuid user_id FK
-        text name
-        text status
-        integer progress
-        text color
-    }
-    
-    knowledge_graph_nodes {
-        uuid id PK
-        uuid user_id FK
-        text node_id
-        text label
-        text node_type
-        integer size
-        text color
-    }
-```
 
-## 🚀 Getting Started
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
+## 🔧 Built With
 
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/second-brain.git
-cd second-brain
-```
-
-2. **Install dependencies**
-```bash
-npm install
-```
-
-3. **Set up Supabase**
-```bash
-# Create a new Supabase project at https://supabase.com
-# Copy your project URL and anon key
-```
-
-4. **Configure environment variables**
-```bash
-# Create .env file
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-5. **Run database migrations**
-```bash
-# Apply the migration file in supabase/migrations/
-# This creates all necessary tables and policies
-```
-
-6. **Start development server**
-```bash
-npm run dev
-```
-
-### Setting Up Supabase (Optional)
-
-The app works with mock data by default. To connect to a real Supabase database:
-
-1. **Create a Supabase project** at [https://supabase.com](https://supabase.com)
-2. **Get your project credentials** from the API settings
-3. **Create a `.env` file** in the project root:
-```bash
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
-4. **Run the migration** to create the database tables:
-   - Go to your Supabase project dashboard
-   - Navigate to SQL Editor
-   - Copy and paste the contents of `supabase/migrations/20250623150558_wandering_meadow.sql`
-   - Run the migration
-
-## 📝 Using Daily Notes
-
-The daily notes feature supports both **short-term** and **long-term** memory types:
-
-### Short-term Notes
-- Automatically archived after 30 days
-- Perfect for daily reflections, meeting notes, temporary thoughts
-- Soft-deleted (can be recovered)
-- Stored in `short_term_notes` table
-
-### Long-term Notes
-- Permanent storage
-- Best for important insights, reference material, knowledge you want to keep
-- Hard-deleted when removed
-- Stored in `long_term_notes` table
-
-### Features
-- **Calendar View**: Heat-map showing note density per day
-- **List View**: Chronological list of all notes
-- **Rich Editor**: Formatting toolbar with basic text styling
-- **Tagging System**: Organize notes with hashtags
-- **Memory Type Toggle**: Move notes between short-term and long-term
-- **Search**: Find notes by title, content, or tags
-- **Star Notes**: Mark important notes for quick access
-
-## 🎨 Design System
-
-### Color Palette
-- **Primary**: `#C2B5FC` (Purple)
-- **Secondary**: `#a7c7e7` (Light Blue)
-- **Success**: `#b8e6b8` (Light Green)
-- **Warning**: `#f4c2a1` (Light Orange)
-- **Error**: `#e7a7c7` (Light Pink)
-- **Background**: `#0f172a` (Slate 900)
-
-### Typography
-- **Headings**: Inter, 120% line height
-- **Body**: Inter, 150% line height
-- **Code**: JetBrains Mono
-
-### Spacing
-- **Base unit**: 8px
-- **Component padding**: 16px, 24px
-- **Section spacing**: 24px, 32px
-
-## 🔧 Tech Stack
-
-### Frontend
-- **React 18** - UI framework
+- **React** - Modern UI framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
-- **Lucide React** - Icons
-- **Vite** - Build tool
+- **Supabase** - Backend & Database
+- **AI Integration** - Smart features
 
-### Backend
-- **Supabase** - Backend as a Service
-- **PostgreSQL** - Database
-- **Row Level Security** - Data protection
-- **Real-time subscriptions** - Live updates
-
-### Analytics & Visualization
-- **Custom SVG charts** - Performance optimized
-- **Interactive knowledge graphs** - D3.js inspired
-- **Responsive design** - Mobile-first approach
-
-## 📱 User Flow
-
-```mermaid
-flowchart TD
-    A[Landing Page] --> B{User Authenticated?}
-    B -->|No| C[Auth Page]
-    B -->|Yes| D[Dashboard]
-    
-    C --> E[Login/Register]
-    E --> D
-    
-    D --> F[Daily Notes]
-    D --> G[Memory Management]
-    D --> H[Projects]
-    D --> I[Analytics]
-    
-    F --> J[Note Editor]
-    G --> K[Short/Long Term]
-    H --> L[Project Detail]
-    I --> M[Knowledge Graph]
-    
-    M --> N{Pro Feature?}
-    N -->|Yes| O[Paywall]
-    N -->|No| P[View Analytics]
-    
-    O --> Q[Upgrade Flow]
-```
-
-## 🔐 Security Features
-
-- **Row Level Security (RLS)** - Database-level access control
-- **JWT Authentication** - Secure token-based auth
-- **Data Encryption** - At rest and in transit
-- **CORS Protection** - Cross-origin request security
-- **Input Validation** - XSS and injection prevention
-
-## 📈 Performance Optimizations
-
-- **Code Splitting** - Lazy loading of components
-- **Image Optimization** - WebP format with fallbacks
-- **Database Indexing** - Optimized query performance
-- **Caching Strategy** - Browser and CDN caching
-- **Bundle Analysis** - Tree shaking and minification
-
-## 🧪 Testing Strategy
-
-```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
-```
-
-## 🚀 Deployment
-
-### Netlify (Recommended)
-```bash
-# Build for production
-npm run build
-
-# Deploy to Netlify
-npm run deploy
-```
-
-### Manual Deployment
-```bash
-# Build static files
-npm run build
-
-# Upload dist/ folder to your hosting provider
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Commercial License - All Rights Reserved**
+
+This software and its source code are proprietary and confidential. You may not use, copy, modify, distribute, or create derivative works of this software without explicit written permission from the copyright holder.
+
+**Restrictions:**
+- ❌ Commercial use is prohibited
+- ❌ Distribution is prohibited  
+- ❌ Modification is prohibited
+- ❌ Private use is prohibited
+- ❌ Sublicensing is prohibited
+
+For licensing inquiries, please contact: productora.analytics@gmail.com
+
+© 2025 Second Brain. All rights reserved.
 
 ## 🙏 Acknowledgments
 
 - [Supabase](https://supabase.com) - Backend infrastructure
 - [Tailwind CSS](https://tailwindcss.com) - Styling framework
 - [Lucide](https://lucide.dev) - Beautiful icons
-- [Unsplash](https://unsplash.com) - Stock photography
+- [React](https://react.dev) - Frontend framework
 
-## 📞 Support
+## 📞 Support & Contact
 
-- 📧 Email: support@secondbrain.app
-- 💬 Discord: [Join our community](https://discord.gg/secondbrain)
-- 📖 Docs: [Documentation](https://docs.secondbrain.app)
+- 📧 Email: productora.analytics@gmail.com
 - 🐛 Issues: [GitHub Issues](https://github.com/yourusername/second-brain/issues)
+- 💼 Business Inquiries: productora.analytics@gmail.com
+- 🔒 Security Issues: productora.analytics@gmail.com
 
 ---
 
-**Built with ❤️ by the Second Brain team**
+**Built with ❤️ by the Second Brain**
