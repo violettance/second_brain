@@ -29,7 +29,6 @@ createRoot(document.getElementById('root')!).render(
       apiKey={posthogKey}
       options={{
         api_host: posthogHost,
-        defaults: '2025-05-24',
         capture_exceptions: true,
         debug: isPosthogDebugEnabled,
       }}
