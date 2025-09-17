@@ -13,6 +13,14 @@ export default defineConfig({
     }),
   ],
   server: {
+    proxy: {
+      '/ph': {
+        target: 'https://us.i.posthog.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/ph/, ''),
+      },
+    },
     headers: {
       // Development CSP: allow Vite HMR and Datadog intake
       'Content-Security-Policy': [
@@ -23,7 +31,7 @@ export default defineConfig({
         "img-src 'self' data: blob:",
         "font-src 'self'",
         // allow localhost/ws for HMR + Supabase (wss) + Datadog intake
-        "connect-src 'self' http://localhost:* ws://localhost:* https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in https://browser-intake-us5-datadoghq.com https://*.datadoghq.com",
+        "connect-src 'self' http://localhost:* ws://localhost:* https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in https://browser-intake-us5-datadoghq.com https://*.datadoghq.com https://us.i.posthog.com https://eu.i.posthog.com",
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",

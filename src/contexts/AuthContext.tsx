@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import posthog from 'posthog-js';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Profile } from '../types/database';
 
@@ -32,6 +34,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setIsPro(false);
       }
+
+      // Identify user in PostHog when available; reset when logged out
+      try {
+        if (profile) {
+          const distinctId = String(profile.id);
+          posthog.identify(distinctId, {
+            email: profile.email,
+            name: profile.name,
+            subscription_plan: profile.subscription_plan || 'free',
+          });
+        } else {
+          posthog.reset();
+        }
+      } catch (_e) {
+        // swallow analytics errors; do not block auth flow
+      }
     };
 
     const initializeAuth = async () => {
@@ -53,14 +71,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initializeAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       if (session?.user) {
         supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single()
-          .then(({ data: profile }) => {
+          .then(({ data: profile }: { data: User | null }) => {
             if (profile) updateUserStatus(profile);
           });
       } else {
@@ -112,6 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setUser(null);
     setIsPro(false);
+    try { posthog.reset(); } catch (_e) {}
   };
 
   return (
