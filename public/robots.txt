@@ -1,0 +1,78 @@
+User-agent: *
+
+# Disallow private app areas
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /tasks
+Disallow: /projects
+Disallow: /daily-notes
+Disallow: /short-term-memory
+Disallow: /long-term-memory
+Disallow: /knowledge-network
+
+# Allow public pages
+Allow: /
+Allow: /our-pricing
+Allow: /privacy-policy
+Allow: /terms-and-conditions
+
+# Sitemap
+Sitemap: https://second-brain-pkm.vercel.app/sitemap.xml
+
+# AI Crawlers explicit policy (LLM agents)
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /tasks
+Disallow: /projects
+Disallow: /daily-notes
+Disallow: /short-term-memory
+Disallow: /long-term-memory
+Disallow: /knowledge-network
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /tasks
+Disallow: /projects
+Disallow: /daily-notes
+Disallow: /short-term-memory
+Disallow: /long-term-memory
+Disallow: /knowledge-network
+
+User-agent: CCBot
+Allow: /
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /tasks
+Disallow: /projects
+Disallow: /daily-notes
+Disallow: /short-term-memory
+Disallow: /long-term-memory
+Disallow: /knowledge-network
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /tasks
+Disallow: /projects
+Disallow: /daily-notes
+Disallow: /short-term-memory
+Disallow: /long-term-memory
+Disallow: /knowledge-network
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /tasks
+Disallow: /projects
+Disallow: /daily-notes
+Disallow: /short-term-memory
+Disallow: /long-term-memory
+Disallow: /knowledge-network
+
+

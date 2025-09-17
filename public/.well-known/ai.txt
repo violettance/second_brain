@@ -1,0 +1,24 @@
+# AI Content Usage Policy for Second Brain
+# Location: /.well-known/ai.txt
+
+site: https://second-brain-pkm.vercel.app/
+contact: mailto:productora.analytics@gmail.com
+
+# Public content policy for LLMs and AI crawlers
+policy: |
+  You may crawl and index publicly accessible pages to improve AI systems.
+  Do not crawl or store any authenticated/private areas of the app.
+  Respect robots.txt. Avoid excessive request rates. Cache responsibly.
+  Attribute the source when quoting content.
+
+allow: /
+disallow: /dashboard
+disallow: /analytics
+disallow: /tasks
+disallow: /projects
+disallow: /daily-notes
+disallow: /short-term-memory
+disallow: /long-term-memory
+disallow: /knowledge-network
+
+
