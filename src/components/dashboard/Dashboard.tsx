@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Zap, BookOpen, Brain, LayoutGrid } from 'lucide-react';
 import { StatsCard } from './StatsCard';
@@ -89,7 +90,12 @@ export const Dashboard: React.FC = React.memo(() => {
   }, [navigate]);
 
   return (
-    <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
+    <>
+      <Helmet>
+        <title>Dashboard - Second Brain</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
       {/* Header - Added left padding for mobile view to prevent overlap with hamburger menu */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0 pl-12 lg:pl-0">
@@ -155,7 +161,8 @@ export const Dashboard: React.FC = React.memo(() => {
         {/* Extra padding at bottom to ensure proper scrolling */}
         <div className="h-8"></div>
       </div>
-    </div>
+      </div>
+    </>
   );
 });
 

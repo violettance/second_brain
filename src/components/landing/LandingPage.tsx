@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { 
   Brain, 
   ArrowRight, 
@@ -22,7 +23,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <>
+      <Helmet>
+        <title>Second Brain - AI-Powered Personal Knowledge Management</title>
+        <meta name="description" content="Transform your ideas into actionable insights with Second Brain. AI-powered personal knowledge management system that helps you capture, organize, and connect your thoughts seamlessly." />
+        <meta name="keywords" content="personal knowledge management, AI, productivity, note-taking, second brain, knowledge organization" />
+        <link rel="canonical" href="https://second-brain-pkm.vercel.app/" />
+        <meta property="og:title" content="Second Brain - AI-Powered Personal Knowledge Management" />
+        <meta property="og:description" content="Transform your ideas into actionable insights with Second Brain. AI-powered personal knowledge management system that helps you capture, organize, and connect your thoughts seamlessly." />
+        <meta property="og:url" content="https://second-brain-pkm.vercel.app/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Second Brain - AI-Powered Personal Knowledge Management" />
+        <meta name="twitter:description" content="Transform your ideas into actionable insights with Second Brain. AI-powered personal knowledge management system that helps you capture, organize, and connect your thoughts seamlessly." />
+        <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+      </Helmet>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23374151%22 fill-opacity=%220.1%22%3E%3Ccircle cx=%2230%22 cy=%2230%22 r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
       
@@ -415,6 +432,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 };

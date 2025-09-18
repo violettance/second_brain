@@ -40,6 +40,7 @@
     "react-dom": "^18.3.1",
     "react-force-graph": "^1.48.0",
     "react-force-graph-2d": "^1.28.0",
+    "react-helmet-async": "^2.0.5",
     "react-router-dom": "^7.6.3",
     "zod": "^4.0.5"
   },

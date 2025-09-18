@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { ArrowRight } from 'lucide-react';
 
 const sections = [
@@ -63,7 +64,23 @@ export const TermsAndConditions: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <>
+      <Helmet>
+        <title>Terms and Conditions - Second Brain | Legal Terms</title>
+        <meta name="description" content="Read Second Brain's terms and conditions. Learn about our legal terms, payment processing, user responsibilities, and service agreements for our knowledge management platform." />
+        <meta name="keywords" content="terms and conditions, legal terms, second brain terms, service agreement, user agreement" />
+        <link rel="canonical" href="https://second-brain-pkm.vercel.app/terms-and-conditions" />
+        <meta property="og:title" content="Terms and Conditions - Second Brain | Legal Terms" />
+        <meta property="og:description" content="Read Second Brain's terms and conditions. Learn about our legal terms, payment processing, user responsibilities, and service agreements for our knowledge management platform." />
+        <meta property="og:url" content="https://second-brain-pkm.vercel.app/terms-and-conditions" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Terms and Conditions - Second Brain | Legal Terms" />
+        <meta name="twitter:description" content="Read Second Brain's terms and conditions. Learn about our legal terms, payment processing, user responsibilities, and service agreements for our knowledge management platform." />
+        <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
         {/* Logo */}
@@ -102,7 +119,8 @@ export const TermsAndConditions: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

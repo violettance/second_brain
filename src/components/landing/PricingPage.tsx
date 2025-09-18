@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { logger } from '../../lib/logger';
 import { ArrowRight } from 'lucide-react';
@@ -70,7 +71,23 @@ export const PricingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <>
+      <Helmet>
+        <title>Pricing - Second Brain | Choose Your Plan</title>
+        <meta name="description" content="Choose the perfect Second Brain plan for your needs. Free tier available with AI-powered knowledge management, or upgrade to Pro for unlimited features and advanced AI capabilities." />
+        <meta name="keywords" content="second brain pricing, knowledge management pricing, AI productivity tools, personal knowledge management cost" />
+        <link rel="canonical" href="https://second-brain-pkm.vercel.app/our-pricing" />
+        <meta property="og:title" content="Pricing - Second Brain | Choose Your Plan" />
+        <meta property="og:description" content="Choose the perfect Second Brain plan for your needs. Free tier available with AI-powered knowledge management, or upgrade to Pro for unlimited features and advanced AI capabilities." />
+        <meta property="og:url" content="https://second-brain-pkm.vercel.app/our-pricing" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Pricing - Second Brain | Choose Your Plan" />
+        <meta name="twitter:description" content="Choose the perfect Second Brain plan for your needs. Free tier available with AI-powered knowledge management, or upgrade to Pro for unlimited features and advanced AI capabilities." />
+        <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
         {/* Logo */}
@@ -224,7 +241,8 @@ export const PricingPage: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 };
 

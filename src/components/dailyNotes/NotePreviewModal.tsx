@@ -12,11 +12,17 @@ interface NotePreviewModalProps {
   note: DailyNote;
   onClose: () => void;
   onEdit: () => void;
-  onUpdateNote: (updatedNote: DailyNote) => void;
+  updateNote: (noteId: string, updates: {
+    title?: string;
+    content?: string;
+    tags?: string[];
+    references?: any[];
+    memory_type?: 'short-term' | 'long-term';
+  }) => Promise<DailyNote | undefined>;
   refetchNotes: () => void;
 }
 
-export const NotePreviewModal: React.FC<NotePreviewModalProps> = ({ note, onClose, onEdit, onUpdateNote, refetchNotes }) => {
+export const NotePreviewModal: React.FC<NotePreviewModalProps> = ({ note, onClose, onEdit, updateNote, refetchNotes }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);

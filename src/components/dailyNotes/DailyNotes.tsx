@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { SEO } from '../SEO';
 import { Calendar } from './Calendar';
 import { NoteEditor } from './NoteEditor';
 import { NotesList } from './NotesList';
 import { NotePreviewModal } from './NotePreviewModal';
-import { CalendarDays, List, Plus, Menu, Clock, Brain, X } from 'lucide-react';
+import { CalendarDays, List, Plus, Clock, Brain, X } from 'lucide-react';
 import { DailyNote } from '../../types/database';
 import { useDailyNotes } from '../../hooks/useDailyNotes';
 
@@ -61,7 +62,9 @@ export const DailyNotes: React.FC = React.memo(() => {
   };
 
   return (
-    <div className="flex-1 bg-slate-900 overflow-hidden h-screen flex flex-col">
+    <>
+      <SEO title="Daily Notes - Second Brain" noindex nofollow />
+      <div className="flex-1 bg-slate-900 overflow-hidden h-screen flex flex-col">
       {/* Header */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
@@ -216,6 +219,8 @@ export const DailyNotes: React.FC = React.memo(() => {
             note={previewNote}
             onClose={handleClosePreview}
             onEdit={handleEditFromPreview}
+            updateNote={updateNoteAll as any}
+            refetchNotes={refetchAll}
           />
         )}
 
@@ -230,6 +235,7 @@ export const DailyNotes: React.FC = React.memo(() => {
           />
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 });

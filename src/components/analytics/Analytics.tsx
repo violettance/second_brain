@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { SEO } from '../SEO';
 import { 
   Tag, 
   TrendingUp,
@@ -473,7 +474,9 @@ export const Analytics: React.FC = React.memo(() => {
   );
 
   return (
-    <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
+    <>
+      <SEO title="Analytics - Second Brain" noindex nofollow />
+      <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
       {/* Mobile-Optimized Header */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
         <div className="flex flex-col space-y-4">
@@ -803,6 +806,7 @@ export const Analytics: React.FC = React.memo(() => {
           onUpgrade={handleUpgrade}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 });

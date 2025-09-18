@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { ArrowRight } from 'lucide-react';
 
 const sections = [
@@ -141,7 +142,23 @@ export const PrivacyPolicy: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <>
+      <Helmet>
+        <title>Privacy Policy - Second Brain | Data Protection & Privacy</title>
+        <meta name="description" content="Learn how Second Brain protects your personal data and privacy. Our comprehensive privacy policy covers data collection, usage, and your rights under GDPR and other privacy laws." />
+        <meta name="keywords" content="privacy policy, data protection, GDPR, second brain privacy, personal data security" />
+        <link rel="canonical" href="https://second-brain-pkm.vercel.app/privacy-policy" />
+        <meta property="og:title" content="Privacy Policy - Second Brain | Data Protection & Privacy" />
+        <meta property="og:description" content="Learn how Second Brain protects your personal data and privacy. Our comprehensive privacy policy covers data collection, usage, and your rights under GDPR and other privacy laws." />
+        <meta property="og:url" content="https://second-brain-pkm.vercel.app/privacy-policy" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Privacy Policy - Second Brain | Data Protection & Privacy" />
+        <meta name="twitter:description" content="Learn how Second Brain protects your personal data and privacy. Our comprehensive privacy policy covers data collection, usage, and your rights under GDPR and other privacy laws." />
+        <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+      </Helmet>
+      <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
         {/* Logo */}
@@ -180,7 +197,8 @@ export const PrivacyPolicy: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

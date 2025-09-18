@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SEO } from '../SEO';
 import { ProjectsList, ProjectsListRef } from './ProjectsList';
 import { CreateProjectModal } from './CreateProjectModal';
 import { Plus } from 'lucide-react';
@@ -14,7 +15,9 @@ export const ProjectsPage: React.FC = React.memo(() => {
   };
 
   return (
-    <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
+    <>
+      <SEO title="Projects - Second Brain" noindex nofollow />
+      <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
       {/* Header - Added left padding for mobile view to prevent overlap with hamburger menu */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
@@ -47,6 +50,7 @@ export const ProjectsPage: React.FC = React.memo(() => {
           onProjectCreated={() => projectsListRef.current?.refetch()} 
         />
       )}
-    </div>
+      </div>
+    </>
   );
 });
