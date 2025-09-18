@@ -14,15 +14,15 @@
 - [x] Deliverable: PR with head tags, robots.txt, sitemap.xml, OG assets
 
 ### Day 2 — Route-level Metadata (Titles, Descriptions per Page)
-- [ ] Install and set up `react-helmet-async`
-- [ ] Add unique `<title>` and meta description for `/` (Landing)
-- [ ] Add unique `<title>` and meta description for `/our-pricing`
-- [ ] Add unique `<title>` and meta description for `/privacy-policy`
-- [ ] Add unique `<title>` and meta description for `/terms-and-conditions`
-- [ ] Add canonical tags per route
-- [ ] Add `noindex, nofollow` meta for private app routes
-- [ ] QA: navigate all routes and confirm titles/meta update correctly
-- [ ] Deliverable: PR with Helmet usage and route-level SEO components
+- [x] Install and set up `react-helmet-async`
+- [x] Add unique `<title>` and meta description for `/` (Landing)
+- [x] Add unique `<title>` and meta description for `/our-pricing`
+- [x] Add unique `<title>` and meta description for `/privacy-policy`
+- [x] Add unique `<title>` and meta description for `/terms-and-conditions`
+- [x] Add canonical tags per route
+- [x] Add `noindex, nofollow` meta for private app routes
+- [x] QA: navigate all routes and confirm titles/meta update correctly
+- [x] Deliverable: PR with Helmet usage and route-level SEO components
 
 ### Day 3 — Pre-render/SSG (SPA SEO)
 - [ ] Choose plugin: `vite-plugin-ssg` or `vite-plugin-prerender`
