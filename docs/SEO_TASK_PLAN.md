@@ -24,12 +24,13 @@
 - [x] QA: navigate all routes and confirm titles/meta update correctly
 - [x] Deliverable: PR with Helmet usage and route-level SEO components
 
-### Day 3 — Pre-render/SSG (SPA SEO)
-- [ ] Choose plugin: `vite-plugin-ssg` or `vite-plugin-prerender`
-- [ ] Configure pre-render for: `/`, `/our-pricing`, `/privacy-policy`, `/terms-and-conditions`
-- [ ] Ensure critical content (H1/hero) is server-rendered in static HTML
-- [ ] Test build and inspect `dist/` HTML for content presence
-- [ ] Deliverable: PR enabling pre-render of public routes
+### Day 3 — Pre-render/SSG (SPA SEO) - ❌ CANCELLED
+- [❌] ~~Choose plugin: `vite-plugin-seo-prerender`~~ (Cancelled - slowed down build time)
+- [❌] ~~Configure pre-render for: `/`, `/our-pricing`, `/privacy-policy`, `/terms-and-conditions`~~ (Cancelled)
+- [❌] ~~Ensure critical content (H1/hero) is server-rendered in static HTML~~ (Cancelled)
+- [❌] ~~Test build and inspect `dist/` HTML for content presence~~ (Cancelled)
+- [❌] ~~Deliverable: PR enabling pre-render of public routes~~ (Cancelled)
+- [❌] **Decision**: Pre-render process slowed down build time by 8-10 seconds. Continuing as SPA.
 
 ### Day 4 — Structured Data (JSON-LD)
 - [ ] Add Organization schema (name, url, logo, sameAs) on `/`
