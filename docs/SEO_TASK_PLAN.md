@@ -38,7 +38,7 @@
 - [x] Add WebSite + SearchAction (if on-site search exists; else skip)
 - [x] Add Offer/AggregateOffer on `/our-pricing`
 - [x] Add WebPage schema to policy pages (or Article if applicable)
-- [ ] Validate with Rich Results Test; fix warnings
+ - [x] Validate with Rich Results Test; fix warnings
 - [x] Deliverable: PR with JSON-LD blocks and validation notes
 
 ### Day 5 — Core Web Vitals & Media Optimization
