@@ -86,6 +86,48 @@ export const PricingPage: React.FC = () => {
         <meta name="twitter:title" content="Pricing - Second Brain | Choose Your Plan" />
         <meta name="twitter:description" content="Choose the perfect Second Brain plan for your needs. Free tier available with AI-powered knowledge management, or upgrade to Pro for unlimited features and advanced AI capabilities." />
         <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+
+        {/* JSON-LD: Product with AggregateOffer for pricing */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: 'Second Brain',
+            description:
+              'AI-powered personal knowledge management system to capture, organize, and connect your thoughts seamlessly.',
+            image: ['https://second-brain-pkm.vercel.app/dashboard.png'],
+            brand: {
+              '@type': 'Brand',
+              name: 'Second Brain'
+            },
+            url: 'https://second-brain-pkm.vercel.app/our-pricing',
+            offers: {
+              '@type': 'AggregateOffer',
+              lowPrice: '0',
+              highPrice: '9',
+              priceCurrency: 'USD',
+              offerCount: '2',
+              offers: [
+                {
+                  '@type': 'Offer',
+                  name: 'Free',
+                  price: '0',
+                  priceCurrency: 'USD',
+                  availability: 'https://schema.org/InStock',
+                  url: 'https://second-brain-pkm.vercel.app/our-pricing'
+                },
+                {
+                  '@type': 'Offer',
+                  name: 'Pro',
+                  price: '9',
+                  priceCurrency: 'USD',
+                  availability: 'https://schema.org/InStock',
+                  url: 'https://second-brain-pkm.vercel.app/our-pricing'
+                }
+              ]
+            }
+          })}
+        </script>
       </Helmet>
       <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Navigation */}

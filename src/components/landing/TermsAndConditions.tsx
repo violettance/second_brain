@@ -79,6 +79,35 @@ export const TermsAndConditions: React.FC = () => {
         <meta name="twitter:title" content="Terms and Conditions - Second Brain | Legal Terms" />
         <meta name="twitter:description" content="Read Second Brain's terms and conditions. Learn about our legal terms, payment processing, user responsibilities, and service agreements for our knowledge management platform." />
         <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+
+        {/* JSON-LD: WebPage for Terms and Conditions */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: 'Terms and Conditions',
+            url: 'https://second-brain-pkm.vercel.app/terms-and-conditions',
+            description:
+              "Read Second Brain's terms and conditions. Learn about our legal terms, payment processing, user responsibilities, and service agreements for our knowledge management platform.",
+            breadcrumb: {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: 'https://second-brain-pkm.vercel.app/'
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'Terms and Conditions',
+                  item: 'https://second-brain-pkm.vercel.app/terms-and-conditions'
+                }
+              ]
+            }
+          })}
+        </script>
       </Helmet>
       <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Navigation */}

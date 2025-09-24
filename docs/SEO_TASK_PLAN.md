@@ -33,13 +33,13 @@
 - [❌] **Decision**: Pre-render process slowed down build time by 8-10 seconds. Continuing as SPA.
 
 ### Day 4 — Structured Data (JSON-LD)
-- [ ] Add Organization schema (name, url, logo, sameAs) on `/`
-- [ ] Add Product schema for Second Brain (description, image, url, offers)
-- [ ] Add WebSite + SearchAction (if on-site search exists; else skip)
-- [ ] Add Offer/AggregateOffer on `/our-pricing`
-- [ ] Add WebPage schema to policy pages (or Article if applicable)
+- [x] Add Organization schema (name, url, logo, sameAs) on `/`
+- [x] Add Product schema for Second Brain (description, image, url, offers)
+- [x] Add WebSite + SearchAction (if on-site search exists; else skip)
+- [x] Add Offer/AggregateOffer on `/our-pricing`
+- [x] Add WebPage schema to policy pages (or Article if applicable)
 - [ ] Validate with Rich Results Test; fix warnings
-- [ ] Deliverable: PR with JSON-LD blocks and validation notes
+- [x] Deliverable: PR with JSON-LD blocks and validation notes
 
 ### Day 5 — Core Web Vitals & Media Optimization
 - [ ] Add `loading="lazy"` and `decoding="async"` to non-critical images

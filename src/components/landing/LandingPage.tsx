@@ -38,6 +38,77 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
         <meta name="twitter:title" content="Second Brain - AI-Powered Personal Knowledge Management" />
         <meta name="twitter:description" content="Transform your ideas into actionable insights with Second Brain. AI-powered personal knowledge management system that helps you capture, organize, and connect your thoughts seamlessly." />
         <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+
+        {/* JSON-LD: Organization */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Second Brain',
+            url: 'https://second-brain-pkm.vercel.app/',
+            logo: 'https://second-brain-pkm.vercel.app/logo.png',
+            sameAs: [
+              'https://x.com/',
+              'https://www.linkedin.com/',
+              'https://github.com/'
+            ]
+          })}
+        </script>
+
+        {/* JSON-LD: Product */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: 'Second Brain',
+            description:
+              'AI-powered personal knowledge management system to capture, organize, and connect your thoughts seamlessly.',
+            image: ['https://second-brain-pkm.vercel.app/dashboard.png'],
+            brand: {
+              '@type': 'Brand',
+              name: 'Second Brain'
+            },
+            url: 'https://second-brain-pkm.vercel.app/',
+            offers: {
+              '@type': 'AggregateOffer',
+              lowPrice: '0',
+              highPrice: '9',
+              priceCurrency: 'USD',
+              offerCount: '2',
+              offers: [
+                {
+                  '@type': 'Offer',
+                  price: '0',
+                  priceCurrency: 'USD',
+                  url: 'https://second-brain-pkm.vercel.app/our-pricing',
+                  availability: 'https://schema.org/InStock'
+                },
+                {
+                  '@type': 'Offer',
+                  price: '9',
+                  priceCurrency: 'USD',
+                  url: 'https://second-brain-pkm.vercel.app/our-pricing',
+                  availability: 'https://schema.org/InStock'
+                }
+              ]
+            }
+          })}
+        </script>
+
+        {/* JSON-LD: WebSite with SearchAction (no on-site search implemented yet; providing potential action) */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Second Brain',
+            url: 'https://second-brain-pkm.vercel.app/',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: 'https://second-brain-pkm.vercel.app/?q={search_term_string}',
+              'query-input': 'required name=search_term_string'
+            }
+          })}
+        </script>
       </Helmet>
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Background Pattern */}

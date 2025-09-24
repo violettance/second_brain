@@ -157,6 +157,35 @@ export const PrivacyPolicy: React.FC = () => {
         <meta name="twitter:title" content="Privacy Policy - Second Brain | Data Protection & Privacy" />
         <meta name="twitter:description" content="Learn how Second Brain protects your personal data and privacy. Our comprehensive privacy policy covers data collection, usage, and your rights under GDPR and other privacy laws." />
         <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
+
+        {/* JSON-LD: WebPage for Privacy Policy */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: 'Privacy Policy',
+            url: 'https://second-brain-pkm.vercel.app/privacy-policy',
+            description:
+              'Learn how Second Brain protects your personal data and privacy. Our comprehensive privacy policy covers data collection, usage, and your rights under GDPR and other privacy laws.',
+            breadcrumb: {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: 'https://second-brain-pkm.vercel.app/'
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'Privacy Policy',
+                  item: 'https://second-brain-pkm.vercel.app/privacy-policy'
+                }
+              ]
+            }
+          })}
+        </script>
       </Helmet>
       <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Navigation */}
