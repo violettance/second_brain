@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ArrowUpRight, Brain } from 'lucide-react';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,26 +8,47 @@ export const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const { user } = useAuth();
 
-  // Eğer kullanıcı zaten giriş yaptıysa dashboard'a yönlendir
   useEffect(() => {
-    if (user) {
-      window.location.href = '/'; // ya da direkt Dashboard bileşenini render edebilirsin
-    }
+    if (user) window.location.href = '/';
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23374151%22 fill-opacity=%220.1%22%3E%3Ccircle cx=%2230%22 cy=%2230%22 r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-      
-      <div className="relative w-full max-w-md">
-        <div className="bg-slate-800/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 lg:p-8 shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center bg-canvas p-4 lg:p-8">
+      <section className="grid w-full max-w-5xl overflow-hidden rounded-xl border-2 border-ink bg-surface shadow-lg md:grid-cols-auth">
+        <aside className="relative hidden flex-col justify-between overflow-hidden border-r-2 border-ink bg-brand-secondary p-8 md:flex lg:p-10">
+          <a href="/" className="inline-flex w-fit items-center gap-3 font-display text-xl font-bold tracking-tight">
+            <img src="/logo.png" alt="" className="h-11 w-11 object-contain" />
+            Second Brain
+          </a>
+          <div className="relative z-10 py-12">
+            <Brain aria-hidden="true" className="mb-6 h-12 w-12" />
+            <h1 className="font-display text-4xl font-bold leading-tight tracking-tight lg:text-5xl">
+              Good ideas grow when you can find them again.
+            </h1>
+            <p className="mt-5 max-w-sm text-base leading-relaxed">
+              Bring daily notes, lasting knowledge, projects, and tasks into one connected space.
+            </p>
+          </div>
+          <div className="relative z-10 flex items-center justify-between border-t-2 border-ink pt-4 text-sm font-semibold">
+            <span>Built for your next thought</span>
+            <ArrowUpRight aria-hidden="true" className="h-5 w-5" />
+          </div>
+          <div aria-hidden="true" className="absolute -bottom-12 -right-12 h-48 w-48 rounded-full border-2 border-ink bg-brand-yellow shadow-lg" />
+          <div aria-hidden="true" className="absolute right-10 top-1/3 h-8 w-8 rotate-12 border-2 border-ink bg-brand-primary shadow-sm" />
+        </aside>
+
+        <div className="p-6 sm:p-8 lg:p-12">
+          <div className="mb-6 flex items-center gap-3 md:hidden">
+            <img src="/logo.png" alt="" className="h-10 w-10 object-contain" />
+            <span className="font-display text-lg font-bold">Second Brain</span>
+          </div>
           {isLogin ? (
             <LoginForm onToggleMode={() => setIsLogin(false)} />
           ) : (
             <RegisterForm onToggleMode={() => setIsLogin(true)} />
           )}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };

@@ -12,7 +12,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onSelectTask }) => {
   let statusBorder = '';
   switch (task.status) {
     case 'TO DO':
-      statusBorder = 'border-slate-500'; // gray
+      statusBorder = 'border-ink'; // gray
       break;
     case 'IN PROGRESS':
       statusBorder = 'border-orange-400'; // orange
@@ -21,16 +21,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onSelectTask }) => {
       statusBorder = 'border-green-500'; // green
       break;
     default:
-      statusBorder = 'border-slate-500';
+      statusBorder = 'border-ink';
   }
 
   return (
     <div 
-      className={`bg-slate-800 p-3 rounded-lg border-l-4 ${statusBorder} mb-3 cursor-pointer hover:bg-slate-700/80 transition-colors`}
+      className={`bg-surface p-3 rounded-lg border-l-4 ${statusBorder} mb-3 cursor-pointer hover:bg-surface-muted transition-colors`}
       onClick={() => onSelectTask(task)}
     >
-      <h4 className="font-semibold text-slate-200 mb-2">{task.name}</h4>
-      <p className="text-sm text-slate-400 truncate">{task.description}</p>
+      <h4 className="font-semibold text-ink mb-2">{task.name}</h4>
+      <p className="text-sm text-muted truncate">{task.description}</p>
     </div>
   );
 }; 

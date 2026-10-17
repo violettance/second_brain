@@ -79,34 +79,34 @@ const EmergingTopics = () => {
     
     const renderContent = () => {
         if (isLoading) {
-            return <div className="text-center text-slate-400">Analyzing your notes...</div>;
+            return <div className="text-center text-muted">Analyzing your notes...</div>;
         }
 
         if (!dna) {
-            return <p className="text-center text-slate-400">Start writing to see your note DNA.</p>;
+            return <p className="text-center text-muted">Start writing to see your note DNA.</p>;
         }
         
         return (
-            <div className="space-y-3 text-slate-300">
+            <div className="space-y-3 text-muted">
                 {dna.topTag ? (
                     <p className="text-base">
                         Your most frequent tag is <strong className="font-semibold text-indigo-400">"{dna.topTag.name}"</strong>, used <strong className="font-semibold text-indigo-400">{dna.topTag.count}</strong> times.
                     </p>
                 ) : (
-                    <p className="text-base text-slate-500">You haven't used any tags yet.</p>
+                    <p className="text-base text-muted">You haven't used any tags yet.</p>
                 )}
                  <p className="text-base">
-                    This month you created <strong className="text-cyan-400">{dna.counts.month.short} ST</strong> & <strong className="text-green-400">{dna.counts.month.long} LT</strong> notes; this week <strong className="text-cyan-400">{dna.counts.week.short} ST</strong> & <strong className="text-green-400">{dna.counts.week.long} LT</strong>; and <strong className="text-cyan-400">{dna.counts.allTime.short} ST</strong> & <strong className="text-green-400">{dna.counts.allTime.long} LT</strong> in total.
+                    This month you created <strong className="text-brand-secondary-deep">{dna.counts.month.short} ST</strong> & <strong className="text-brand-secondary-deep">{dna.counts.month.long} LT</strong> notes; this week <strong className="text-brand-secondary-deep">{dna.counts.week.short} ST</strong> & <strong className="text-brand-secondary-deep">{dna.counts.week.long} LT</strong>; and <strong className="text-brand-secondary-deep">{dna.counts.allTime.short} ST</strong> & <strong className="text-brand-secondary-deep">{dna.counts.allTime.long} LT</strong> in total.
                 </p>
             </div>
         );
     };
 
     return (
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
+        <div className="bg-surface  border border-ink rounded-xl p-6">
             <div className="flex items-center mb-4">
                 <Fingerprint className="h-6 w-6 text-indigo-400 mr-3" />
-                <h3 className="text-xl font-bold text-white">Your Note DNA</h3>
+                <h3 className="text-xl font-bold text-ink">Your Note DNA</h3>
             </div>
             {renderContent()}
         </div>

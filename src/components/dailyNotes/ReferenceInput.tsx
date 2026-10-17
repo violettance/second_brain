@@ -101,22 +101,22 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center space-x-2">
-        <Quote className="h-4 w-4 text-slate-400" />
-        <label className="text-sm font-medium text-slate-300">References</label>
+        <Quote className="h-4 w-4 text-muted" />
+        <label className="text-sm font-medium text-muted">References</label>
       </div>
 
       {/* Input Area */}
       <div className="relative" ref={dropdownRef}>
         <div 
-          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus-within:ring-1 text-sm cursor-pointer hover:bg-slate-650 transition-colors"
-          style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+          className="w-full px-3 py-2 bg-surface-muted border border-ink rounded-md text-ink placeholder-slate-400 focus-within:ring-1 text-sm cursor-pointer hover:bg-surface-muted transition-colors"
+          style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? (
             <div className="space-y-3" onClick={e => e.stopPropagation()}>
               {/* Type Selector */}
               <div className="flex items-center space-x-2">
-                <span className="text-xs text-slate-400">Type:</span>
+                <span className="text-xs text-muted">Type:</span>
                 <div className="flex flex-wrap gap-1">
                   {REFERENCE_TYPES.map(({ type, label, icon: Icon }) => (
                     <button
@@ -124,8 +124,8 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
                       onClick={() => setSelectedType(type)}
                       className={`flex items-center space-x-1 px-2 py-1 rounded text-xs transition-colors ${
                         selectedType === type
-                          ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
-                          : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                          ? 'bg-purple-500/30 text-brand-purple-deep border border-purple-500/50'
+                          : 'bg-surface-muted text-muted hover:bg-slate-500'
                       }`}
                     >
                       <Icon className="h-3 w-3" />
@@ -143,8 +143,8 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={selectedTypeData?.placeholder || 'Enter reference details'}
-                  className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-1 text-sm"
-                  style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+                  className="w-full px-3 py-2 bg-surface-muted border border-ink rounded text-ink placeholder-slate-400 focus:outline-none focus:ring-1 text-sm"
+                  style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
                   autoFocus
                 />
                 
@@ -156,14 +156,14 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
                       setEditingReference(null);
                       setInput('');
                     }}
-                    className="px-3 py-1 text-xs bg-slate-600 hover:bg-slate-500 text-slate-300 rounded transition-colors"
+                    className="px-3 py-1 text-xs bg-surface-muted hover:bg-slate-500 text-muted rounded transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={addReference}
                     disabled={!input.trim()}
-                    className="flex items-center space-x-1 px-3 py-1 text-xs bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-1 px-3 py-1 text-xs bg-purple-600 hover:bg-purple-500 text-ink rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="h-3 w-3" />
                     <span>{editingReference ? 'Update' : 'Add'}</span>
@@ -173,10 +173,10 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">
+              <span className="text-muted">
                 {references.length > 0 ? `${references.length} reference(s) added` : 'Click to add references'}
               </span>
-              <ChevronDown className="h-4 w-4 text-slate-400" />
+              <ChevronDown className="h-4 w-4 text-muted" />
             </div>
           )}
         </div>
@@ -186,27 +186,27 @@ export const ReferenceInput: React.FC<ReferenceInputProps> = ({
       {references.length > 0 && (
         <div className="space-y-2">
           {references.map((ref, index) => (
-            <div key={ref.id} className="bg-slate-700/50 border border-slate-600 rounded p-3">
+            <div key={ref.id} className="bg-surface-muted border border-ink rounded p-3">
               <div className="flex items-start justify-between">
                 <div 
-                  className="flex-1 cursor-pointer hover:bg-slate-600/20 rounded p-1 -m-1 transition-colors"
+                  className="flex-1 cursor-pointer hover:bg-surface-muted rounded p-1 -m-1 transition-colors"
                   onClick={() => editReference(ref)}
                 >
                   <div className="flex items-center space-x-2 mb-1">
                     {(() => {
                       const typeData = REFERENCE_TYPES.find(t => t.type === ref.type);
                       const Icon = typeData?.icon || Quote;
-                      return <Icon className="h-3 w-3 text-slate-400" />;
+                      return <Icon className="h-3 w-3 text-muted" />;
                     })()}
-                    <span className="text-xs text-slate-400 uppercase">{ref.type}</span>
+                    <span className="text-xs text-muted uppercase">{ref.type}</span>
                   </div>
-                  <div className="text-sm text-slate-200">{ref.formatted}</div>
+                  <div className="text-sm text-ink">{ref.formatted}</div>
                 </div>
                 <button
                   onClick={() => removeReference(ref.id)}
-                  className="p-1 hover:bg-slate-600 rounded transition-colors"
+                  className="p-1 hover:bg-surface-muted rounded transition-colors"
                 >
-                  <X className="h-3 w-3 text-slate-400 hover:text-red-400" />
+                  <X className="h-3 w-3 text-muted hover:text-brand-primary-deep" />
                 </button>
               </div>
             </div>

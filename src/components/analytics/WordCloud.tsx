@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveDesignNumber } from '../../design/tokens';
 
 interface WordData {
   word: string;
@@ -12,12 +13,14 @@ interface WordCloudProps {
 
 export const WordCloud: React.FC<WordCloudProps> = ({ words }) => {
   const maxFreq = Math.max(...words.map(w => w.frequency));
+  const minFontSize = resolveDesignNumber('--word-cloud-min-font-size');
+  const maxFontSize = resolveDesignNumber('--word-cloud-max-font-size');
   
   return (
-    <div className="h-64 bg-slate-900/50 rounded-lg border border-slate-700/50 p-4 overflow-hidden">
+    <div className="h-64 bg-canvas rounded-lg border border-ink p-4 overflow-hidden">
       <div className="h-full flex flex-wrap items-center justify-center gap-2">
         {words.map((word, index) => {
-          const fontSize = Math.max(12, (word.frequency / maxFreq) * 32);
+          const fontSize = Math.max(minFontSize, (word.frequency / maxFreq) * maxFontSize);
           const positions = [
             'rotate-0', 'rotate-12', '-rotate-12', 'rotate-6', '-rotate-6'
           ];
@@ -30,7 +33,7 @@ export const WordCloud: React.FC<WordCloudProps> = ({ words }) => {
               style={{
                 fontSize: `${fontSize}px`,
                 color: word.color,
-                textShadow: '0 0 10px rgba(0,0,0,0.5)'
+                textShadow: 'var(--shadow-text)'
               }}
               title={`${word.word}: used ${word.frequency} times`}
             >

@@ -20,7 +20,7 @@ export const mockNotes: Note[] = [
     connections: 8,
     createdAt: '2024-03-12',
     updatedAt: '2024-03-12',
-    color: '#3b82f6'
+    color: 'var(--color-brand-secondary)'
   },
   {
     id: '2',
@@ -31,7 +31,7 @@ export const mockNotes: Note[] = [
     connections: 3,
     createdAt: '2024-03-12',
     updatedAt: '2024-03-12',
-    color: '#10b981'
+    color: 'var(--color-brand-secondary)'
   },
   {
     id: '3',
@@ -42,7 +42,7 @@ export const mockNotes: Note[] = [
     connections: 12,
     createdAt: '2024-03-11',
     updatedAt: '2024-03-11',
-    color: '#8b5cf6'
+    color: 'var(--color-brand-purple)'
   },
   {
     id: '4',
@@ -53,7 +53,7 @@ export const mockNotes: Note[] = [
     connections: 6,
     createdAt: '2024-03-11',
     updatedAt: '2024-03-11',
-    color: '#f59e0b'
+    color: 'var(--color-brand-yellow)'
   },
   {
     id: '5',
@@ -64,7 +64,7 @@ export const mockNotes: Note[] = [
     connections: 4,
     createdAt: '2024-03-10',
     updatedAt: '2024-03-10',
-    color: '#ef4444'
+    color: 'var(--color-brand-primary)'
   }
 ];
 
@@ -76,7 +76,7 @@ export const mockProjects: Project[] = [
     progress: 75,
     notesCount: 45,
     lastUpdated: '12 Mar 2024',
-    color: '#3b82f6'
+    color: 'var(--color-brand-secondary)'
   },
   {
     id: '2',
@@ -85,7 +85,7 @@ export const mockProjects: Project[] = [
     progress: 100,
     notesCount: 31,
     lastUpdated: '12 Mar 2024',
-    color: '#10b981'
+    color: 'var(--color-brand-secondary)'
   },
   {
     id: '3',
@@ -94,7 +94,7 @@ export const mockProjects: Project[] = [
     progress: 60,
     notesCount: 67,
     lastUpdated: '12 Mar 2024',
-    color: '#8b5cf6'
+    color: 'var(--color-brand-purple)'
   },
   {
     id: '4',
@@ -103,7 +103,7 @@ export const mockProjects: Project[] = [
     progress: 40,
     notesCount: 23,
     lastUpdated: '12 Mar 2024',
-    color: '#f59e0b'
+    color: 'var(--color-brand-yellow)'
   },
   {
     id: '5',
@@ -112,7 +112,7 @@ export const mockProjects: Project[] = [
     progress: 85,
     notesCount: 89,
     lastUpdated: '11 Mar 2024',
-    color: '#06b6d4'
+    color: 'var(--color-brand-secondary)'
   },
   {
     id: '6',
@@ -121,7 +121,7 @@ export const mockProjects: Project[] = [
     progress: 55,
     notesCount: 34,
     lastUpdated: '11 Mar 2024',
-    color: '#84cc16'
+    color: 'var(--color-brand-secondary)'
   },
   {
     id: '7',
@@ -130,7 +130,7 @@ export const mockProjects: Project[] = [
     progress: 30,
     notesCount: 18,
     lastUpdated: '10 Mar 2024',
-    color: '#f97316'
+    color: 'var(--color-brand-yellow)'
   },
   {
     id: '8',
@@ -139,7 +139,7 @@ export const mockProjects: Project[] = [
     progress: 65,
     notesCount: 42,
     lastUpdated: '10 Mar 2024',
-    color: '#ec4899'
+    color: 'var(--color-brand-primary)'
   },
   {
     id: '9',
@@ -148,7 +148,7 @@ export const mockProjects: Project[] = [
     progress: 20,
     notesCount: 12,
     lastUpdated: '09 Mar 2024',
-    color: '#6366f1'
+    color: 'var(--color-brand-purple)'
   },
   {
     id: '10',
@@ -157,7 +157,7 @@ export const mockProjects: Project[] = [
     progress: 45,
     notesCount: 28,
     lastUpdated: '09 Mar 2024',
-    color: '#14b8a6'
+    color: 'var(--color-brand-secondary)'
   },
   {
     id: '11',
@@ -166,7 +166,7 @@ export const mockProjects: Project[] = [
     progress: 70,
     notesCount: 56,
     lastUpdated: '08 Mar 2024',
-    color: '#eab308'
+    color: 'var(--color-brand-yellow)'
   },
   {
     id: '12',
@@ -175,6 +175,6 @@ export const mockProjects: Project[] = [
     progress: 80,
     notesCount: 39,
     lastUpdated: '08 Mar 2024',
-    color: '#22c55e'
+    color: 'var(--color-brand-secondary)'
   }
 ];

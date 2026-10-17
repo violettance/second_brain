@@ -18,8 +18,8 @@ export const TopicEvolutionChart: React.FC<TopicEvolutionChartProps> = ({ data }
   );
   
   const colors = [
-    '#a7c7e7', '#b8e6b8', '#f4c2a1', '#d4a5d4', 
-    '#f0d4a3', '#c7e7a7', '#e7a7c7', '#a7e7d4'
+    'var(--color-brand-secondary)', 'var(--color-brand-secondary)', 'var(--color-brand-yellow)', 'var(--color-brand-purple)',
+    'var(--color-brand-yellow)', 'var(--color-brand-secondary)', 'var(--color-brand-primary)', 'var(--color-brand-secondary)'
   ];
   
   const maxValue = Math.max(
@@ -27,7 +27,7 @@ export const TopicEvolutionChart: React.FC<TopicEvolutionChartProps> = ({ data }
   );
   
   return (
-    <div className="h-64 bg-slate-900/50 rounded-lg border border-slate-700/50 p-4">
+    <div className="h-64 bg-canvas rounded-lg border border-ink p-4">
       <div className="relative h-full">
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           <defs>
@@ -115,8 +115,8 @@ export const TopicEvolutionChart: React.FC<TopicEvolutionChartProps> = ({ data }
         </svg>
         
         {/* Legend */}
-        <div className="absolute bottom-4 right-4 bg-slate-800/80 backdrop-blur-sm rounded-lg p-3 border border-slate-700/50 max-w-[200px]">
-          <div className="text-slate-300 text-xs font-medium mb-2">Topics</div>
+        <div className="absolute bottom-4 right-4 bg-surface rounded-lg p-3 border border-ink max-w-panel">
+          <div className="text-muted text-xs font-medium mb-2">Topics</div>
           <div className="grid grid-cols-2 gap-1 text-xs">
             {allTopics.slice(0, 6).map((topic, index) => (
               <div key={topic} className="flex items-center space-x-1">
@@ -124,7 +124,7 @@ export const TopicEvolutionChart: React.FC<TopicEvolutionChartProps> = ({ data }
                   className="w-2 h-2 rounded-full" 
                   style={{ backgroundColor: colors[index % colors.length] }}
                 ></div>
-                <span className="text-slate-400 truncate">
+                <span className="text-muted truncate">
                   {topic.length > 8 ? topic.slice(0, 6) + '..' : topic}
                 </span>
               </div>
@@ -133,7 +133,7 @@ export const TopicEvolutionChart: React.FC<TopicEvolutionChartProps> = ({ data }
         </div>
         
         {/* Y-axis labels */}
-        <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-slate-400 -ml-8">
+        <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-muted -ml-8">
           <span>{maxValue}</span>
           <span>{Math.round(maxValue / 2)}</span>
           <span>0</span>

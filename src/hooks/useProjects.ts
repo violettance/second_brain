@@ -13,7 +13,7 @@ const MOCK_PROJECTS: Project[] = [
     description: 'Building a comprehensive second brain application',
     status: 'In Progress',
     progress: 75,
-    color: '#C2B5FC',
+    color: 'var(--color-brand-primary)',
     tasksCount: 12,
     completedTasks: 9,
 
@@ -27,7 +27,7 @@ const MOCK_PROJECTS: Project[] = [
     description: 'AI and machine learning research initiative',
     status: 'Active',
     progress: 45,
-    color: '#10b981',
+    color: 'var(--color-brand-secondary)',
     tasksCount: 8,
     completedTasks: 3,
 
@@ -41,7 +41,7 @@ const MOCK_PROJECTS: Project[] = [
     description: 'Blog posts and educational content',
     status: 'Active',
     progress: 60,
-    color: '#f59e0b',
+    color: 'var(--color-brand-yellow)',
     tasksCount: 15,
     completedTasks: 9,
     createdAt: new Date().toISOString(),

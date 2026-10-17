@@ -64,9 +64,9 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
 
   if (isLoading) {
     return (
-      <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+      <div className="bg-surface  border border-ink rounded-xl p-4">
         <div className="flex items-center justify-center py-8">
-          <div className="text-slate-400">Loading notes...</div>
+          <div className="text-muted">Loading notes...</div>
         </div>
       </div>
     );
@@ -74,37 +74,37 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
 
   if (error) {
     return (
-      <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+      <div className="bg-surface  border border-ink rounded-xl p-4">
         <div className="flex items-center justify-center py-8">
-          <div className="text-red-400">Error loading notes: {error}</div>
+          <div className="text-brand-primary-deep">Error loading notes: {error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+    <div className="bg-surface  border border-ink rounded-xl p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-medium text-white">
+          <h2 className="text-lg font-medium text-ink">
             {selectedDate ? `Notes for ${formatDate(`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`)}` : 'All Notes'}
           </h2>
-          <p className="text-slate-400 text-xs">
+          <p className="text-muted text-xs">
             {notes.length} {notes.length === 1 ? 'note' : 'notes'} found
           </p>
         </div>
         
         {/* Search */}
         <div className="relative w-48">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted" />
           <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-1 text-xs"
-            style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+            className="w-full pl-8 pr-3 py-1.5 bg-surface-muted border border-ink rounded-md text-ink placeholder-slate-400 focus:outline-none focus:ring-1 text-xs"
+            style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
           />
         </div>
       </div>
@@ -113,11 +113,11 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
       <div className="space-y-3 pr-1">
         {filteredNotes.length === 0 ? (
           <div className="text-center py-8">
-            <Calendar className="h-10 w-10 text-slate-500 mx-auto mb-3" />
-            <div className="text-slate-400 text-sm mb-1">
+            <Calendar className="h-10 w-10 text-muted mx-auto mb-3" />
+            <div className="text-muted text-sm mb-1">
               {selectedDate ? 'No notes for this date' : 'No notes found'}
             </div>
-            <div className="text-slate-500 text-xs">
+            <div className="text-muted text-xs">
               {selectedDate 
                 ? 'Create your first note for this day'
                 : 'Start writing to build your knowledge base'
@@ -128,7 +128,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
           filteredNotes.map((note) => (
             <div 
               key={note.id} 
-              className="p-3 bg-slate-700/40 rounded-lg hover:bg-slate-700/60 transition-all cursor-pointer group border border-slate-600/40"
+              className="p-3 bg-surface-muted rounded-lg hover:bg-surface-muted transition-all cursor-pointer group border border-ink"
             >
               {/* Note Header */}
               <div className="flex items-start justify-between mb-2">
@@ -137,14 +137,14 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                   onClick={() => onEditNote(note)}
                 >
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-medium text-white text-sm truncate">
+                    <h3 className="font-medium text-ink text-sm truncate">
                       {note.title}
                     </h3>
                     {note.tags?.includes('starred') && (
-                      <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                      <Star className="h-3 w-3 text-brand-yellow-ink fill-yellow-400" />
                     )}
                   </div>
-                  <div className="flex items-center space-x-3 text-xs text-slate-400 mt-1">
+                  <div className="flex items-center space-x-3 text-xs text-muted mt-1">
                     <div className="flex items-center space-x-1">
                       <Calendar className="h-3 w-3" />
                       <span>{formatDate(note.note_date)}</span>
@@ -152,13 +152,13 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                     <div className="flex items-center space-x-1">
                       {note.memory_type === 'short-term' ? (
                         <>
-                          <Clock className="h-3 w-3 text-orange-400" />
-                          <span className="text-orange-400">Short-term</span>
+                          <Clock className="h-3 w-3 text-brand-yellow-ink" />
+                          <span className="text-brand-yellow-ink">Short-term</span>
                         </>
                       ) : (
                         <>
-                          <Brain className="h-3 w-3" style={{ color: '#C2B5FC' }} />
-                          <span style={{ color: '#C2B5FC' }}>Long-term</span>
+                          <Brain className="h-3 w-3" style={{ color: 'var(--color-brand-primary)' }} />
+                          <span style={{ color: 'var(--color-brand-primary)' }}>Long-term</span>
                         </>
                       )}
                     </div>
@@ -168,14 +168,14 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                 <div className="relative">
                   <button
                     onClick={() => setShowOptions(showOptions === note.id ? null : note.id)}
-                    className="p-1 hover:bg-slate-600 rounded transition-colors"
+                    className="p-1 hover:bg-surface-muted rounded transition-colors"
                   >
-                    <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                    <MoreHorizontal className="h-4 w-4 text-muted" />
                   </button>
                   
                   {/* Options Menu */}
                   {showOptions === note.id && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 py-1">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-ink rounded-lg shadow-lg z-50 py-1">
                       <button
                         onClick={() => {
                           if (onDirectEdit) {
@@ -185,7 +185,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                           }
                           setShowOptions(null);
                         }}
-                        className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
+                        className="w-full text-left px-3 py-2 text-sm text-ink hover:bg-surface-muted flex items-center space-x-2"
                       >
                         <Edit3 className="h-3.5 w-3.5" />
                         <span>Edit Note</span>
@@ -206,16 +206,16 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                             logger.error('Error updating note memory type', { error: message });
                           }
                         }}
-                        className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
+                        className="w-full text-left px-3 py-2 text-sm text-ink hover:bg-surface-muted flex items-center space-x-2"
                       >
                         {note.memory_type === 'short-term' ? (
                           <>
-                            <Brain className="h-3.5 w-3.5" style={{ color: '#C2B5FC' }} />
+                            <Brain className="h-3.5 w-3.5" style={{ color: 'var(--color-brand-primary)' }} />
                             <span>Move to Long-term</span>
                           </>
                         ) : (
                           <>
-                            <Clock className="h-3.5 w-3.5 text-orange-400" />
+                            <Clock className="h-3.5 w-3.5 text-brand-yellow-ink" />
                             <span>Move to Short-term</span>
                           </>
                         )}
@@ -239,13 +239,13 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                             logger.error('Error starring note', { error: message });
                           }
                         }}
-                        className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center space-x-2"
+                        className="w-full text-left px-3 py-2 text-sm text-ink hover:bg-surface-muted flex items-center space-x-2"
                       >
-                        <Star className={`h-3.5 w-3.5 ${note.tags?.includes('starred') ? 'text-yellow-400' : 'text-slate-400'}`} />
+                        <Star className={`h-3.5 w-3.5 ${note.tags?.includes('starred') ? 'text-brand-yellow-ink' : 'text-muted'}`} />
                         <span>{note.tags?.includes('starred') ? 'Remove Star' : 'Star Note'}</span>
                       </button>
                       
-                      <div className="border-t border-slate-700 my-1"></div>
+                      <div className="border-t border-ink my-1"></div>
                       
                       <button
                         onClick={async () => {
@@ -263,7 +263,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                           }
                           setShowOptions(null);
                         }}
-                        className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-slate-700 flex items-center space-x-2"
+                        className="w-full text-left px-3 py-2 text-sm text-brand-primary-deep hover:bg-surface-muted flex items-center space-x-2"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         <span>Delete Note</span>
@@ -275,7 +275,7 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
 
               {/* Note Content */}
               <div 
-                className="text-slate-300 text-xs leading-relaxed line-clamp-2 mb-2"
+                className="text-muted text-xs leading-relaxed line-clamp-2 mb-2"
                 onClick={() => onEditNote(note)}
               >
                 {note.content 
@@ -299,15 +299,15 @@ export const NotesList: React.FC<NotesListProps> = ({ selectedDate, onEditNote, 
                         key={index}
                         className="inline-flex items-center text-xs px-1.5 py-0.5 rounded"
                         style={{ 
-                          backgroundColor: note.memory_type === 'short-term' ? 'rgba(251, 146, 60, 0.2)' : 'rgba(194, 181, 252, 0.2)',
-                          color: note.memory_type === 'short-term' ? '#fb923c' : '#C2B5FC'
+                          backgroundColor: note.memory_type === 'short-term' ? 'color-mix(in srgb, var(--color-brand-yellow) 20%, transparent)' : 'color-mix(in srgb, var(--color-brand-purple) 20%, transparent)',
+                          color: note.memory_type === 'short-term' ? 'var(--color-brand-yellow)' : 'var(--color-brand-primary)'
                         }}
                                               >
                           {tag}
                         </span>
                     ))}
                   {note.tags.filter(tag => tag !== 'starred').length > 3 && (
-                    <span className="inline-flex items-center text-xs px-1.5 py-0.5 rounded bg-slate-600/40 text-slate-400">
+                    <span className="inline-flex items-center text-xs px-1.5 py-0.5 rounded bg-surface-muted text-muted">
                       +{note.tags.filter(tag => tag !== 'starred').length - 3}
                     </span>
                   )}

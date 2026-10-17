@@ -81,32 +81,32 @@ export const TasksPage: React.FC = () => {
 
   if (!projectId) {
     return (
-      <div className="flex h-full items-center justify-center text-white">
+      <div className="flex h-full items-center justify-center text-ink">
         <p>No project selected. Redirecting to projects page...</p>
       </div>
     );
   }
 
   if (loading) {
-    return <div className="p-8 text-white">Loading tasks...</div>;
+    return <div className="p-8 text-ink">Loading tasks...</div>;
   }
 
   return (
-    <div className="flex h-screen bg-slate-900 overflow-hidden">
+    <div className="flex h-screen bg-canvas overflow-hidden">
       <div className="flex-1 flex flex-col h-screen">
         {/* Header */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
+        <div className="bg-surface  border-b border-ink p-4 lg:p-6 sticky top-0 z-10">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
                 <div className="pl-12 lg:pl-0">
-                    <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">{projectName || 'Project Tasks'}</h1>
-                    <p className="text-slate-400 text-sm lg:text-base">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-ink mb-2">{projectName || 'Project Tasks'}</h1>
+                    <p className="text-muted text-sm lg:text-base">
                         Organize and manage tasks for this project
                     </p>
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
-                    style={{ background: '#C2B5FC' }}
+                    className="flex items-center justify-center space-x-2 px-4 py-2 text-ink rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
+                    style={{ background: 'var(--color-brand-primary)' }}
                 >
                     <Plus className="h-4 w-4" />
                     <span>New Task</span>
@@ -115,7 +115,7 @@ export const TasksPage: React.FC = () => {
         </div>
 
         {/* Kanban Board */}
-        <div className="flex-1 text-white p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <div className="flex-1 text-ink p-4 sm:p-6 lg:p-8 overflow-y-auto">
           {tasks.length > 0 ? (
             <KanbanBoard 
               initialTasks={tasks}

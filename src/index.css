@@ -1,3 +1,140 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import "./design/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: var(--layout-viewport-min-width);
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--type-base);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: var(--focus-width) solid var(--color-brand-secondary);
+    outline-offset: var(--focus-offset);
+  }
+
+  ::selection {
+    background: var(--color-brand-yellow);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .sb-panel {
+    border: var(--border-width) solid var(--color-ink);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-hard-sm);
+  }
+
+  .sb-panel-raised {
+    border: var(--border-width) solid var(--color-ink);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-hard);
+  }
+
+  .sb-action {
+    border: var(--border-width) solid var(--color-ink);
+    border-radius: var(--radius-md);
+    background: var(--color-brand-primary);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-hard-sm);
+    font-weight: var(--font-weight-bold);
+    transition: transform var(--motion-fast), box-shadow var(--motion-fast), background-color var(--motion-fast);
+  }
+
+  .sb-action:hover {
+    transform: translate(var(--motion-lift-x), var(--motion-lift-y));
+    box-shadow: var(--shadow-hard);
+  }
+
+  .sb-action:active {
+    transform: translate(var(--motion-press-x), var(--motion-press-y));
+    box-shadow: none;
+  }
+
+  .sb-control {
+    border: var(--border-width) solid var(--color-ink);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .sb-control::placeholder {
+    color: var(--color-neutral-muted);
+  }
+
+  .sb-action-secondary {
+    background: var(--color-surface);
+  }
+
+  .sb-accordion > summary {
+    list-style: none;
+  }
+
+  .sb-accordion > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .sb-accordion[open] > summary .sb-disclosure-icon {
+    transform: rotate(var(--motion-disclosure-open-rotation));
+  }
+
+  .sb-skip-link {
+    position: fixed;
+    top: var(--space-3);
+    left: var(--space-4);
+    z-index: var(--z-modal);
+    transform: translateY(calc(-100% - var(--space-4)));
+    border: var(--border-width) solid var(--color-ink);
+    border-radius: var(--radius-md);
+    background: var(--color-brand-yellow);
+    padding: var(--space-2) var(--space-4);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .sb-skip-link:focus {
+    transform: none;
+  }
+}

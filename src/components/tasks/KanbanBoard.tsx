@@ -133,11 +133,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialTasks, onSelect
                             <div
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`bg-slate-900/70 rounded-xl p-4 transition-colors ${snapshot.isDraggingOver ? 'bg-slate-800/60' : ''}`}
+                                className={`bg-canvas rounded-xl p-4 transition-colors ${snapshot.isDraggingOver ? 'bg-surface' : ''}`}
                             >
-                                <h3 className="text-lg font-semibold text-white mb-4 sticky top-0 bg-slate-900/70 py-2">
+                                <h3 className="text-lg font-semibold text-ink mb-4 sticky top-0 bg-canvas py-2">
                                     {column.title}
-                                    <span className="ml-2 text-sm font-normal text-slate-400">
+                                    <span className="ml-2 text-sm font-normal text-muted">
                                         {column.tasks.length}
                                     </span>
                                 </h3>

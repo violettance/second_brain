@@ -1,509 +1,150 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { 
-  Brain, 
-  ArrowRight, 
-  Zap, 
-  Network, 
-  BookOpen, 
-  Search,
-  Star,
-  Users,
-  Shield,
-  Sparkles,
-  Menu,
-  X
-} from 'lucide-react';
+import { PublicSiteLayout } from './PublicSiteLayout';
+import { ArrowRight, BookOpen, Brain, Network, Mic } from 'lucide-react';
 
 interface LandingPageProps {
   onGoToApp: () => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+const features = [
+  {
+    icon: BookOpen,
+    title: 'Catch the thought',
+    description: 'Write a daily note or dictate one while it is still fresh.',
+    tone: 'bg-brand-primary-soft',
+  },
+  {
+    icon: Network,
+    title: 'Follow the thread',
+    description: 'See the links between notes, projects, and questions.',
+    tone: 'bg-brand-secondary-soft',
+  },
+  {
+    icon: Brain,
+    title: 'Keep what matters',
+    description: 'Move useful ideas into a lasting, searchable memory.',
+    tone: 'bg-brand-yellow-soft',
+  },
+];
 
+export const LandingPage: React.FC<LandingPageProps> = ({ onGoToApp }) => {
   return (
     <>
       <Helmet>
-        <title>Second Brain - AI-Powered Personal Knowledge Management</title>
-        <meta name="description" content="Transform your ideas into actionable insights with Second Brain. AI-powered personal knowledge management system that helps you capture, organize, and connect your thoughts seamlessly." />
-        <meta name="keywords" content="personal knowledge management, AI, productivity, note-taking, second brain, knowledge organization" />
+        <title>Second Brain — Capture, connect, remember</title>
+        <meta name="description" content="Capture daily thoughts, connect ideas, and keep the knowledge worth returning to." />
+        <meta name="keywords" content="personal knowledge management, notes, second brain, knowledge graph" />
         <link rel="canonical" href="https://second-brain-pkm.vercel.app/" />
-        <meta property="og:title" content="Second Brain - AI-Powered Personal Knowledge Management" />
-        <meta property="og:description" content="Transform your ideas into actionable insights with Second Brain. AI-powered personal knowledge management system that helps you capture, organize, and connect your thoughts seamlessly." />
+        <meta property="og:title" content="Second Brain — Capture, connect, remember" />
+        <meta property="og:description" content="A calm, connected home for the ideas you want to keep." />
         <meta property="og:url" content="https://second-brain-pkm.vercel.app/" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Second Brain - AI-Powered Personal Knowledge Management" />
-        <meta name="twitter:description" content="Transform your ideas into actionable insights with Second Brain. AI-powered personal knowledge management system that helps you capture, organize, and connect your thoughts seamlessly." />
-        <meta name="twitter:image" content="https://second-brain-pkm.vercel.app/dashboard.png" />
-
-        {/* JSON-LD: Organization */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Organization',
-            name: 'Second Brain',
-            url: 'https://second-brain-pkm.vercel.app/',
-            logo: 'https://second-brain-pkm.vercel.app/logo.png',
-            sameAs: [
-              'https://x.com/',
-              'https://www.linkedin.com/',
-              'https://github.com/'
-            ]
-          })}
-        </script>
-
-        {/* JSON-LD: Product */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Product',
-            name: 'Second Brain',
-            description:
-              'AI-powered personal knowledge management system to capture, organize, and connect your thoughts seamlessly.',
-            image: ['https://second-brain-pkm.vercel.app/dashboard.png'],
-            brand: {
-              '@type': 'Brand',
-              name: 'Second Brain'
-            },
-            url: 'https://second-brain-pkm.vercel.app/',
-            offers: {
-              '@type': 'AggregateOffer',
-              lowPrice: '0',
-              highPrice: '9',
-              priceCurrency: 'USD',
-              offerCount: '2',
-              offers: [
-                {
-                  '@type': 'Offer',
-                  price: '0',
-                  priceCurrency: 'USD',
-                  url: 'https://second-brain-pkm.vercel.app/our-pricing',
-                  availability: 'https://schema.org/InStock'
-                },
-                {
-                  '@type': 'Offer',
-                  price: '9',
-                  priceCurrency: 'USD',
-                  url: 'https://second-brain-pkm.vercel.app/our-pricing',
-                  availability: 'https://schema.org/InStock'
-                }
-              ]
-            }
-          })}
-        </script>
-
-        {/* JSON-LD: WebSite with SearchAction (no on-site search implemented yet; providing potential action) */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'WebSite',
-            name: 'Second Brain',
-            url: 'https://second-brain-pkm.vercel.app/',
-            potentialAction: {
-              '@type': 'SearchAction',
-              target: 'https://second-brain-pkm.vercel.app/?q={search_term_string}',
-              'query-input': 'required name=search_term_string'
-            }
-          })}
-        </script>
       </Helmet>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23374151%22 fill-opacity=%220.1%22%3E%3Ccircle cx=%2230%22 cy=%2230%22 r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-      
-      {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
-        {/* Logo */}
-        <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-          <div className="flex-shrink-0">
-            <img src="/logo.png" alt="Second Brain Logo" className="h-14 w-14 lg:h-16 lg:w-16 rounded-lg" />
-          </div>
-          <span className="text-xl lg:text-2xl font-bold text-white">Second Brain</span>
-        </a>
-        
-        {/* Desktop Navigation - Center */}
-        <div className="hidden md:flex items-center space-x-8">
-          <a
-            href="/our-pricing"
-            className="text-slate-300 hover:text-white transition-colors font-medium"
-          >
-            Pricing
-          </a>
-          <a
-            href="/privacy-policy"
-            className="text-slate-300 hover:text-white transition-colors font-medium"
-          >
-            Privacy
-          </a>
-          <a
-            href="/terms-and-conditions"
-            className="text-slate-300 hover:text-white transition-colors font-medium"
-          >
-            Terms
-          </a>
-        </div>
 
-        {/* Desktop CTA Button - Right */}
-        <div className="hidden md:block">
-          <button
-            onClick={onGoToApp}
-            className="flex items-center space-x-2 px-4 lg:px-6 py-2 lg:py-3 text-slate-900 rounded-xl font-semibold hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
-            style={{ background: '#C2B5FC' }}
-          >
-            <span>Go to App</span>
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-white"
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 md:hidden">
-            <div className="p-4 space-y-4">
-              <a
-                href="/our-pricing"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-slate-300 hover:text-white transition-colors font-medium text-center py-2"
-              >
-                Pricing
-              </a>
-              <a
-                href="/privacy-policy"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-slate-300 hover:text-white transition-colors font-medium text-center py-2"
-              >
-                Privacy
-              </a>
-              <a
-                href="/terms-and-conditions"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-slate-300 hover:text-white transition-colors font-medium text-center py-2"
-              >
-                Terms
-              </a>
-              <button
-                onClick={() => {
-                  onGoToApp();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-center space-x-2 px-6 py-3 text-slate-900 rounded-xl font-semibold"
-                style={{ background: '#C2B5FC' }}
-              >
-                <span>Go to App</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 pt-8 lg:pt-20 pb-16 lg:pb-32">
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-6 lg:mb-8">
-            <div className="border rounded-full px-4 lg:px-6 py-2 lg:py-3" style={{ backgroundColor: '#C2B5FC20', borderColor: '#C2B5FC50' }}>
-              <div className="flex items-center space-x-2" style={{ color: '#C2B5FC' }}>
-                <Sparkles className="h-4 w-4" />
-                <span className="text-xs lg:text-sm font-medium">AI-Powered Knowledge Management</span>
+      <PublicSiteLayout onGoToApp={onGoToApp}>
+          <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-12 lg:grid-cols-landing lg:gap-16 lg:px-8 lg:py-20">
+            <div className="max-w-2xl">
+              <p className="mb-5 inline-flex items-center gap-2 rounded-md border-2 border-ink bg-brand-secondary-soft px-3 py-1.5 text-sm font-semibold shadow-sm">
+                <span className="h-2.5 w-2.5 rounded-full border-2 border-ink bg-brand-primary" />
+                A workspace for curious minds
+              </p>
+              <h1 className="font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-7xl">
+                Your ideas deserve to <span className="inline-block bg-brand-yellow px-2">connect.</span>
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
+                Catch the thought, find the thread, and keep the insight. Second Brain gives your notes a place to grow into something useful.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <button type="button" onClick={onGoToApp} className="sb-action inline-flex items-center justify-center gap-2 px-6 py-3 text-base">
+                  Start with a note <ArrowRight aria-hidden="true" className="h-5 w-5" />
+                </button>
+                <a href="/our-pricing" className="inline-flex items-center justify-center rounded-md border-2 border-ink bg-surface px-6 py-3 text-base font-semibold shadow-sm transition-transform hover:-translate-y-0.5">
+                  See how it works
+                </a>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-muted">
+                <span className="inline-flex items-center gap-2"><BookOpen aria-hidden="true" className="h-4 w-4 text-brand-primary" /> Daily notes</span>
+                <span className="inline-flex items-center gap-2"><Mic aria-hidden="true" className="h-4 w-4 text-brand-purple" /> Voice capture</span>
+                <span className="inline-flex items-center gap-2"><Network aria-hidden="true" className="h-4 w-4 text-secondary" /> Idea links</span>
               </div>
             </div>
-          </div>
-          
-          <h1 className="text-3xl sm:text-4xl lg:text-7xl font-bold text-white mb-6 lg:mb-8 leading-tight px-4">
-            Build Your
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, #C2B5FC, #A78BFA)` }}> Second Brain</span>
-          </h1>
-          
-          <p className="text-lg lg:text-2xl text-slate-300 mb-8 lg:mb-12 max-w-4xl mx-auto leading-relaxed px-4">
-            Transform scattered thoughts into connected knowledge. Capture, organize, and discover insights 
-            with our intelligent note-taking system that grows smarter with every entry.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 px-4">
-            <button
-              onClick={onGoToApp}
-              className="w-full sm:w-auto flex items-center justify-center space-x-3 px-6 lg:px-8 py-3 lg:py-4 text-slate-900 rounded-xl font-semibold text-base lg:text-lg hover:opacity-90 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105"
-              style={{ background: '#C2B5FC' }}
-            >
-              <span>Start Building</span>
-              <ArrowRight className="h-5 w-5" />
-            </button>
-            <button className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 lg:px-8 py-3 lg:py-4 border border-slate-600 text-slate-300 rounded-xl font-semibold text-base lg:text-lg hover:bg-slate-800 hover:border-slate-500 transition-all duration-200">
-              <span>Watch Demo</span>
-            </button>
-          </div>
-        </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8 mt-16 lg:mt-24 px-4">
-          <div className="text-center">
-            <div className="text-2xl lg:text-4xl font-bold text-white mb-2">10K+</div>
-            <div className="text-slate-400">Active Users</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl lg:text-4xl font-bold text-white mb-2">1M+</div>
-            <div className="text-slate-400">Notes Created</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl lg:text-4xl font-bold text-white mb-2">500K+</div>
-            <div className="text-slate-400">Connections Made</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-16 lg:py-24">
-        <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 lg:mb-6">
-            Powerful Features for
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, #10b981, #C2B5FC)` }}> Polymaths</span>
-          </h2>
-          <p className="text-lg lg:text-xl text-slate-300 max-w-3xl mx-auto px-4">
-            Everything you need to capture, connect, and cultivate your ideas into a thriving knowledge ecosystem.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Feature 1 - Daily Notes */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-green-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <BookOpen className="h-6 w-6 lg:h-8 lg:w-8 text-green-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Daily Notes</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Capture daily thoughts and reflections with automatic linking to your knowledge base.
-            </p>
-          </div>
-
-          {/* Feature 2 - Voice Recording */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-blue-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Zap className="h-6 w-6 lg:h-8 lg:w-8 text-blue-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Voice Recording</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Record your thoughts instantly with voice-to-text transcription and automatic note creation.
-            </p>
-          </div>
-
-          {/* Feature 3 - Knowledge Graph */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="p-3 rounded-xl w-fit mb-4 lg:mb-6" style={{ backgroundColor: '#C2B5FC20' }}>
-              <Network className="h-6 w-6 lg:h-8 lg:w-8" style={{ color: '#C2B5FC' }} />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Knowledge Graph</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Visualize relationships between your notes and ideas in an interactive network graph.
-            </p>
-          </div>
-
-          {/* Feature 4 - Smart Diagrams */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-purple-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Brain className="h-6 w-6 lg:h-8 lg:w-8 text-purple-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Smart Diagrams</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Generate Mermaid diagrams from your notes to visualize complex ideas and processes.
-            </p>
-          </div>
-
-          {/* Feature 5 - Daily Insights */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-orange-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Sparkles className="h-6 w-6 lg:h-8 lg:w-8 text-orange-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Daily Insights</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Get AI-powered insights and patterns from your daily notes to discover hidden connections.
-            </p>
-          </div>
-
-          {/* Feature 6 - Connection Discovery */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-pink-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Search className="h-6 w-6 lg:h-8 lg:w-8 text-pink-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Connection Discovery</h3>
-            <p className="text-slate-300 leading-relaxed">
-              AI automatically discovers and suggests connections between your ideas and notes.
-            </p>
-          </div>
-
-          {/* Feature 7 - AI Tagging */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-indigo-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Brain className="h-6 w-6 lg:h-8 lg:w-8 text-indigo-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">AI-Powered Tagging</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Automatically tag and categorize your notes with intelligent AI-powered suggestions.
-            </p>
-          </div>
-
-          {/* Feature 8 - Memory System */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-teal-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Users className="h-6 w-6 lg:h-8 lg:w-8 text-teal-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Memory System</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Short-term and long-term memory storage with automatic archiving and connection discovery.
-            </p>
-          </div>
-
-          {/* Feature 9 - Analytics Dashboard */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 hover:bg-slate-800/70 transition-all duration-200">
-            <div className="bg-red-500/20 p-3 rounded-xl w-fit mb-4 lg:mb-6">
-              <Shield className="h-6 w-6 lg:h-8 lg:w-8 text-red-400" />
-            </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-white mb-3 lg:mb-4">Analytics Dashboard</h3>
-            <p className="text-slate-300 leading-relaxed">
-              Track your knowledge growth with insights, patterns, and productivity analytics.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-16 lg:py-24">
-        <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 lg:mb-6">
-            Loved by
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, #C2B5FC, #A78BFA)` }}> Polymaths</span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8">
-            <div className="flex items-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-400 fill-current" />
-              ))}
-            </div>
-            <p className="text-slate-300 mb-4 lg:mb-6 leading-relaxed text-sm lg:text-base">
-              "Second Brain has revolutionized how I manage my research and helps me discover connections I never would have found."
-            </p>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full" style={{ background: '#C2B5FC' }}></div>
-              <div>
-                <div className="text-white font-semibold text-sm lg:text-base">Dr. Sarah Chen</div>
-                <div className="text-slate-400 text-xs lg:text-sm">Research Scientist</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8">
-            <div className="flex items-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-400 fill-current" />
-              ))}
-            </div>
-            <p className="text-slate-300 mb-4 lg:mb-6 leading-relaxed text-sm lg:text-base">
-              "The knowledge graph visualization is incredible. I can see how all my ideas connect and build upon each other."
-            </p>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-green-500 to-purple-600 rounded-full"></div>
-              <div>
-                <div className="text-white font-semibold text-sm lg:text-base">Marcus Johnson</div>
-                <div className="text-slate-400 text-xs lg:text-sm">Product Manager</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 lg:p-8 md:col-span-2 lg:col-span-1">
-            <div className="flex items-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-400 fill-current" />
-              ))}
-            </div>
-            <p className="text-slate-300 mb-4 lg:mb-6 leading-relaxed text-sm lg:text-base">
-              "Finally, a note-taking app that thinks like I do. The daily notes feature keeps me consistent and productive."
-            </p>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full"></div>
-              <div>
-                <div className="text-white font-semibold text-sm lg:text-base">Elena Rodriguez</div>
-                <div className="text-slate-400 text-xs lg:text-sm">Writer & Educator</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 lg:px-8 py-16 lg:py-24 text-center">
-        <div className="border rounded-3xl p-8 lg:p-12" style={{ backgroundColor: '#C2B5FC20', borderColor: '#C2B5FC50' }}>
-          <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4 lg:mb-6">
-            Ready to Build Your Second Brain?
-          </h2>
-          <p className="text-lg lg:text-xl text-slate-300 mb-6 lg:mb-8 max-w-2xl mx-auto">
-            Join thousands of polymaths who have transformed their thinking with Second Brain.
-          </p>
-          <button
-            onClick={onGoToApp}
-            className="w-full sm:w-auto flex items-center justify-center space-x-3 px-6 lg:px-8 py-3 lg:py-4 text-slate-900 rounded-xl font-semibold text-base lg:text-lg hover:opacity-90 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 mx-auto"
-            style={{ background: '#C2B5FC' }}
-          >
-            <span>Get Started Free</span>
-            <ArrowRight className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-slate-800 py-8 lg:py-12">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="flex flex-col space-y-6">
-            {/* Top Section */}
-            <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <img src="/logo.png" alt="Second Brain Logo" className="h-12 w-12 lg:h-14 lg:w-14 rounded-lg" />
+            <div className="relative mx-auto w-full max-w-xl lg:ml-auto">
+              <div aria-hidden="true" className="absolute -right-3 -top-3 h-full w-full rounded-xl border-2 border-ink bg-brand-primary" />
+              <div className="relative rounded-xl border-2 border-ink bg-surface p-4 shadow-lg sm:p-6">
+                <div className="mb-5 flex items-center justify-between border-b-2 border-ink pb-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted">Your knowledge map</p>
+                    <h2 className="font-display text-xl font-bold">One idea, three paths</h2>
+                  </div>
+                  <div className="rounded-md border-2 border-ink bg-brand-yellow p-2">
+                    <Brain aria-hidden="true" className="h-5 w-5" />
+                  </div>
                 </div>
-                <span className="text-lg lg:text-xl font-bold text-white">Second Brain</span>
-              </div>
-              
-              {/* Navigation Links */}
-              <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-                <a href="/our-pricing" className="text-slate-400 hover:text-white transition-colors">
-                  Pricing
-                </a>
-                <a href="/terms-and-conditions" className="text-slate-400 hover:text-white transition-colors">
-                  Terms & Conditions
-                </a>
-                <a href="/privacy-policy" className="text-slate-400 hover:text-white transition-colors">
-                  Privacy Policy
-                </a>
-                <a href="mailto:productora.analytics@gmail.com" className="text-slate-400 hover:text-white transition-colors">
-                  Support
-                </a>
+
+                <div className="relative grid min-h-64 grid-cols-2 gap-3 sm:min-h-72">
+                  <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 440 260" preserveAspectRatio="none">
+                    <path d="M220 130 105 55M220 130 335 55M220 130 105 205M220 130 335 205" fill="none" stroke="var(--color-ink)" strokeWidth="var(--border-width)" strokeDasharray="var(--space-2) var(--space-2)" />
+                  </svg>
+                  <div className="relative z-10 flex flex-col justify-center rounded-md border-2 border-ink bg-brand-primary-soft p-3 shadow-sm">
+                    <span className="mb-2 text-xs font-semibold text-muted">Daily note</span>
+                    <span className="font-display text-sm font-bold">A question from today</span>
+                  </div>
+                  <div className="relative z-10 flex flex-col justify-center rounded-md border-2 border-ink bg-brand-secondary-soft p-3 shadow-sm">
+                    <span className="mb-2 text-xs font-semibold text-muted">Project</span>
+                    <span className="font-display text-sm font-bold">Learning plan</span>
+                  </div>
+                  <div className="relative z-10 flex flex-col justify-center rounded-md border-2 border-ink bg-brand-purple-soft p-3 shadow-sm">
+                    <span className="mb-2 text-xs font-semibold text-muted">Long-term memory</span>
+                    <span className="font-display text-sm font-bold">A pattern worth keeping</span>
+                  </div>
+                  <div className="relative z-10 flex flex-col justify-center rounded-md border-2 border-ink bg-brand-yellow-soft p-3 shadow-sm">
+                    <span className="mb-2 text-xs font-semibold text-muted">Next action</span>
+                    <span className="font-display text-sm font-bold">Read and connect</span>
+                  </div>
+                  <div className="absolute left-1/2 top-1/2 z-20 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-ink bg-brand-secondary shadow-sm">
+                    <Network aria-hidden="true" className="h-7 w-7" />
+                  </div>
+                </div>
+                <div className="mt-5 flex items-center justify-between rounded-md border-2 border-ink bg-surface-muted px-3 py-2 text-sm">
+                  <span className="font-medium">Connection found</span>
+                  <span className="rounded-md border-2 border-ink bg-brand-yellow px-2 py-0.5 font-semibold">+ 3 related ideas</span>
+                </div>
               </div>
             </div>
-            
-            {/* Bottom Section */}
-            <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 pt-4 border-t border-slate-800">
-              <div className="text-slate-400 text-sm text-center md:text-left">
-                © 2025 Second Brain. All rights reserved.
+          </section>
+
+          <section id="how-it-works" className="border-y-2 border-ink bg-surface">
+            <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+              <div className="mb-8 grid gap-4 md:grid-cols-copy md:items-end">
+                <h2 className="font-display text-3xl font-bold tracking-tight lg:text-4xl">A simple path from thought to insight.</h2>
+                <p className="max-w-xl text-muted">Keep the capture lightweight. Let connections and context build over time.</p>
               </div>
-              <div className="text-slate-500 text-xs text-center md:text-right">
-                Payment processing by Paddle.com
+              <div className="grid gap-4 md:grid-cols-3">
+                {features.map(({ icon: Icon, title, description, tone }) => (
+                  <article key={title} className="sb-panel p-5 lg:p-6">
+                    <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-md border-2 border-ink ${tone}`}>
+                      <Icon aria-hidden="true" className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-display text-xl font-bold">{title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted">{description}</p>
+                  </article>
+                ))}
               </div>
             </div>
-          </div>
-        </div>
-      </footer>
-      </div>
+          </section>
+
+          <section className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-12 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-16">
+            <div className="max-w-2xl">
+              <p className="mb-2 text-sm font-semibold text-muted">Start small</p>
+              <h2 className="font-display text-3xl font-bold tracking-tight lg:text-4xl">Save one thought. See where it leads.</h2>
+            </div>
+            <button type="button" onClick={onGoToApp} className="sb-action inline-flex w-fit items-center gap-2 px-6 py-3 text-base">
+              Open Second Brain <ArrowRight aria-hidden="true" className="h-5 w-5" />
+            </button>
+          </section>
+      </PublicSiteLayout>
     </>
   );
 };

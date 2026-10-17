@@ -95,9 +95,9 @@ export const ShortTermMemory: React.FC = React.memo(() => {
   };
 
   const getDaysRemainingColor = (days: number) => {
-    if (days <= 3) return 'text-red-400';
-    if (days <= 7) return 'text-yellow-400';
-    return 'text-green-400';
+    if (days <= 3) return 'text-brand-primary-deep';
+    if (days <= 7) return 'text-brand-yellow-ink';
+    return 'text-brand-secondary-deep';
   };
 
   const filteredAndSortedNotes = shortTermNotes
@@ -153,16 +153,16 @@ export const ShortTermMemory: React.FC = React.memo(() => {
   };
 
   return (
-    <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
+    <div className="flex-1 bg-canvas overflow-y-auto h-screen">
       {/* Header - Added left padding for mobile view to prevent overlap with hamburger menu */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
+      <div className="bg-surface  border-b border-ink p-4 lg:p-6 sticky top-0 z-10">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
           <div className="pl-12 lg:pl-0">
-            <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2 flex items-center space-x-3">
-              <Clock className="h-8 w-8 text-orange-400" />
+            <h1 className="text-2xl lg:text-3xl font-bold text-ink mb-2 flex items-center space-x-3">
+              <Clock className="h-8 w-8 text-brand-yellow-ink" />
               <span>Short Term Memory</span>
             </h1>
-            <p className="text-slate-400 text-sm lg:text-base">
+            <p className="text-muted text-sm lg:text-base">
               Temporary notes that will be archived after 30 days
             </p>
           </div>
@@ -178,20 +178,20 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                 }}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm border ${
                   (user as any)?.subscription_plan === 'pro'
-                    ? 'bg-slate-700/50 text-slate-200 hover:bg-slate-700 border-slate-600/80'
-                    : 'bg-transparent text-slate-500 border-slate-700/80 cursor-pointer opacity-70 hover:opacity-100'
+                    ? 'bg-surface-muted text-ink hover:bg-surface-muted border-ink'
+                    : 'bg-transparent text-muted border-ink cursor-pointer opacity-70 hover:opacity-100'
                 }`}
                 title={(user as any)?.subscription_plan === 'pro' ? 'Toggle AI Insights' : 'Upgrade to unlock'}
               >
-                <Crown className={`h-4 w-4 ${(user as any)?.subscription_plan === 'pro' ? 'text-yellow-400' : 'text-slate-500'}`} />
+                <Crown className={`h-4 w-4 ${(user as any)?.subscription_plan === 'pro' ? 'text-brand-yellow-ink' : 'text-muted'}`} />
                 <span className="hidden lg:inline">AI Insights</span>
               </button>
             )}
             
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
-              style={{ background: '#C2B5FC' }}
+              className="flex items-center justify-center space-x-2 px-4 py-2 text-ink rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
+              style={{ background: 'var(--color-brand-primary)' }}
             >
               <Plus className="h-4 w-4" />
               <span>Add Note</span>
@@ -201,19 +201,19 @@ export const ShortTermMemory: React.FC = React.memo(() => {
       </div>
 
       {/* Main Content */}
-      <div className="p-4 lg:p-6 space-y-6 bg-slate-900 min-h-full">
+      <div className="p-4 lg:p-6 space-y-6 bg-canvas min-h-full">
         
         {/* Search and Filter */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
           <div className="relative flex-1 lg:max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted" />
             <input
               type="text"
               placeholder="Search short term notes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 text-sm"
-              style={{ '--tw-ring-color': '#fb923c' } as React.CSSProperties}
+              className="w-full pl-10 pr-4 py-2 bg-surface border border-ink rounded-lg text-ink placeholder-slate-400 focus:outline-none focus:ring-2 text-sm"
+              style={{ '--tw-ring-color': 'var(--color-brand-yellow)' } as React.CSSProperties}
             />
           </div>
           
@@ -221,8 +221,8 @@ export const ShortTermMemory: React.FC = React.memo(() => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 text-sm"
-              style={{ '--tw-ring-color': '#fb923c' } as React.CSSProperties}
+              className="px-4 py-2 bg-surface border border-ink rounded-lg text-ink focus:outline-none focus:ring-2 text-sm"
+              style={{ '--tw-ring-color': 'var(--color-brand-yellow)' } as React.CSSProperties}
             >
               <option value="recent">Most Recent</option>
               <option value="oldest">Oldest First</option>
@@ -232,7 +232,7 @@ export const ShortTermMemory: React.FC = React.memo(() => {
             
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-3 h-3 rounded-full bg-orange-400"></div>
-              <span className="text-slate-400">{filteredAndSortedNotes.length} notes</span>
+              <span className="text-muted">{filteredAndSortedNotes.length} notes</span>
             </div>
           </div>
         </div>
@@ -240,18 +240,18 @@ export const ShortTermMemory: React.FC = React.memo(() => {
         {/* Notes Grid */}
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <p className="text-slate-400">Loading notes...</p>
+            <p className="text-muted">Loading notes...</p>
           </div>
         ) : filteredAndSortedNotes.length === 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-8 lg:p-12 text-center">
-            <Clock className="h-12 w-12 lg:h-16 lg:w-16 text-orange-400 mx-auto mb-4" />
-            <h3 className="text-xl lg:text-2xl font-semibold text-white mb-2">No short term notes yet</h3>
-            <p className="text-slate-400 mb-6 max-w-md mx-auto">
+          <div className="bg-surface  border border-ink rounded-xl p-8 lg:p-12 text-center">
+            <Clock className="h-12 w-12 lg:h-16 lg:w-16 text-brand-yellow-ink mx-auto mb-4" />
+            <h3 className="text-xl lg:text-2xl font-semibold text-ink mb-2">No short term notes yet</h3>
+            <p className="text-muted mb-6 max-w-md mx-auto">
               Short term notes are perfect for temporary thoughts or ideas that you don't need to keep forever.
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold transition-colors text-sm hover:bg-orange-600"
+              className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-orange-500 text-ink rounded-lg font-semibold transition-colors text-sm hover:bg-orange-600"
             >
               <Plus className="h-4 w-4" />
               <span>Create Your First Note</span>
@@ -265,12 +265,12 @@ export const ShortTermMemory: React.FC = React.memo(() => {
               return (
                 <div 
                   key={note.id} 
-                  className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6 hover:bg-slate-800 transition-all group cursor-pointer"
+                  className="bg-surface  border border-ink rounded-xl p-4 lg:p-6 hover:bg-surface transition-all group cursor-pointer"
                   onClick={() => handleNoteClick(note)}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-white text-lg mb-2 truncate">
+                      <h3 className="font-semibold text-ink text-lg mb-2 truncate">
                         {note.title}
                       </h3>
                       <div className="flex items-center space-x-2 text-xs">
@@ -286,10 +286,10 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                           e.stopPropagation();
                           moveToLongTerm(note.id);
                         }}
-                        className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                        className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
                         title="Move to Long Term Memory"
                       >
-                        <Brain className="h-4 w-4 text-purple-400" />
+                        <Brain className="h-4 w-4 text-brand-purple-deep" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -298,16 +298,16 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                             deleteNote(note.id, 'short-term');
                           }
                         }}
-                        className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                        className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
                         title="Delete Note"
                       >
-                        <Trash2 className="h-4 w-4 text-red-400" />
+                        <Trash2 className="h-4 w-4 text-brand-primary-deep" />
                       </button>
                     </div>
                   </div>
 
                   {/* Content Preview */}
-                  <p className="text-slate-300 text-sm leading-relaxed mb-4 line-clamp-3">
+                  <p className="text-muted text-sm leading-relaxed mb-4 line-clamp-3">
                     {note.content || 'No content'}
                   </p>
 
@@ -317,7 +317,7 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                       {note.tags.map((tag, index) => (
                         <span 
                           key={index}
-                          className="inline-flex items-center text-xs px-2 py-1 rounded-md bg-orange-500/20 text-orange-400"
+                          className="inline-flex items-center text-xs px-2 py-1 rounded-md bg-orange-500/20 text-brand-yellow-ink"
                         >
                           {tag}
                         </span>
@@ -326,7 +326,7 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                   )}
                   
                   {/* Date */}
-                  <div className="mt-4 pt-3 border-t border-slate-700 flex items-center text-xs text-slate-400">
+                  <div className="mt-4 pt-3 border-t border-ink flex items-center text-xs text-muted">
                     <Calendar className="h-3 w-3 mr-1" />
                     <span>
                       {new Date(note.created_at).toLocaleDateString('en-US', {
@@ -372,35 +372,35 @@ export const ShortTermMemory: React.FC = React.memo(() => {
       )}
 
       {/* AI Insights Slide Panel */}
-      <div className={`fixed top-0 right-0 h-full w-80 lg:w-96 bg-slate-800/95 backdrop-blur-sm border-l border-slate-700/50 transform transition-transform duration-300 ease-in-out z-50 ${
+      <div className={`fixed top-0 right-0 h-full w-80 lg:w-96 bg-surface  border-l border-ink transform transition-transform duration-300 ease-in-out z-50 ${
         showAiInsights ? 'translate-x-0' : 'translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
           {/* Panel Header */}
-          <div className="p-6 border-b border-slate-700/50">
+          <div className="p-6 border-b border-ink">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg" style={{ background: '#fb923c20' }}>
-                  <Sparkles className="h-6 w-6 text-orange-400" />
+                <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-brand-yellow) 20%, transparent)' }}>
+                  <Sparkles className="h-6 w-6 text-brand-yellow-ink" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">AI Insights</h2>
-                  <p className="text-slate-400 text-sm">
+                  <h2 className="text-xl font-bold text-ink">AI Insights</h2>
+                  <p className="text-muted text-sm">
                     Analyzing {shortTermNotes?.length || 0} notes • Smart patterns & recommendations
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowAiInsights(false)}
-                className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
                 title="Close panel"
               >
-                <X className="h-5 w-5 text-slate-400" />
+                <X className="h-5 w-5 text-muted" />
               </button>
             </div>
             
             {(user as any)?.subscription_plan === 'pro' && (
-              <div className="flex items-center space-x-2 text-xs text-orange-400">
+              <div className="flex items-center space-x-2 text-xs text-brand-yellow-ink">
                 <Crown className="h-4 w-4" />
                 <span>Pro Feature Active</span>
               </div>
@@ -414,18 +414,18 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                 {aiInsightsLoading ? (
                   <div className="flex items-center justify-center h-32">
                     <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-orange-400 mx-auto mb-3" />
-                      <p className="text-slate-400">Generating AI insights...</p>
+                      <Loader2 className="h-8 w-8 animate-spin text-brand-yellow-ink mx-auto mb-3" />
+                      <p className="text-muted">Generating AI insights...</p>
                     </div>
                   </div>
                 ) : aiInsights.summary ? (
                   <div>
-                    <div className="mb-4 p-4 bg-slate-700/30 rounded-lg">
-                      <h3 className="text-sm font-semibold text-orange-400 mb-2 flex items-center">
+                    <div className="mb-4 p-4 bg-surface-muted rounded-lg">
+                      <h3 className="text-sm font-semibold text-brand-yellow-ink mb-2 flex items-center">
                         <Brain className="h-4 w-4 mr-2" />
                         Analysis Summary
                       </h3>
-                      <div className="text-white whitespace-pre-line text-sm leading-relaxed">
+                      <div className="text-ink whitespace-pre-line text-sm leading-relaxed">
                         {aiInsights.summary}
                       </div>
                     </div>
@@ -435,20 +435,20 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                     {/* The new aiInsights.recommendations is used here */}
                     {aiInsights.recommendations.length > 0 ? (
                       <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                        <h3 className="text-sm font-semibold text-green-400 mb-3 flex items-center">
+                        <h3 className="text-sm font-semibold text-brand-secondary-deep mb-3 flex items-center">
                           <Archive className="h-4 w-4 mr-2" />
                           Long-term Memory Suggestions
                         </h3>
                         <div className="space-y-3">
                           {aiInsights.recommendations.map((rec, index) => (
-                            <div key={index} className="flex items-start justify-between p-3 bg-slate-700/30 rounded-lg">
+                            <div key={index} className="flex items-start justify-between p-3 bg-surface-muted rounded-lg">
                               <div className="flex-1 min-w-0">
-                                <p className="text-white text-sm font-medium truncate">{rec.note.title}</p>
-                                <p className="text-slate-400 text-xs mt-1">{rec.reason}</p>
+                                <p className="text-ink text-sm font-medium truncate">{rec.note.title}</p>
+                                <p className="text-muted text-xs mt-1">{rec.reason}</p>
                               </div>
                               <button
                                 onClick={() => moveToLongTerm(rec.note.id)}
-                                className="ml-3 px-3 py-1 bg-green-500 text-white text-xs rounded-md hover:bg-green-600 transition-colors flex-shrink-0"
+                                className="ml-3 px-3 py-1 bg-green-500 text-ink text-xs rounded-md hover:bg-green-600 transition-colors flex-shrink-0"
                                 title="Move to Long-term Memory"
                               >
                                 Move
@@ -459,15 +459,15 @@ export const ShortTermMemory: React.FC = React.memo(() => {
                       </div>
                     ) : null}
                     
-                    <div className="text-xs text-slate-500 text-center mt-4">
+                    <div className="text-xs text-muted text-center mt-4">
                       <p>Insights are automatically refreshed once every 24 hours.</p>
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Sparkles className="h-12 w-12 text-slate-500 mx-auto mb-3" />
-                    <p className="text-slate-400">No sufficient notes for analysis.</p>
-                    <p className="text-slate-500 text-sm mt-2">Add more thoughts to get AI insights</p>
+                    <Sparkles className="h-12 w-12 text-muted mx-auto mb-3" />
+                    <p className="text-muted">No sufficient notes for analysis.</p>
+                    <p className="text-muted text-sm mt-2">Add more thoughts to get AI insights</p>
                   </div>
                 )}
               </div>
@@ -475,25 +475,25 @@ export const ShortTermMemory: React.FC = React.memo(() => {
               <div className="text-center py-8">
                 <div className="mb-6">
                   <div className="relative inline-block">
-                    <Crown className="h-16 w-16 text-orange-400 mx-auto" />
+                    <Crown className="h-16 w-16 text-brand-yellow-ink mx-auto" />
                     <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                      <Sparkles className="h-3 w-3 text-white" />
+                      <Sparkles className="h-3 w-3 text-ink" />
                     </div>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-3">Unlock AI Insights</h3>
-                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                <h3 className="text-lg font-bold text-ink mb-3">Unlock AI Insights</h3>
+                <p className="text-muted text-sm mb-6 leading-relaxed">
                   Get personalized insights, patterns, and recommendations from your short-term thoughts with advanced AI analysis.
                 </p>
                 <div className="space-y-3">
                   <Link to="/pricing">
                     <button 
-                      className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg font-semibold transition-colors hover:bg-orange-600"
+                      className="w-full px-4 py-3 bg-orange-500 text-ink rounded-lg font-semibold transition-colors hover:bg-orange-600"
                     >
                       Upgrade to Pro
                     </button>
                   </Link>
-                  <div className="text-xs text-slate-500 space-y-1">
+                  <div className="text-xs text-muted space-y-1">
                     <p>✨ Smart pattern recognition</p>
                     <p>🧠 Knowledge gap analysis</p>
                     <p>📊 Personalized recommendations</p>
@@ -508,7 +508,7 @@ export const ShortTermMemory: React.FC = React.memo(() => {
       {/* Overlay for mobile when panel is open */}
       {showAiInsights && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50  z-40 lg:hidden"
           onClick={() => setShowAiInsights(false)}
         />
       )}

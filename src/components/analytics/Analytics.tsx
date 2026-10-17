@@ -15,6 +15,7 @@ import { useProjects } from '../../hooks/useProjects';
 import { Task } from '../../types/projects';
 import { useAuth } from '../../contexts/AuthContext';
 import { logger } from '../../lib/logger';
+import { resolveDesignNumber } from '../../design/tokens';
 
 export const Analytics: React.FC = React.memo(() => {
   const [timeRange, setTimeRange] = useState('30d');
@@ -22,6 +23,7 @@ export const Analytics: React.FC = React.memo(() => {
   const { analyticsData, isLoading, exportData } = useAnalytics(timeRange);
   const { projects, isLoading: loadingProjects } = useProjects();
   const { user } = useAuth();
+  const chartBarUnitHeight = resolveDesignNumber('--chart-bar-unit-height');
 
   // Not Creation Trends state
   const [notCreationTrends, setNotCreationTrends] = useState<{ date: string; value: number }[]>([]);
@@ -70,8 +72,8 @@ export const Analytics: React.FC = React.memo(() => {
       long = Number(data.lt_all) || 0;
     }
     setMemoryBarData([
-      { label: 'Short Term', value: short, color: '#fb923c' },
-      { label: 'Long Term', value: long, color: '#a78bfa' }
+      { label: 'Short Term', value: short, color: 'var(--color-brand-yellow)' },
+      { label: 'Long Term', value: long, color: 'var(--color-brand-purple)' }
     ]);
   };
 
@@ -120,7 +122,7 @@ export const Analytics: React.FC = React.memo(() => {
         setNoteActivityBarData([]);
         return;
       }
-      setNoteActivityBarData(data.map((d: any) => ({ label: d.weekday_name.trim(), value: Number(d.total), color: '#38bdf8' })));
+      setNoteActivityBarData(data.map((d: any) => ({ label: d.weekday_name.trim(), value: Number(d.total), color: 'var(--color-brand-secondary)' })));
     }
     fetchNoteActivity();
   }, [timeRange, user]);
@@ -149,7 +151,7 @@ export const Analytics: React.FC = React.memo(() => {
       const bars = Array.from({ length: 24 }, (_, h) => ({
         label: h.toString().padStart(2, '0') + ':00',
         value: hourMap.get(h) || 0,
-        color: '#f472b6'
+        color: 'var(--color-brand-primary)'
       }));
       setNoteHourBarData(bars);
     }
@@ -184,7 +186,7 @@ export const Analytics: React.FC = React.memo(() => {
       });
       // En çok kullanılan 10 tag'i al
       const merged = Array.from(tagMap.entries())
-        .map(([label, value]) => ({ label, value, color: '#38bdf8' }))
+        .map(([label, value]) => ({ label, value, color: 'var(--color-brand-secondary)' }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 10);
       setTagUsageBarData(merged);
@@ -417,24 +419,24 @@ export const Analytics: React.FC = React.memo(() => {
 
   function renderTotalChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
-    if (change === 0) return <span className="text-slate-400">0</span>;
-    const color = change > 0 ? 'text-green-400' : 'text-red-400';
+    if (change === 0) return <span className="text-muted">0</span>;
+    const color = change > 0 ? 'text-brand-secondary-deep' : 'text-brand-primary-deep';
     const sign = change > 0 ? '+' : '';
     return <span className={color}>{sign}{change} from previous period</span>;
   }
 
   function renderActiveTopicsChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
-    if (change === 0) return <span className="text-slate-400">0</span>;
-    const color = change > 0 ? 'text-green-400' : 'text-red-400';
+    if (change === 0) return <span className="text-muted">0</span>;
+    const color = change > 0 ? 'text-brand-secondary-deep' : 'text-brand-primary-deep';
     const sign = change > 0 ? '+' : '';
     return <span className={color}>{sign}{change} from previous period</span>;
   }
 
   function renderKnowledgeScoreChange(change: number | null) {
     if (change === null || timeRange === 'all') return null;
-    if (change === 0) return <span className="text-slate-400">0</span>;
-    const color = change > 0 ? 'text-green-400' : 'text-red-400';
+    if (change === 0) return <span className="text-muted">0</span>;
+    const color = change > 0 ? 'text-brand-secondary-deep' : 'text-brand-primary-deep';
     const sign = change > 0 ? '+' : '';
     return <span className={color}>{sign}{change} from previous period</span>;
   }
@@ -457,9 +459,9 @@ export const Analytics: React.FC = React.memo(() => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
+      <div className="flex-1 bg-canvas overflow-y-auto h-screen">
         <div className="flex items-center justify-center py-12">
-          <div className="flex items-center space-x-3 text-slate-400">
+          <div className="flex items-center space-x-3 text-muted">
             <RefreshCw className="h-5 w-5 animate-spin" />
             <span>Analyzing your knowledge...</span>
           </div>
@@ -476,15 +478,15 @@ export const Analytics: React.FC = React.memo(() => {
   return (
     <>
       <SEO title="Analytics - Second Brain" noindex nofollow />
-      <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
+      <div className="flex-1 bg-canvas overflow-y-auto h-screen">
       {/* Mobile-Optimized Header */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
+      <div className="bg-surface  border-b border-ink p-4 lg:p-6 sticky top-0 z-10">
         <div className="flex flex-col space-y-4">
           {/* Simple Mobile Title */}
           <div className="flex items-center justify-between">
             <div className="pl-12 lg:pl-0">
-              <h1 className="text-xl lg:text-3xl font-bold text-white">Analytics</h1>
-              <p className="text-slate-400 text-xs lg:text-base hidden lg:block">
+              <h1 className="text-xl lg:text-3xl font-bold text-ink">Analytics</h1>
+              <p className="text-muted text-xs lg:text-base hidden lg:block">
                 Insights into your knowledge patterns and thinking trends
               </p>
             </div>
@@ -495,15 +497,15 @@ export const Analytics: React.FC = React.memo(() => {
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 text-xs lg:text-sm flex-1 max-w-[140px]"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="px-3 py-2 bg-surface border border-ink rounded-lg text-ink focus:outline-none focus:ring-2 text-xs lg:text-sm flex-1 max-w-filter"
+              style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
             >
               <option value="7d">7 days</option>
               <option value="30d">30 days</option>
               <option value="all">All time</option>
             </select>
             
-            <div className="text-xs lg:text-sm text-slate-400">
+            <div className="text-xs lg:text-sm text-muted">
               {analyticsData.totalNotes} total thoughts
             </div>
           </div>
@@ -511,107 +513,107 @@ export const Analytics: React.FC = React.memo(() => {
       </div>
 
       {/* Main Content */}
-      <div className="p-4 lg:p-6 space-y-6 bg-slate-900 min-h-full">
+      <div className="p-4 lg:p-6 space-y-6 bg-canvas min-h-full">
         {/* Metrics Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
+          <div className="bg-surface  border border-ink rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 text-sm font-medium">Total Thoughts</h3>
-              <Zap className="h-5 w-5" style={{ color: '#a7c7e7' }} />
+              <h3 className="text-muted text-sm font-medium">Total Thoughts</h3>
+              <Zap className="h-5 w-5" style={{ color: 'var(--color-brand-secondary)' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{totalThoughts}</div>
+            <div className="text-2xl lg:text-3xl font-bold text-ink">{totalThoughts}</div>
             {renderTotalChange(totalChange)}
             {timeRange === 'all' && (
-              <div className="text-sm text-slate-400 mt-1">All time total thoughts</div>
+              <div className="text-sm text-muted mt-1">All time total thoughts</div>
             )}
           </div>
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
+          <div className="bg-surface  border border-ink rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 text-sm font-medium">Active Topics</h3>
-              <Tag className="h-5 w-5" style={{ color: '#f4c2a1' }} />
+              <h3 className="text-muted text-sm font-medium">Active Topics</h3>
+              <Tag className="h-5 w-5" style={{ color: 'var(--color-brand-yellow)' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{activeTopics}</div>
+            <div className="text-2xl lg:text-3xl font-bold text-ink">{activeTopics}</div>
             {renderActiveTopicsChange(activeTopicsChange)}
             {timeRange === 'all' && (
-              <div className="text-sm text-slate-400 mt-1">All time active topics</div>
+              <div className="text-sm text-muted mt-1">All time active topics</div>
             )}
           </div>
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
+          <div className="bg-surface  border border-ink rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 text-sm font-medium">Knowledge Score</h3>
-              <TrendingUp className="h-5 w-5" style={{ color: '#a7c7e7' }} />
+              <h3 className="text-muted text-sm font-medium">Knowledge Score</h3>
+              <TrendingUp className="h-5 w-5" style={{ color: 'var(--color-brand-secondary)' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{knowledgeScore}</div>
+            <div className="text-2xl lg:text-3xl font-bold text-ink">{knowledgeScore}</div>
             {renderKnowledgeScoreChange(knowledgeScoreChange)}
             {timeRange === 'all' && (
-              <div className="text-sm text-slate-400 mt-1">All time cumulative score</div>
+              <div className="text-sm text-muted mt-1">All time cumulative score</div>
             )}
           </div>
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 lg:p-6">
+          <div className="bg-surface  border border-ink rounded-xl p-4 lg:p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 text-sm font-medium">Connections</h3>
-              <Activity className="h-5 w-5" style={{ color: '#d4a5d4' }} />
+              <h3 className="text-muted text-sm font-medium">Connections</h3>
+              <Activity className="h-5 w-5" style={{ color: 'var(--color-brand-purple)' }} />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold text-white">{analyticsData.connections}</div>
-            <div className="text-sm" style={{ color: '#d4a5d4' }}>Neural links</div>
+            <div className="text-2xl lg:text-3xl font-bold text-ink">{analyticsData.connections}</div>
+            <div className="text-sm" style={{ color: 'var(--color-brand-purple)' }}>Neural links</div>
           </div>
         </div>
 
         {/* New Analytics Charts Section */}
         <div className="space-y-8 mb-12">
           {/* 1. Not Creation Trends (Short Term vs Long Term) — Line Chart */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">Note Creation Trends</h2>
-            <p className="text-slate-400 text-sm mb-4">{trendsDescription}</p>
+          <div className="bg-surface border border-ink rounded-xl p-6">
+            <h2 className="text-lg font-bold text-ink mb-1">Note Creation Trends</h2>
+            <p className="text-muted text-sm mb-4">{trendsDescription}</p>
             {loadingTrends ? (
-              <div className="h-64 flex items-center justify-center text-slate-500">
-                <svg className="animate-spin h-8 w-8 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+              <div className="h-64 flex items-center justify-center text-muted">
+                <svg className="animate-spin h-8 w-8 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
               </div>
             ) : (
               <LineChart data={notCreationTrends} />
             )}
           </div>
-          <hr className="border-slate-700" />
+          <hr className="border-ink" />
           {/* Memory Distribution & Note Activity by Day of Week yan yana */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Memory Distribution */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-1">Memory Distribution</h2>
-              <p className="text-slate-400 text-sm mb-4">
+            <div className="bg-surface border border-ink rounded-xl p-6">
+              <h2 className="text-lg font-bold text-ink mb-1">Memory Distribution</h2>
+              <p className="text-muted text-sm mb-4">
                 {`Distribution of your notes by memory type for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
               </p>
               <div className="h-64 flex items-end justify-center">
                 {memoryBarData.map((bar, idx) => (
                   <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
-                    <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
-                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
-                    <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
+                    <div className="text-ink text-lg font-bold mb-1">{bar.value}</div>
+                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * chartBarUnitHeight}px`, backgroundColor: bar.color, minHeight: 'var(--chart-bar-min-height)' }} />
+                    <div className="text-muted text-xs text-center font-medium mt-2">{bar.label}</div>
                   </div>
                 ))}
               </div>
             </div>
             {/* Note Activity by Day of Week */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-1">Note Activity by Day of Week</h2>
-              <p className="text-slate-400 text-sm mb-4">
+            <div className="bg-surface border border-ink rounded-xl p-6">
+              <h2 className="text-lg font-bold text-ink mb-1">Note Activity by Day of Week</h2>
+              <p className="text-muted text-sm mb-4">
                 {`Number of notes created on each day of the week for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
               </p>
               <div className="h-64 flex items-end justify-center">
                 {noteActivityBarData.map((bar, idx) => (
                   <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
-                    <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
-                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
-                    <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
+                    <div className="text-ink text-lg font-bold mb-1">{bar.value}</div>
+                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * chartBarUnitHeight}px`, backgroundColor: bar.color, minHeight: 'var(--chart-bar-min-height)' }} />
+                    <div className="text-muted text-xs text-center font-medium mt-2">{bar.label}</div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <hr className="border-slate-700" />
+          <hr className="border-ink" />
           {/* 3. Note Activity by Hour — Bar Chart */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-1">Note Activity by Hour</h2>
-            <p className="text-slate-400 text-sm mb-4">
+          <div className="bg-surface border border-ink rounded-xl p-6">
+            <h2 className="text-lg font-bold text-ink mb-1">Note Activity by Hour</h2>
+            <p className="text-muted text-sm mb-4">
               {`Number of notes created by hour for the ${timeRange === '7d' ? 'last 7 days' : timeRange === '30d' ? 'last 30 days' : 'all time'}.`}
             </p>
             {/* Mobilde yatay scroll, desktopta klasik görünüm */}
@@ -619,52 +621,52 @@ export const Analytics: React.FC = React.memo(() => {
               {noteHourBarData.map((bar, idx) => (
                 <div
                   key={bar.label}
-                  className="flex flex-col items-center mx-1 min-w-[32px] md:min-w-0 flex-1"
+                  className="flex flex-col items-center mx-1 min-w-analytics-column md:min-w-0 flex-1"
                 >
-                  <div className="text-white text-xs font-bold mb-1">{bar.value}</div>
+                  <div className="text-ink text-xs font-bold mb-1">{bar.value}</div>
                   <div
                     className="w-4 rounded-t-lg"
-                    style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }}
+                    style={{ height: `${bar.value * chartBarUnitHeight}px`, backgroundColor: bar.color, minHeight: 'var(--chart-bar-min-height)' }}
                   />
-                  <div className="text-slate-400 text-[10px] text-center font-medium mt-2">{bar.label}</div>
+                  <div className="text-muted text-2xs text-center font-medium mt-2">{bar.label}</div>
                 </div>
               ))}
             </div>
           </div>
-          <hr className="border-slate-700" />
+          <hr className="border-ink" />
           {/* Tag Usage Frequency & Tag Co-Occurrence yan yana */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Tag Usage Frequency — Bar Chart */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-1">Tag Usage Frequency</h2>
-              <p className="text-slate-400 text-sm mb-4">
+            <div className="bg-surface border border-ink rounded-xl p-6">
+              <h2 className="text-lg font-bold text-ink mb-1">Tag Usage Frequency</h2>
+              <p className="text-muted text-sm mb-4">
                 {`All time tag usage frequency`}
               </p>
               <div className="h-64 flex items-end justify-center">
                 {tagUsageBarData.slice(0, 5).map((bar, idx) => (
                   <div key={bar.label} className="flex-1 flex flex-col items-center mx-2">
-                    <div className="text-white text-lg font-bold mb-1">{bar.value}</div>
-                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * 8}px`, backgroundColor: bar.color, minHeight: '4px' }} />
-                    <div className="text-slate-400 text-xs text-center font-medium mt-2">{bar.label}</div>
+                    <div className="text-ink text-lg font-bold mb-1">{bar.value}</div>
+                    <div className="w-8 rounded-t-lg" style={{ height: `${bar.value * chartBarUnitHeight}px`, backgroundColor: bar.color, minHeight: 'var(--chart-bar-min-height)' }} />
+                    <div className="text-muted text-xs text-center font-medium mt-2">{bar.label}</div>
                   </div>
                 ))}
               </div>
             </div>
             {/* Tag Co-Occurrence Matrix — Table */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-1">Tag Co-Occurrence Matrix</h2>
-              <p className="text-slate-400 text-sm mb-4">
+            <div className="bg-surface border border-ink rounded-xl p-6">
+              <h2 className="text-lg font-bold text-ink mb-1">Tag Co-Occurrence Matrix</h2>
+              <p className="text-muted text-sm mb-4">
                 {`All time tag co-occurrence matrix`}
               </p>
               {loadingCooccurrence ? (
-                <div className="h-32 flex items-center justify-center text-slate-500">Loading...</div>
+                <div className="h-32 flex items-center justify-center text-muted">Loading...</div>
               ) : tagCooccurrence.length === 0 ? (
-                <div className="h-32 flex items-center justify-center text-slate-500">No tag co-occurrence data found.</div>
+                <div className="h-32 flex items-center justify-center text-muted">No tag co-occurrence data found.</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-[320px] w-full text-left border-collapse">
+                  <table className="min-w-table w-full text-left border-collapse">
                     <thead>
-                      <tr className="text-slate-400 text-xs uppercase border-b border-slate-700">
+                      <tr className="text-muted text-xs uppercase border-b border-ink">
                         <th className="py-2 px-3">Tag 1</th>
                         <th className="py-2 px-3">Tag 2</th>
                         <th className="py-2 px-3">Co-Occurrence</th>
@@ -672,10 +674,10 @@ export const Analytics: React.FC = React.memo(() => {
                     </thead>
                     <tbody>
                       {tagCooccurrence.slice(0, 5).map((row, idx) => (
-                        <tr key={row.tag1 + '-' + row.tag2} className="border-b border-slate-700 hover:bg-slate-700/30">
-                          <td className="py-2 px-3 font-medium text-white">{row.tag1}</td>
-                          <td className="py-2 px-3 font-medium text-white">{row.tag2}</td>
-                          <td className="py-2 px-3 text-slate-300">{row.total}</td>
+                        <tr key={row.tag1 + '-' + row.tag2} className="border-b border-ink hover:bg-surface-muted">
+                          <td className="py-2 px-3 font-medium text-ink">{row.tag1}</td>
+                          <td className="py-2 px-3 font-medium text-ink">{row.tag2}</td>
+                          <td className="py-2 px-3 text-muted">{row.total}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -684,19 +686,19 @@ export const Analytics: React.FC = React.memo(() => {
               )}
             </div>
           </div>
-          <hr className="border-slate-700" />
+          <hr className="border-ink" />
           {/* 9. Active Project Progress Overview + 10. Note Depth & Complexity Analysis side by side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Active Project Progress Overview */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-1">Active Project Progress Overview</h2>
-              <p className="text-slate-400 text-sm mb-4">
+            <div className="bg-surface border border-ink rounded-xl p-6">
+              <h2 className="text-lg font-bold text-ink mb-1">Active Project Progress Overview</h2>
+              <p className="text-muted text-sm mb-4">
                 Progress and task status for your in-progress projects.
               </p>
               {loadingProjects ? (
-                <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+                <div className="h-64 flex items-center justify-center text-muted">Loading...</div>
               ) : (
-                <div className="flex flex-col items-center justify-start text-slate-500 w-full">
+                <div className="flex flex-col items-center justify-start text-muted w-full">
                   {projectsWithInProgressTasks.length === 0 ? (
                     <div className="h-64 flex items-center justify-center">No in-progress projects found.</div>
                   ) :
@@ -704,38 +706,38 @@ export const Analytics: React.FC = React.memo(() => {
                       const projectTasks = tasksByProject[project.id] || [];
                       const inProgressTasks = projectTasks.filter(task => task.status === 'IN PROGRESS');
                       return (
-                        <div key={project.id} className="w-full max-w-xl mb-6 bg-slate-900/60 rounded-lg p-4">
+                        <div key={project.id} className="w-full max-w-xl mb-6 bg-canvas rounded-lg p-4">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-white font-medium">{project.name}</span>
-                            <span className="text-slate-400 text-xs">{project.progress}%</span>
+                            <span className="text-ink font-medium">{project.name}</span>
+                            <span className="text-muted text-xs">{project.progress}%</span>
                           </div>
-                          <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden mb-2">
+                          <div className="w-full h-3 bg-surface-muted rounded-full overflow-hidden mb-2">
                             <div
                               className="h-3 rounded-full"
-                              style={{ width: `${project.progress}%`, backgroundColor: project.color || '#a78bfa' }}
+                              style={{ width: `${project.progress}%`, backgroundColor: project.color || 'var(--color-brand-purple)' }}
                             ></div>
                           </div>
                           {/* Task List for this project */}
                           <div className="mt-2">
-                            <div className="text-slate-400 text-xs mb-1">Tasks</div>
+                            <div className="text-muted text-xs mb-1">Tasks</div>
                             {inProgressTasks.length > 0 ? (
                               <div className="space-y-2">
                                 {inProgressTasks.map((task: Task) => (
-                                  <div key={task.id} className="bg-slate-800/70 rounded px-2 py-1 flex flex-col mb-1">
+                                  <div key={task.id} className="bg-surface rounded px-2 py-1 flex flex-col mb-1">
                                     <div className="flex items-center justify-between">
-                                      <span className="text-slate-200 text-sm">{task.name}</span>
+                                      <span className="text-ink text-sm">{task.name}</span>
                                       <span className="flex items-center gap-1 text-xs font-medium">
                                         <span className={`inline-block w-2 h-2 rounded-full bg-yellow-400`}></span>
-                                        <span className="text-yellow-400">IN PROGRESS</span>
+                                        <span className="text-brand-yellow-ink">IN PROGRESS</span>
                                       </span>
                                     </div>
                                     {/* Subtask progress bar if available */}
                                     {task.subtasks && task.subtasks.length > 0 && (
                                       <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-slate-400 text-xs">
+                                        <span className="text-muted text-xs">
                                           {task.subtasks.filter((st: { completed: boolean }) => st.completed).length} / {task.subtasks.length} subtasks
                                         </span>
-                                        <div className="flex-1 h-1 bg-slate-700 rounded-full overflow-hidden">
+                                        <div className="flex-1 h-1 bg-surface-muted rounded-full overflow-hidden">
                                           <div
                                             className="h-1 rounded-full bg-green-400"
                                             style={{ width: `${(task.subtasks.filter((st: { completed: boolean }) => st.completed).length / task.subtasks.length) * 100}%` }}
@@ -747,7 +749,7 @@ export const Analytics: React.FC = React.memo(() => {
                                 ))}
                               </div>
                             ) : (
-                              <div className="text-slate-500 text-xs italic">No in-progress tasks</div>
+                              <div className="text-muted text-xs italic">No in-progress tasks</div>
                             )}
                           </div>
                         </div>
@@ -758,32 +760,32 @@ export const Analytics: React.FC = React.memo(() => {
               )}
             </div>
             {/* Note Depth & Complexity Analysis */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-bold text-white mb-1">Note Depth & Complexity Analysis</h2>
-              <p className="text-slate-400 text-sm mb-4">
+            <div className="bg-surface border border-ink rounded-xl p-6">
+              <h2 className="text-lg font-bold text-ink mb-1">Note Depth & Complexity Analysis</h2>
+              <p className="text-muted text-sm mb-4">
                 Average note length, word count, and lexical complexity for your notes.
               </p>
               {loadingNoteDepth ? (
-                <div className="h-32 flex items-center justify-center text-slate-500">Loading...</div>
+                <div className="h-32 flex items-center justify-center text-muted">Loading...</div>
               ) : noteDepthData.length === 0 ? (
-                <div className="h-32 flex items-center justify-center text-slate-500">No data found.</div>
+                <div className="h-32 flex items-center justify-center text-muted">No data found.</div>
               ) : (
                 <div className="flex flex-col gap-4">
                   {noteDepthData.map((row: any) => (
-                    <div key={row.type} className="rounded-lg shadow border border-slate-700 bg-slate-900/80 p-4 flex flex-col min-w-[180px]">
-                      <div className="font-bold text-white text-base mb-2 capitalize">{row.type.replace('_', ' ')} Note</div>
+                    <div key={row.type} className="rounded-lg shadow border border-ink bg-canvas p-4 flex flex-col min-w-metric">
+                      <div className="font-bold text-ink text-base mb-2 capitalize">{row.type.replace('_', ' ')} Note</div>
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                         <div className="flex flex-col">
-                          <span className="text-slate-400 text-xs">Avg Length</span>
-                          <span className="text-sm text-white font-semibold">{Number(row.avg_length).toFixed(1)} chars</span>
+                          <span className="text-muted text-xs">Avg Length</span>
+                          <span className="text-sm text-ink font-semibold">{Number(row.avg_length).toFixed(1)} chars</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-slate-400 text-xs">Avg Word Count</span>
-                          <span className="text-sm text-white font-semibold">{Number(row.avg_word_count).toFixed(1)}</span>
+                          <span className="text-muted text-xs">Avg Word Count</span>
+                          <span className="text-sm text-ink font-semibold">{Number(row.avg_word_count).toFixed(1)}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-slate-400 text-xs">Avg Word Complexity</span>
-                          <span className="text-sm text-white font-semibold">{Number(row.avg_word_complexity).toFixed(2)}</span>
+                          <span className="text-muted text-xs">Avg Word Complexity</span>
+                          <span className="text-sm text-ink font-semibold">{Number(row.avg_word_complexity).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>

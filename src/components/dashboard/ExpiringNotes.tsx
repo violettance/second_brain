@@ -52,29 +52,29 @@ const ExpiringNotes = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-slate-800/50 p-6 rounded-lg animate-pulse h-[180px]">
-        <div className="h-5 bg-slate-700 rounded w-1/3 mb-4"></div>
-        <div className="h-4 bg-slate-700 rounded w-full mb-2"></div>
+      <div className="bg-surface p-6 rounded-lg animate-pulse h-chart-compact">
+        <div className="h-5 bg-surface-muted rounded w-1/3 mb-4"></div>
+        <div className="h-4 bg-surface-muted rounded w-full mb-2"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 h-full">
+    <div className="bg-surface  border border-ink rounded-xl p-6 h-full">
       <div className="flex items-center mb-4">
-        <AlertTriangle className="h-6 w-6 text-red-400 mr-3" />
-        <h3 className="text-xl font-bold text-white">Expiring Notes</h3>
+        <AlertTriangle className="h-6 w-6 text-brand-primary-deep mr-3" />
+        <h3 className="text-xl font-bold text-ink">Expiring Notes</h3>
       </div>
       {expiringNotes.length > 0 ? (
         <ul className="space-y-3">
           {expiringNotes.slice(0, 3).map(note => {
             const daysLeft = getDaysRemaining(note.note_date || note.created_at);
             return (
-              <li key={note.id} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between transition-colors hover:bg-slate-700/50">
-                <p className="text-sm text-slate-300 truncate pr-4">{note.title}</p>
+              <li key={note.id} className="bg-surface p-3 rounded-lg flex items-center justify-between transition-colors hover:bg-surface-muted">
+                <p className="text-sm text-muted truncate pr-4">{note.title}</p>
                 <div className="flex items-center text-xs flex-shrink-0">
-                  <Clock className="h-4 w-4 mr-1.5 text-red-400" />
-                  <span className="font-semibold text-red-400">
+                  <Clock className="h-4 w-4 mr-1.5 text-brand-primary-deep" />
+                  <span className="font-semibold text-brand-primary-deep">
                     {daysLeft > 0 ? `${daysLeft}d left` : 'Today'}
                   </span>
                 </div>
@@ -84,13 +84,13 @@ const ExpiringNotes = () => {
         </ul>
       ) : (
         <div className="flex flex-col items-center justify-center text-center h-full -mt-8">
-          <Clock className="h-10 w-10 text-green-400 mb-3" />
-          <h3 className="text-lg font-bold text-white">All Good!</h3>
-          <p className="text-sm text-slate-400">No short-term notes are expiring soon.</p>
+          <Clock className="h-10 w-10 text-brand-secondary-deep mb-3" />
+          <h3 className="text-lg font-bold text-ink">All Good!</h3>
+          <p className="text-sm text-muted">No short-term notes are expiring soon.</p>
         </div>
       )}
     </div>
   );
 };
 
-export default ExpiringNotes; 
+export default ExpiringNotes;

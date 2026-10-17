@@ -214,15 +214,15 @@ export const CompactVoiceRecorder: React.FC<CompactVoiceRecorderProps> = ({
   const getThemeColors = () => {
     if (theme === 'short-term') {
       return {
-        primary: '#fb923c',
-        primaryRgba: 'rgba(251, 146, 60, 0.2)',
-        primaryBorder: 'rgba(251, 146, 60, 0.3)'
+        primary: 'var(--color-brand-yellow)',
+        primaryRgba: 'var(--color-brand-yellow-wash)',
+        primaryBorder: 'var(--color-brand-yellow-outline)'
       };
     }
     return {
-      primary: '#C2B5FC',
-      primaryRgba: 'rgba(194, 181, 252, 0.2)',
-      primaryBorder: 'rgba(194, 181, 252, 0.3)'
+      primary: 'var(--color-brand-primary)',
+      primaryRgba: 'var(--color-brand-purple-wash)',
+      primaryBorder: 'var(--color-brand-purple-outline)'
     };
   };
 
@@ -231,11 +231,11 @@ export const CompactVoiceRecorder: React.FC<CompactVoiceRecorderProps> = ({
   if (!isSupported) {
     return (
       <button
-        className="relative flex items-center justify-center p-2 rounded-full bg-slate-700 border border-slate-600 opacity-50 cursor-not-allowed"
+        className="relative flex items-center justify-center p-2 rounded-full bg-surface-muted border border-ink opacity-50 cursor-not-allowed"
         title="Voice recording not supported in this browser"
         disabled
       >
-        <AlertCircle className="h-4 w-4 text-red-400" />
+        <AlertCircle className="h-4 w-4 text-brand-primary-deep" />
       </button>
     );
   }
@@ -250,14 +250,14 @@ export const CompactVoiceRecorder: React.FC<CompactVoiceRecorderProps> = ({
           : 'hover:scale-105'
       } ${
         !isProUser 
-          ? 'bg-slate-700 border border-slate-600 hover:bg-slate-600' 
+          ? 'bg-surface-muted border border-ink hover:bg-surface-muted'
           : ''
       } disabled:opacity-50 disabled:cursor-not-allowed`}
       style={
         isProUser 
           ? { 
               backgroundColor: isListening ? colors.primaryRgba : colors.primaryRgba,
-              border: `1px solid ${colors.primaryBorder}`,
+              border: `var(--border-width-thin) solid ${colors.primaryBorder}`,
               color: isListening ? colors.primary : colors.primary
             }
           : {}
@@ -273,7 +273,7 @@ export const CompactVoiceRecorder: React.FC<CompactVoiceRecorderProps> = ({
       }
     >
       {!isProUser && (
-        <Crown className="absolute -top-1 -right-1 h-3 w-3 text-yellow-400 bg-slate-800 rounded-full p-0.5" />
+        <Crown className="absolute -top-1 -right-1 h-3 w-3 text-brand-yellow-ink bg-surface rounded-full p-0.5" />
       )}
       
       {isProcessing ? (
@@ -281,7 +281,7 @@ export const CompactVoiceRecorder: React.FC<CompactVoiceRecorderProps> = ({
       ) : isListening ? (
         <MicOff className="h-4 w-4" />
       ) : (
-        <Mic className={`h-4 w-4 ${!isProUser ? 'text-slate-400' : ''}`} />
+        <Mic className={`h-4 w-4 ${!isProUser ? 'text-muted' : ''}`} />
       )}
     </button>
   );

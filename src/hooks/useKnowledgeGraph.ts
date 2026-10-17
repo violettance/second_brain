@@ -158,7 +158,7 @@ const useKnowledgeGraph = () => {
             label,
             type: row.entity_type,
             val: 8,
-            color: row.entity_type === 'short_term_note' ? '#f472b6' : (row.entity_type === 'long_term_note' ? '#60a5fa' : (row.entity_type === 'project' ? '#4ade80' : undefined))
+            color: row.entity_type === 'short_term_note' ? 'var(--color-brand-primary)' : (row.entity_type === 'long_term_note' ? 'var(--color-brand-secondary)' : (row.entity_type === 'project' ? 'var(--color-brand-secondary)' : undefined))
           };
         }
         // Tag node
@@ -168,7 +168,7 @@ const useKnowledgeGraph = () => {
             label: row.tag_name,
             type: 'tag',
             val: 6,
-            color: '#a855f7'
+            color: 'var(--color-brand-purple)'
           };
         }
         // Link between entity and tag
@@ -185,7 +185,7 @@ const useKnowledgeGraph = () => {
               label: task.name || 'Task',
               type: 'task',
               val: 7,
-              color: '#fbbf24'
+              color: 'var(--color-brand-yellow)'
             };
           }
           // Project node (if not already from tags view)
@@ -210,7 +210,7 @@ const useKnowledgeGraph = () => {
               label: projectLabel || '',
               type: 'project',
               val: 8,
-              color: '#4ade80'
+              color: 'var(--color-brand-secondary)'
             };
           }
           // Link: task -> project

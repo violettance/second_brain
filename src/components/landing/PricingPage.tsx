@@ -1,8 +1,8 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
-import { logger } from '../../lib/logger';
-import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronDown, Network } from 'lucide-react';
+import { PublicSiteLayout } from './PublicSiteLayout';
 
 const plans = [
   {
@@ -22,8 +22,7 @@ const plans = [
       'Analytics dashboard',
       'Export capabilities'
     ],
-    buttonText: 'Start Building',
-    buttonStyle: 'bg-slate-700 hover:bg-slate-600 text-white',
+    buttonText: 'Start for free',
     popular: false
   },
   {
@@ -43,35 +42,28 @@ const plans = [
       'Feature request priority',
       'Theme choices'
     ],
-    buttonText: 'Start Pro Trial',
-    buttonStyle: 'bg-purple-600 hover:bg-purple-700 text-white',
+    buttonText: 'Contact us for Pro',
     popular: true
   }
 ];
 
-export const PricingPage: React.FC = () => {
-  const navigate = useNavigate();
+const questions = [
+  {
+    question: 'How does the 30-day evaluation work?',
+    answer: "Your ideas start in short-term memory where they're automatically archived after 30 days. During this time, you can decide which ideas deserve to move to your long-term memory for permanent storage.",
+  },
+  {
+    question: 'What makes this different from other note-taking apps?',
+    answer: 'Second Brain focuses on connection discovery. Our AI finds hidden relationships between your ideas, creating a knowledge graph that helps you see patterns and insights you might have missed.',
+  },
+  {
+    question: 'What happens to my knowledge graph if I cancel?',
+    answer: 'Your data remains accessible for 30 days after cancellation. You can export all your notes and connections before the end of this period to preserve your second brain.',
+  },
+];
 
-  const handleGetStarted = () => {
-    navigate('/auth');
-  };
-
-  const handleUpgrade = () => {
-    // In a real implementation, this would trigger Paddle checkout
-    logger.info('User clicked Pro subscription', { component: 'PricingPage' });
-    alert('Paddle checkout would open here for Pro subscription');
-  };
-
-  const handleContactSales = () => {
-    window.location.href = 'mailto:productora.analytics@gmail.com?subject=Enterprise Pricing Inquiry';
-  };
-
-  const handleGoToApp = () => {
-    navigate('/');
-  };
-
-  return (
-    <>
+export const PricingPage: React.FC = () => (
+  <>
       <Helmet>
         <title>Pricing - Second Brain | Choose Your Plan</title>
         <meta name="description" content="Choose the perfect Second Brain plan for your needs. Free tier available with AI-powered knowledge management, or upgrade to Pro for unlimited features and advanced AI capabilities." />
@@ -129,163 +121,83 @@ export const PricingPage: React.FC = () => {
           })}
         </script>
       </Helmet>
-      <div className="min-h-screen bg-slate-900 text-slate-100">
-      {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between p-4 lg:px-8 lg:py-6">
-        {/* Logo */}
-        <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-          <div className="flex-shrink-0">
-            <img src="/logo.png" alt="Second Brain Logo" className="h-14 w-14 lg:h-16 lg:w-16 rounded-lg" />
-          </div>
-          <span className="text-xl lg:text-2xl font-bold text-white">Second Brain</span>
-        </a>
-        
-        {/* Go to App Button */}
-        <button
-          onClick={handleGoToApp}
-          className="flex items-center space-x-2 px-4 lg:px-6 py-2 lg:py-3 text-slate-900 rounded-xl font-semibold hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
-          style={{ background: '#C2B5FC' }}
-        >
-          <span>Go to App</span>
-          <ArrowRight className="h-4 w-4" />
-        </button>
-      </nav>
+    <PublicSiteLayout>
+      <section aria-labelledby="pricing-heading" className="mx-auto max-w-7xl px-4 pb-12 pt-7 lg:px-8 lg:pb-16">
+        <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-ink">
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" /> Back to Second Brain
+        </Link>
+        <div className="mb-10 grid items-end gap-5 lg:grid-cols-copy lg:gap-12">
+          <h1 id="pricing-heading" className="font-display text-5xl font-bold tracking-tight lg:text-6xl">Start free.<br />Keep growing.</h1>
+          <p className="max-w-public-copy text-lg leading-relaxed text-muted">
+            A place for your daily thoughts. A way to see the bigger picture. Choose how you want to build your second brain.
+          </p>
+        </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          {/* Header Section */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-900/20 border border-purple-500/20 text-purple-300 text-sm font-medium mb-6">
-              <span className="mr-2">✨</span>
-              Simple, Transparent Pricing
-            </div>
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Build Your <span className="text-purple-400">Second Brain</span>
-            </h1>
-            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              Capture every idea, discover hidden connections, and amplify your thinking. Perfect for polymaths who want to turn scattered thoughts into powerful knowledge.
-            </p>
-          </div>
-
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {plans.map((plan, index) => (
-              <div
-                key={index}
-                className={`relative bg-slate-800 rounded-2xl p-8 border-2 transition-all duration-200 hover:scale-105 flex flex-col ${
-                  plan.popular
-                    ? 'border-purple-500 shadow-2xl shadow-purple-500/20'
-                    : 'border-slate-700 hover:border-slate-600'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                      Most Popular
-                    </span>
+        <div className="grid gap-6 md:grid-cols-2 lg:gap-8">
+          {plans.map(plan => {
+            const Icon = plan.popular ? Network : BookOpen;
+            return (
+              <article key={plan.name} aria-labelledby={`plan-${plan.name}`} className="flex min-w-0 flex-col overflow-hidden rounded-xl border-2 border-ink bg-surface shadow-md">
+                <div className={`border-b-2 border-ink p-6 lg:p-8 ${plan.popular ? 'bg-brand-primary-soft' : 'bg-brand-secondary-soft'}`}>
+                  <div className="mb-5 flex items-center justify-between gap-4">
+                    <h2 id={`plan-${plan.name}`} className="font-display text-2xl font-bold">{plan.name}</h2>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-ink bg-surface">
+                      <Icon aria-hidden="true" className="h-5 w-5" />
+                    </div>
                   </div>
-                )}
-
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold text-white">{plan.price}</span>
-                    <span className="text-slate-400 ml-2">{plan.period}</span>
+                  <div className="flex flex-wrap items-baseline gap-3">
+                    <span className="font-display text-6xl font-bold tracking-tight">{plan.price}</span>
+                    <span className="text-sm font-medium text-muted-strong">{plan.period}</span>
                   </div>
-                  <p className="text-slate-400">{plan.description}</p>
+                  <p className="mt-4 text-sm text-muted-strong">{plan.description}</p>
                 </div>
+                <div className="flex flex-1 flex-col p-6 lg:p-8">
+                  {plan.popular ? (
+                    <a href="mailto:productora.analytics@gmail.com?subject=Second%20Brain%20Pro" className="sb-action inline-flex items-center justify-center gap-3 px-5 py-3 text-base">
+                      {plan.buttonText} <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <Link to="/auth" className="sb-action sb-action-secondary inline-flex items-center justify-center gap-3 px-5 py-3 text-base">
+                      {plan.buttonText} <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                    </Link>
+                  )}
+                  <h3 className="mb-4 mt-8 text-sm font-semibold">{plan.popular ? 'Go further with Pro' : 'Everything you need to begin'}</h3>
+                  <ul className="space-y-3">
+                    {plan.features.map(feature => (
+                      <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-muted-strong">
+                        <Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-ink" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <p className="mt-7 text-center text-sm text-muted">Questions about a plan? <a href="mailto:productora.analytics@gmail.com" className="font-semibold text-ink underline underline-offset-4">Let's talk.</a></p>
+      </section>
 
-                <ul className="space-y-4 mb-8 flex-1">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start">
-                      <svg
-                        className="w-5 h-5 text-purple-400 mr-3 mt-0.5 flex-shrink-0"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span className="text-slate-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={
-                    plan.name === 'Free'
-                      ? handleGetStarted
-                      : plan.name === 'Pro'
-                      ? handleUpgrade
-                      : handleContactSales
-                  }
-                  className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${plan.buttonStyle}`}
-                >
-                  {plan.buttonText}
-                </button>
-              </div>
+      <section aria-labelledby="pricing-questions" className="border-t-2 border-ink bg-surface">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 lg:grid-cols-copy lg:gap-12 lg:px-8 lg:py-16">
+          <div>
+            <h2 id="pricing-questions" className="max-w-public-copy font-display text-3xl font-bold tracking-tight lg:text-4xl">A few things<br />to know.</h2>
+            <p className="mt-4 max-w-public-copy text-sm text-muted">A closer look at how your notes, connections, and plan work together.</p>
+          </div>
+          <div className="min-w-0 border-t-2 border-ink">
+            {questions.map(({ question, answer }, index) => (
+              <details key={question} open={index === 0} className="sb-accordion border-b-2 border-ink">
+                <summary className="flex cursor-pointer items-start justify-between gap-5 py-5 font-display text-lg font-bold">
+                  {question}<ChevronDown aria-hidden="true" className="sb-disclosure-icon mt-1 h-5 w-5 shrink-0" />
+                </summary>
+                <p className="pb-6 text-sm leading-reading text-muted-strong">{answer}</p>
+              </details>
             ))}
           </div>
-
-          {/* FAQ Section */}
-          <div className="mt-24 max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-            <div className="space-y-8">
-              <div className="bg-slate-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">How does the 30-day evaluation work?</h3>
-                <p className="text-slate-400">
-                  Your ideas start in short-term memory where they're automatically archived after 30 days. During this time, you can decide which ideas deserve to move to your long-term memory for permanent storage.
-                </p>
-              </div>
-              <div className="bg-slate-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">What makes this different from other note-taking apps?</h3>
-                <p className="text-slate-400">
-                  Second Brain focuses on connection discovery. Our AI finds hidden relationships between your ideas, creating a knowledge graph that helps you see patterns and insights you might have missed.
-                </p>
-              </div>
-              <div className="bg-slate-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">What happens to my knowledge graph if I cancel?</h3>
-                <p className="text-slate-400">
-                  Your data remains accessible for 30 days after cancellation. You can export all your notes and connections before the end of this period to preserve your second brain.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-slate-800 py-8">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-3">
-              <img src="/logo.png" alt="Second Brain Logo" className="h-8 w-8 rounded-lg" />
-              <span className="text-lg font-bold text-white">Second Brain</span>
-            </div>
-            <div className="flex items-center space-x-6 text-sm">
-              <a href="/terms-and-conditions" className="text-slate-400 hover:text-white transition-colors">
-                Terms & Conditions
-              </a>
-              <a href="/privacy-policy" className="text-slate-400 hover:text-white transition-colors">
-                Privacy Policy
-              </a>
-              <a href="mailto:productora.analytics@gmail.com" className="text-slate-400 hover:text-white transition-colors">
-                Support
-              </a>
-            </div>
-          </div>
-          <div className="mt-4 text-center text-xs text-slate-500">
-            &copy; {new Date().getFullYear()} Second Brain. All rights reserved.
-          </div>
-        </div>
-      </footer>
-      </div>
-    </>
-  );
-};
+      </section>
+    </PublicSiteLayout>
+  </>
+);
 
 export default PricingPage;

@@ -54,45 +54,45 @@ export const ProjectDetail: React.FC = () => {
   };
 
   if (isLoading) return <div>Loading project...</div>;
-  if (projectError) return <div className="text-red-500">Error: {projectError}</div>;
+  if (projectError) return <div className="text-brand-primary-deep">Error: {projectError}</div>;
   if (!project) return <div>Project not found.</div>;
 
   return (
-    <div className="flex-1 bg-slate-900 text-white flex flex-col h-screen overflow-hidden">
+    <div className="flex-1 bg-canvas text-ink flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <header className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 sticky top-0 z-10">
+      <header className="bg-surface  border-b border-ink p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button onClick={() => navigate('/projects')} className="p-2 hover:bg-slate-700 rounded-full">
+            <button onClick={() => navigate('/projects')} className="p-2 hover:bg-surface-muted rounded-full">
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div>
               <h1 className="text-2xl font-bold">{project.name}</h1>
-              <p className="text-slate-400 text-sm">{project.description}</p>
+              <p className="text-muted text-sm">{project.description}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <button onClick={() => setShowEditProject(project)} className="flex items-center space-x-2 px-3 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg">
+            <button onClick={() => setShowEditProject(project)} className="flex items-center space-x-2 px-3 py-2 text-sm bg-surface-muted hover:bg-surface-muted rounded-lg">
               <Edit className="h-4 w-4" />
               <span>Edit Project</span>
             </button>
-            <button onClick={() => setShowCreateTask(true)} className="flex items-center space-x-2 px-3 py-2 text-sm text-slate-900 rounded-lg font-semibold hover:opacity-90" style={{ background: '#C2B5FC' }}>
+            <button onClick={() => setShowCreateTask(true)} className="flex items-center space-x-2 px-3 py-2 text-sm text-ink rounded-lg font-semibold hover:opacity-90" style={{ background: 'var(--color-brand-primary)' }}>
               <Plus className="h-4 w-4" />
               <span>New Task</span>
             </button>
           </div>
         </div>
         <div className="mt-4 flex items-center space-x-6 text-sm">
-            <div className="w-full bg-slate-700 rounded-full h-2.5">
-              <div className="h-2.5 rounded-full" style={{ width: `${project.progress}%`, backgroundColor: project.color || '#C2B5FC' }}></div>
+            <div className="w-full bg-surface-muted rounded-full h-2.5">
+              <div className="h-2.5 rounded-full" style={{ width: `${project.progress}%`, backgroundColor: project.color || 'var(--color-brand-primary)' }}></div>
             </div>
-            <span className="text-slate-300 font-semibold">{project.progress}%</span>
-            <div className="flex items-center space-x-2 text-slate-400">
+            <span className="text-muted font-semibold">{project.progress}%</span>
+            <div className="flex items-center space-x-2 text-muted">
                 <CheckSquare className="h-4 w-4" />
                 <span>{project.completedTasks} / {project.tasksCount} Tasks</span>
             </div>
             {project.due_date && (
-                 <div className="flex items-center space-x-2 text-slate-400">
+                 <div className="flex items-center space-x-2 text-muted">
                     <Calendar className="h-4 w-4" />
                     <span>Due {new Date(project.due_date).toLocaleDateString()}</span>
                 </div>
@@ -102,16 +102,16 @@ export const ProjectDetail: React.FC = () => {
       
       {/* Kanban Board */}
       <main className="flex-1 overflow-x-auto p-4">
-        {tasksError && <p className="text-red-500">{tasksError}</p>}
+        {tasksError && <p className="text-brand-primary-deep">{tasksError}</p>}
         <div className="flex space-x-4 h-full">
           {statusColumns.map(({ status, title, color }) => (
-            <div key={status} className="w-80 flex-shrink-0 bg-slate-800/60 rounded-xl p-3 flex flex-col">
+            <div key={status} className="w-80 flex-shrink-0 bg-surface rounded-xl p-3 flex flex-col">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2">
                   <span className={`w-3 h-3 rounded-full ${color}`}></span>
-                  <h2 className="font-semibold text-slate-200">{title}</h2>
+                  <h2 className="font-semibold text-ink">{title}</h2>
                 </div>
-                <span className="text-sm font-medium text-slate-400 bg-slate-700/80 px-2 py-0.5 rounded-full">
+                <span className="text-sm font-medium text-muted bg-surface-muted px-2 py-0.5 rounded-full">
                   {groupedTasks[status].length}
                 </span>
               </div>

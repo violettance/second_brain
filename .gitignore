@@ -25,3 +25,4 @@ dist-ssr
 .env
 *.mcp.json
 .env.local
+supabase/.temp/

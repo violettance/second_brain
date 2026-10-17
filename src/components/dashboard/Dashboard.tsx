@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { Zap, BookOpen, Brain, LayoutGrid } from 'lucide-react';
+import { Zap, BookOpen, Brain, LayoutGrid, Plus } from 'lucide-react';
 import { StatsCard } from './StatsCard';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAnalytics } from '../../hooks/useAnalytics';
@@ -95,52 +95,54 @@ export const Dashboard: React.FC = React.memo(() => {
         <title>Dashboard - Second Brain</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      <div className="flex-1 bg-slate-900 overflow-y-auto h-screen">
-      {/* Header - Added left padding for mobile view to prevent overlap with hamburger menu */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 lg:p-6 sticky top-0 z-10">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0 pl-12 lg:pl-0">
+      <div className="min-h-screen bg-canvas">
+      <header className="sticky top-0 z-10 border-b-2 border-ink bg-canvas px-4 py-5 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 pl-12 lg:flex-row lg:items-center lg:justify-between lg:pl-0">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-              Welcome Back, {user?.name || 'Knowledge Seeker'}! 👀
+            <p className="mb-1 text-sm font-medium text-muted">Your knowledge, at a glance</p>
+            <h1 className="font-display text-2xl font-bold tracking-tight text-ink lg:text-3xl">
+              Welcome back, {user?.name || 'Knowledge seeker'}.
             </h1>
-            <p className="text-slate-400 text-sm lg:text-base">
-              Here's a snapshot of your brain's activity.
-            </p>
+            <p className="mt-1 text-sm text-muted lg:text-base">See what you have captured and where your ideas are heading.</p>
           </div>
+          <button type="button" onClick={() => navigate('/daily-notes')} className="sb-action flex w-fit items-center gap-2 px-4 py-2.5 text-sm">
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            <span>Capture a thought</span>
+          </button>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="p-4 lg:p-6 space-y-6 bg-slate-900 min-h-full">
+      <div className="mx-auto min-h-full max-w-7xl space-y-6 bg-canvas p-4 lg:p-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4 lg:gap-6">
           <StatsCard
             title="Total Thoughts"
             value={isLoadingAnalytics ? '...' : analyticsData.totalNotes}
             change="All time"
             icon={Zap}
-            iconColor="#a7c7e7"
+            iconColor="var(--color-brand-secondary)"
           />
           <StatsCard
             title="Daily Notes"
             value={isLoadingDailyCount ? '...' : dailyNotesCount}
             change="Today"
             icon={BookOpen}
-            iconColor="#A7F3D0"
+            iconColor="var(--color-brand-secondary)"
           />
           <StatsCard
             title="Knowledge Score"
             value={isLoadingKnowledgeScore ? '...' : knowledgeScore}
             change="All time"
             icon={Brain}
-            iconColor="#FDE68A"
+            iconColor="var(--color-brand-yellow)"
           />
           <StatsCard
             title="Total Projects"
             value={isLoadingProjects ? '...' : projects.length}
             change="All time"
             icon={LayoutGrid}
-            iconColor="#C2B5FC"
+            iconColor="var(--color-brand-purple)"
           />
         </div>
 

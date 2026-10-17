@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import posthog from 'posthog-js';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 import { Profile } from '../types/database';
 
 interface User extends Profile {}
@@ -12,7 +13,7 @@ interface AuthContextType {
   isPro: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   error: string | null;
   success: string | null;
 }
@@ -27,6 +28,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+
     const updateUserStatus = (profile: User | null) => {
       setUser(profile);
       if (profile && profile.subscription_plan && profile.subscription_plan !== 'free') {
@@ -53,20 +59,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const initializeAuth = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const sessionUser = sessionData?.session?.user;
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        const sessionUser = sessionData?.session?.user;
 
-      if (sessionUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', sessionUser.id)
-          .single();
+        if (sessionUser) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', sessionUser.id)
+            .single();
 
-        if (profile) updateUserStatus(profile);
+          if (profileError) throw profileError;
+          if (profile) updateUserStatus(profile);
+        }
+      } catch (error) {
+        // Auth failures should not leave the public landing page stuck on a blank loader.
+        logger.error('Unable to initialize auth session', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        updateUserStatus(null);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     initializeAuth();
@@ -92,12 +108,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    await supabase.auth.signInWithPassword({ email, password });
+    if (!supabase) {
+      setError('Authentication is not configured. Add the Supabase environment variables to continue.');
+      return;
+    }
+
+    setError(null);
+    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+    if (loginError) {
+      setError(loginError.message);
+      throw loginError;
+    }
   };
 
   const register = async (name: string, email: string, password: string) => {
     setError(null);
     setSuccess(null);
+
+    if (!supabase) {
+      setError('Authentication is not configured. Add the Supabase environment variables to continue.');
+      return;
+    }
 
     // Step 1: Check if the user already exists using the custom RPC
     const { data, error } = await supabase.rpc('check_user_exists', { email_input: email });
@@ -114,7 +145,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: { name },
+        emailRedirectTo: `${window.location.origin}/`,
+      },
     });
 
     if (signUpError) {
@@ -127,7 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    if (supabase) await supabase.auth.signOut();
     setUser(null);
     setIsPro(false);
     try { posthog.reset(); } catch (_e) {}

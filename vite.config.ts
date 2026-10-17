@@ -39,7 +39,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    // Bundle the icon library so the browser doesn't request each icon separately.
+    include: ['lucide-react'],
   },
   esbuild: { drop: ['debugger'] },
   build: {

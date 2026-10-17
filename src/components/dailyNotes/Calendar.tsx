@@ -117,28 +117,28 @@ export const Calendar: React.FC<CalendarProps> = ({
   const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
   return (
-    <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+    <div className="bg-surface  border border-ink rounded-xl p-4">
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-white">{monthName} {year}</h2>
+        <h2 className="text-lg font-medium text-ink">{monthName} {year}</h2>
         <div className="flex items-center space-x-2">
           <button
             onClick={handlePrevMonth}
-            className="p-1 hover:bg-slate-700 rounded-md transition-colors"
+            className="p-1 hover:bg-surface-muted rounded-md transition-colors"
           >
-            <ChevronLeft className="h-5 w-5 text-slate-400" />
+            <ChevronLeft className="h-5 w-5 text-muted" />
           </button>
           <button
             onClick={() => setCurrentMonth(new Date())}
-            className="px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 rounded-md transition-colors"
+            className="px-2 py-1 text-xs text-muted hover:bg-surface-muted rounded-md transition-colors"
           >
             Today
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1 hover:bg-slate-700 rounded-md transition-colors"
+            className="p-1 hover:bg-surface-muted rounded-md transition-colors"
           >
-            <ChevronRight className="h-5 w-5 text-slate-400" />
+            <ChevronRight className="h-5 w-5 text-muted" />
           </button>
         </div>
       </div>
@@ -148,7 +148,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         {dayNames.map((day, index) => (
           <div
             key={index}
-            className="text-center text-xs font-medium text-slate-400 py-1"
+            className="text-center text-xs font-medium text-muted py-1"
           >
             {day}
           </div>
@@ -164,12 +164,12 @@ export const Calendar: React.FC<CalendarProps> = ({
                 onClick={() => onDateSelect(date)}
                 className={`w-full h-full rounded-lg flex flex-col items-center justify-center transition-all relative ${
                   isSelected(date)
-                    ? 'text-slate-900'
+                    ? 'text-ink'
                     : isToday(date)
                     ? 'border'
-                    : 'text-slate-300 hover:bg-slate-700/50'
+                    : 'text-muted hover:bg-surface-muted'
                 }`}
-                style={isSelected(date) ? { background: '#C2B5FC' } : isToday(date) ? { backgroundColor: 'rgba(194, 181, 252, 0.1)', color: '#C2B5FC', borderColor: 'rgba(194, 181, 252, 0.3)' } : {}}
+                style={isSelected(date) ? { background: 'var(--color-brand-primary)' } : isToday(date) ? { backgroundColor: 'color-mix(in srgb, var(--color-brand-purple) 10%, transparent)', color: 'var(--color-brand-primary)', borderColor: 'color-mix(in srgb, var(--color-brand-purple) 30%, transparent)' } : {}}
               >
                 <span className={`text-xs ${isSelected(date) ? 'font-medium' : ''}`}>
                   {date.getDate()}
@@ -186,7 +186,7 @@ export const Calendar: React.FC<CalendarProps> = ({
                       
                       return (
                         <Circle 
-                          className={`${size} ${isSelected(date) ? 'text-slate-900 fill-slate-900' : 'text-green-400 fill-green-400'}`} 
+                          className={`${size} ${isSelected(date) ? 'text-ink fill-slate-900' : 'text-brand-secondary-deep fill-brand-secondary-deep'}`}
                           style={{ opacity: isSelected(date) ? 0.7 : 1 }}
                         />
                       );

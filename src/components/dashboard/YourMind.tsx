@@ -68,7 +68,7 @@ const YourMind = () => {
 
     const renderContent = () => {
         if (isLoading) {
-            return <p className="text-center text-slate-400">Analyzing your mind...</p>;
+            return <p className="text-center text-muted">Analyzing your mind...</p>;
         }
 
         const tagElements = topTags.length > 0 ? topTags.map((tagObj, index) => (
@@ -79,18 +79,18 @@ const YourMind = () => {
         )) : null;
 
         return (
-            <div className="space-y-3 text-slate-300">
+            <div className="space-y-3 text-muted">
                 {tagElements ? (
                     <p className="text-base">
                         You have thought most about {tagElements}.
                     </p>
                 ) : (
-                    <p className="text-slate-500">You haven't thought about anything specific yet. Start tagging your notes!</p>
+                    <p className="text-muted">You haven't thought about anything specific yet. Start tagging your notes!</p>
                 )}
                 
                 {noteCounts && (
                      <p className="text-base">
-                        Over the last 7 days, you've written <strong className="text-orange-300">{noteCounts.week.short}</strong> short-term and <strong className="text-green-300">{noteCounts.week.long}</strong> long-term notes. This month, it's <strong className="text-orange-300">{noteCounts.month.short}</strong> short-term and <strong className="text-green-300">{noteCounts.month.long}</strong> long-term. In total, you have <strong className="text-orange-300">{noteCounts.allTime.short}</strong> short-term and <strong className="text-green-300">{noteCounts.allTime.long}</strong> long-term notes.
+                        Over the last 7 days, you've written <strong className="text-brand-yellow-ink">{noteCounts.week.short}</strong> short-term and <strong className="text-brand-secondary-deep">{noteCounts.week.long}</strong> long-term notes. This month, it's <strong className="text-brand-yellow-ink">{noteCounts.month.short}</strong> short-term and <strong className="text-brand-secondary-deep">{noteCounts.month.long}</strong> long-term. In total, you have <strong className="text-brand-yellow-ink">{noteCounts.allTime.short}</strong> short-term and <strong className="text-brand-secondary-deep">{noteCounts.allTime.long}</strong> long-term notes.
                      </p>
                 )}
             </div>
@@ -98,10 +98,10 @@ const YourMind = () => {
     };
 
     return (
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 mt-6">
+        <div className="bg-surface  border border-ink rounded-xl p-6 mt-6">
             <div className="flex items-center mb-4">
                 <BrainCircuit className="h-6 w-6 text-indigo-400 mr-3" />
-                <h3 className="text-xl font-bold text-white">Your Mind</h3>
+                <h3 className="text-xl font-bold text-ink">Your Mind</h3>
             </div>
             {renderContent()}
         </div>

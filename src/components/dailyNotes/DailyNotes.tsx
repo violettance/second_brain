@@ -64,27 +64,27 @@ export const DailyNotes: React.FC = React.memo(() => {
   return (
     <>
       <SEO title="Daily Notes - Second Brain" noindex nofollow />
-      <div className="flex-1 bg-slate-900 overflow-hidden h-screen flex flex-col">
+      <div className="flex-1 bg-canvas overflow-hidden h-screen flex flex-col">
       {/* Header */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 sticky top-0 z-10">
+      <div className="bg-surface  border-b border-ink p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="pl-12 lg:pl-0">
-            <h1 className="text-2xl font-bold text-white">Daily Notes</h1>
-            <p className="text-slate-400 text-sm">
+            <h1 className="text-2xl font-bold text-ink">Daily Notes</h1>
+            <p className="text-muted text-sm">
               Capture your thoughts, ideas, and reflections
             </p>
           </div>
           <div className="flex items-center space-x-3">
             {/* View Toggle */}
-            <div className="flex items-center bg-slate-700 rounded-lg p-1">
+            <div className="flex items-center bg-surface-muted rounded-lg p-1">
               <button
                 onClick={() => setView('calendar')}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-all text-sm ${
                   view === 'calendar'
-                    ? 'text-slate-900'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'text-ink'
+                    : 'text-muted hover:text-ink'
                 }`}
-                style={view === 'calendar' ? { background: '#C2B5FC' } : {}}
+                style={view === 'calendar' ? { background: 'var(--color-brand-primary)' } : {}}
               >
                 <CalendarDays className="h-4 w-4" />
                 <span className="hidden sm:inline">Calendar</span>
@@ -93,10 +93,10 @@ export const DailyNotes: React.FC = React.memo(() => {
                 onClick={() => setView('list')}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-all text-sm ${
                   view === 'list'
-                    ? 'text-slate-900'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'text-ink'
+                    : 'text-muted hover:text-ink'
                 }`}
-                style={view === 'list' ? { background: '#C2B5FC' } : {}}
+                style={view === 'list' ? { background: 'var(--color-brand-primary)' } : {}}
               >
                 <List className="h-4 w-4" />
                 <span className="hidden sm:inline">List</span>
@@ -106,8 +106,8 @@ export const DailyNotes: React.FC = React.memo(() => {
             {/* New Note Button */}
             <button
               onClick={() => handleEditNote()}
-              className="flex items-center justify-center space-x-2 px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
-              style={{ background: '#C2B5FC' }}
+              className="flex items-center justify-center space-x-2 px-4 py-2 text-ink rounded-lg font-semibold transition-colors text-sm hover:opacity-90"
+              style={{ background: 'var(--color-brand-primary)' }}
             >
               <Plus className="h-4 w-4" />
               <span>New Note</span>
@@ -123,9 +123,9 @@ export const DailyNotes: React.FC = React.memo(() => {
             {/* Sidebar Toggle (Mobile) */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden fixed bottom-4 right-4 z-30 p-3 bg-slate-700 hover:bg-slate-600 rounded-full shadow-lg"
+              className="lg:hidden fixed bottom-4 right-4 z-30 p-3 bg-surface-muted hover:bg-surface-muted rounded-full shadow-lg"
             >
-              <CalendarDays className="h-5 w-5 text-white" />
+              <CalendarDays className="h-5 w-5 text-ink" />
             </button>
             
             {/* Backdrop for mobile sidebar */}
@@ -154,16 +154,16 @@ export const DailyNotes: React.FC = React.memo(() => {
             <div 
               className={`transform transition-transform duration-300 ease-in-out ${
                 sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-              } lg:translate-x-0 w-screen max-w-sm lg:w-80 lg:max-w-xs bg-slate-800/80 backdrop-blur-md border-l border-slate-700/50 p-4 overflow-y-auto fixed lg:relative inset-y-0 right-0 z-20`}
+              } lg:translate-x-0 w-screen max-w-sm lg:w-80 lg:max-w-xs bg-surface  border-l border-ink p-4 overflow-y-auto fixed lg:relative inset-y-0 right-0 z-20`}
             >
               <div className="sticky top-0">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium text-white">Calendar</h2>
+                  <h2 className="text-lg font-medium text-ink">Calendar</h2>
                   <button 
-                    className="lg:hidden p-2 hover:bg-slate-700 rounded-md"
+                    className="lg:hidden p-2 hover:bg-surface-muted rounded-md"
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <X className="h-5 w-5 text-slate-400" />
+                    <X className="h-5 w-5 text-muted" />
                   </button>
                 </div>
                 
@@ -176,20 +176,20 @@ export const DailyNotes: React.FC = React.memo(() => {
                 />
                 
                 {/* Memory Type Filters */}
-                <div className="mt-4 border-t border-slate-700/50 pt-4">
-                  <h3 className="text-sm font-medium text-slate-300 mb-3">Quick Actions</h3>
+                <div className="mt-4 border-t border-ink pt-4">
+                  <h3 className="text-sm font-medium text-muted mb-3">Quick Actions</h3>
                   <div className="flex flex-col space-y-2">
                     <button 
                       onClick={() => handleEditNote(undefined, 'short-term')}
-                      className="flex items-center space-x-2 px-3 py-2 bg-orange-500/20 text-orange-400 rounded-md border border-orange-500/30 hover:bg-orange-500/30 transition-colors"
+                      className="flex items-center space-x-2 px-3 py-2 bg-orange-500/20 text-brand-yellow-ink rounded-md border border-orange-500/30 hover:bg-orange-500/30 transition-colors"
                     >
                       <Clock className="h-4 w-4" />
                       <span className="text-sm">New Short Term Note</span>
                     </button>
                     <button 
                       onClick={() => handleEditNote(undefined, 'long-term')}
-                      className="flex items-center space-x-2 px-3 py-2 rounded-md border border-purple-500/30 text-purple-400 hover:opacity-80 transition-colors" 
-                      style={{ backgroundColor: 'rgba(194, 181, 252, 0.2)' }}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-md border border-purple-500/30 text-brand-purple-deep hover:opacity-80 transition-colors"
+                      style={{ backgroundColor: 'color-mix(in srgb, var(--color-brand-purple) 20%, transparent)' }}
                     >
                       <Brain className="h-4 w-4" />
                       <span className="text-sm">New Long Term Note</span>

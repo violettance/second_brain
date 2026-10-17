@@ -87,28 +87,28 @@ const MOCK_ANALYTICS: AnalyticsData = {
   connections: 156,
   growthRate: 23,
   topicBubbles: [
-    { topic: 'Programming', frequency: 45, color: '#a7c7e7', size: 80 },
-    { topic: 'AI/ML', frequency: 32, color: '#b8e6b8', size: 65 },
-    { topic: 'Philosophy', frequency: 28, color: '#f4c2a1', size: 60 },
-    { topic: 'Design', frequency: 24, color: '#d4a5d4', size: 55 },
-    { topic: 'Research', frequency: 20, color: '#f0d4a3', size: 50 },
-    { topic: 'Learning', frequency: 18, color: '#c7e7a7', size: 45 },
-    { topic: 'Ideas', frequency: 15, color: '#e7a7c7', size: 40 },
-    { topic: 'Projects', frequency: 12, color: '#a7e7d4', size: 35 }
+    { topic: 'Programming', frequency: 45, color: 'var(--color-brand-secondary)', size: 80 },
+    { topic: 'AI/ML', frequency: 32, color: 'var(--color-brand-secondary)', size: 65 },
+    { topic: 'Philosophy', frequency: 28, color: 'var(--color-brand-yellow)', size: 60 },
+    { topic: 'Design', frequency: 24, color: 'var(--color-brand-purple)', size: 55 },
+    { topic: 'Research', frequency: 20, color: 'var(--color-brand-yellow)', size: 50 },
+    { topic: 'Learning', frequency: 18, color: 'var(--color-brand-secondary)', size: 45 },
+    { topic: 'Ideas', frequency: 15, color: 'var(--color-brand-primary)', size: 40 },
+    { topic: 'Projects', frequency: 12, color: 'var(--color-brand-secondary)', size: 35 }
   ],
   wordCloud: [
-    { word: 'learning', frequency: 45, color: '#a7c7e7' },
-    { word: 'development', frequency: 38, color: '#b8e6b8' },
-    { word: 'knowledge', frequency: 35, color: '#f4c2a1' },
-    { word: 'research', frequency: 32, color: '#d4a5d4' },
-    { word: 'ideas', frequency: 28, color: '#f0d4a3' },
-    { word: 'thinking', frequency: 25, color: '#c7e7a7' },
-    { word: 'innovation', frequency: 22, color: '#e7a7c7' },
-    { word: 'creativity', frequency: 20, color: '#a7e7d4' },
-    { word: 'analysis', frequency: 18, color: '#d4c7e7' },
-    { word: 'insights', frequency: 15, color: '#e7d4a7' },
-    { word: 'patterns', frequency: 12, color: '#c7d4e7' },
-    { word: 'connections', frequency: 10, color: '#e7c7d4' }
+    { word: 'learning', frequency: 45, color: 'var(--color-brand-secondary)' },
+    { word: 'development', frequency: 38, color: 'var(--color-brand-secondary)' },
+    { word: 'knowledge', frequency: 35, color: 'var(--color-brand-yellow)' },
+    { word: 'research', frequency: 32, color: 'var(--color-brand-purple)' },
+    { word: 'ideas', frequency: 28, color: 'var(--color-brand-yellow)' },
+    { word: 'thinking', frequency: 25, color: 'var(--color-brand-secondary)' },
+    { word: 'innovation', frequency: 22, color: 'var(--color-brand-primary)' },
+    { word: 'creativity', frequency: 20, color: 'var(--color-brand-secondary)' },
+    { word: 'analysis', frequency: 18, color: 'var(--color-brand-purple)' },
+    { word: 'insights', frequency: 15, color: 'var(--color-brand-yellow)' },
+    { word: 'patterns', frequency: 12, color: 'var(--color-brand-secondary)' },
+    { word: 'connections', frequency: 10, color: 'var(--color-brand-primary)' }
   ],
   creationTrends: [
     { date: 'Jan 1', value: 5 },
@@ -125,8 +125,8 @@ const MOCK_ANALYTICS: AnalyticsData = {
     { date: 'Jan 12', value: 24 }
   ],
   memoryDistribution: [
-    { label: 'Short-term', value: 89, color: '#f4c2a1' },
-    { label: 'Long-term', value: 158, color: '#a7c7e7' }
+    { label: 'Short-term', value: 89, color: 'var(--color-brand-yellow)' },
+    { label: 'Long-term', value: 158, color: 'var(--color-brand-secondary)' }
   ],
   brainGrowth: [
     { date: 'Week 1', totalNotes: 50, capacity: 200, fillPercentage: 25 },
@@ -159,21 +159,21 @@ const MOCK_ANALYTICS: AnalyticsData = {
     }
   ],
   hourlyProductivity: [
-    { label: '6AM', value: 2, color: '#a7c7e7' },
-    { label: '9AM', value: 8, color: '#b8e6b8' },
-    { label: '12PM', value: 6, color: '#f4c2a1' },
-    { label: '3PM', value: 9, color: '#d4a5d4' },
-    { label: '6PM', value: 5, color: '#f0d4a3' },
-    { label: '9PM', value: 3, color: '#c7e7a7' }
+    { label: '6AM', value: 2, color: 'var(--color-brand-secondary)' },
+    { label: '9AM', value: 8, color: 'var(--color-brand-secondary)' },
+    { label: '12PM', value: 6, color: 'var(--color-brand-yellow)' },
+    { label: '3PM', value: 9, color: 'var(--color-brand-purple)' },
+    { label: '6PM', value: 5, color: 'var(--color-brand-yellow)' },
+    { label: '9PM', value: 3, color: 'var(--color-brand-secondary)' }
   ],
   weeklyPatterns: [
-    { label: 'Mon', value: 12, color: '#a7c7e7' },
-    { label: 'Tue', value: 15, color: '#b8e6b8' },
-    { label: 'Wed', value: 18, color: '#f4c2a1' },
-    { label: 'Thu', value: 14, color: '#d4a5d4' },
-    { label: 'Fri', value: 16, color: '#f0d4a3' },
-    { label: 'Sat', value: 8, color: '#c7e7a7' },
-    { label: 'Sun', value: 6, color: '#e7a7c7' }
+    { label: 'Mon', value: 12, color: 'var(--color-brand-secondary)' },
+    { label: 'Tue', value: 15, color: 'var(--color-brand-secondary)' },
+    { label: 'Wed', value: 18, color: 'var(--color-brand-yellow)' },
+    { label: 'Thu', value: 14, color: 'var(--color-brand-purple)' },
+    { label: 'Fri', value: 16, color: 'var(--color-brand-yellow)' },
+    { label: 'Sat', value: 8, color: 'var(--color-brand-secondary)' },
+    { label: 'Sun', value: 6, color: 'var(--color-brand-primary)' }
   ],
   knowledgeVelocity: [
     { date: 'Week 1', value: 12 },
@@ -185,16 +185,16 @@ const MOCK_ANALYTICS: AnalyticsData = {
   ],
   knowledgeGraph: {
     nodes: [
-      { id: '1', label: 'Programming', type: 'long-term', size: 20, color: '#a7c7e7', connections: 12 },
-      { id: '2', label: 'AI Research', type: 'long-term', size: 18, color: '#b8e6b8', connections: 8 },
-      { id: '3', label: 'Daily Ideas', type: 'short-term', size: 15, color: '#f4c2a1', connections: 6 },
-      { id: '4', label: 'Philosophy', type: 'long-term', size: 16, color: '#d4a5d4', connections: 7 },
-      { id: '5', label: 'Meeting Notes', type: 'short-term', size: 12, color: '#f4c2a1', connections: 4 },
-      { id: '6', label: '#learning', type: 'tag', size: 14, color: '#c7e7a7', connections: 15 },
-      { id: '7', label: '#research', type: 'tag', size: 13, color: '#e7a7c7', connections: 11 },
-      { id: '8', label: 'Jan 2025', type: 'date', size: 11, color: '#a7e7d4', connections: 9 },
-      { id: '9', label: 'Design System', type: 'long-term', size: 17, color: '#f0d4a3', connections: 10 },
-      { id: '10', label: 'Quick Thoughts', type: 'short-term', size: 10, color: '#f4c2a1', connections: 3 }
+      { id: '1', label: 'Programming', type: 'long-term', size: 20, color: 'var(--color-brand-secondary)', connections: 12 },
+      { id: '2', label: 'AI Research', type: 'long-term', size: 18, color: 'var(--color-brand-secondary)', connections: 8 },
+      { id: '3', label: 'Daily Ideas', type: 'short-term', size: 15, color: 'var(--color-brand-yellow)', connections: 6 },
+      { id: '4', label: 'Philosophy', type: 'long-term', size: 16, color: 'var(--color-brand-purple)', connections: 7 },
+      { id: '5', label: 'Meeting Notes', type: 'short-term', size: 12, color: 'var(--color-brand-yellow)', connections: 4 },
+      { id: '6', label: '#learning', type: 'tag', size: 14, color: 'var(--color-brand-secondary)', connections: 15 },
+      { id: '7', label: '#research', type: 'tag', size: 13, color: 'var(--color-brand-primary)', connections: 11 },
+      { id: '8', label: 'Jan 2025', type: 'date', size: 11, color: 'var(--color-brand-secondary)', connections: 9 },
+      { id: '9', label: 'Design System', type: 'long-term', size: 17, color: 'var(--color-brand-yellow)', connections: 10 },
+      { id: '10', label: 'Quick Thoughts', type: 'short-term', size: 10, color: 'var(--color-brand-yellow)', connections: 3 }
     ],
     edges: [
       { from: '1', to: '2', strength: 0.8 },
@@ -214,37 +214,37 @@ const MOCK_ANALYTICS: AnalyticsData = {
       title: 'Peak Thinking Hours',
       description: 'You create most notes between 9-11 AM and 2-4 PM',
       impact: '68% of your best ideas',
-      color: '#b8e6b8'
+      color: 'var(--color-brand-secondary)'
     },
     {
       title: 'Knowledge Clusters',
       description: 'Strong connections between Programming and AI topics',
       impact: '23 cross-references',
-      color: '#a7c7e7'
+      color: 'var(--color-brand-secondary)'
     },
     {
       title: 'Learning Velocity',
       description: 'Your note creation has increased 45% this month',
       impact: 'Accelerating growth',
-      color: '#f4c2a1'
+      color: 'var(--color-brand-yellow)'
     },
     {
       title: 'Memory Patterns',
       description: 'You tend to promote 30% of short-term notes to long-term',
       impact: 'Good curation habits',
-      color: '#d4a5d4'
+      color: 'var(--color-brand-purple)'
     },
     {
       title: 'Topic Diversity',
       description: 'You explore 8 different knowledge domains regularly',
       impact: 'Broad intellectual range',
-      color: '#c7e7a7'
+      color: 'var(--color-brand-secondary)'
     },
     {
       title: 'Connection Density',
       description: 'Your knowledge graph shows high interconnectedness',
       impact: '89% connectivity score',
-      color: '#e7a7c7'
+      color: 'var(--color-brand-primary)'
     }
   ]
 };

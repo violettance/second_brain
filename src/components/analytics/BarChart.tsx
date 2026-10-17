@@ -1,4 +1,5 @@
 import React from 'react';
+import { resolveDesignNumber } from '../../design/tokens';
 
 interface BarData {
   label: string;
@@ -12,9 +13,10 @@ interface BarChartProps {
 
 export const BarChart: React.FC<BarChartProps> = ({ data }) => {
   const maxValue = Math.max(...data.map(d => d.value));
+  const minimumHeight = resolveDesignNumber('--chart-bar-min-height');
   
   return (
-    <div className="h-64 bg-slate-900/50 rounded-lg border border-slate-700/50 p-4">
+    <div className="h-64 bg-canvas rounded-lg border border-ink p-4">
       <div className="h-full flex items-end justify-between space-x-2">
         {data.map((bar, index) => {
           const height = (bar.value / maxValue) * 100;
@@ -27,17 +29,17 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
                   style={{
                     height: `${height}%`,
                     backgroundColor: bar.color,
-                    minHeight: '4px'
+                    minHeight: `${minimumHeight}px`
                   }}
                 >
                   {/* Tooltip */}
-                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-surface text-ink text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                     {bar.value} notes
                   </div>
                 </div>
               </div>
               
-              <div className="text-slate-400 text-xs text-center font-medium">
+              <div className="text-muted text-xs text-center font-medium">
                 {bar.label}
               </div>
             </div>

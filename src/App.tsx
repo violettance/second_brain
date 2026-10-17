@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LandingPage } from './components/landing/LandingPage';
-import { AuthPage } from './components/auth/AuthPage';
-import { Sidebar } from './components/layout/Sidebar';
-import { Dashboard } from './components/dashboard/Dashboard';
-import { DailyNotes } from './components/dailyNotes/DailyNotes';
-import { ProjectsPage } from './components/projects/ProjectsPage';
-import { ShortTermMemory } from './components/memory/ShortTermMemory';
-import { LongTermMemory } from './components/memory/LongTermMemory';
-import { Analytics } from './components/analytics/Analytics';
-import { Settings } from './components/settings/Settings';
-import { KnowledgeNetworkPage } from './components/knowledge-network/KnowledgeNetworkPage';
-import { TasksPage } from './components/tasks/TasksPage';
-import { TermsAndConditions } from './components/landing/TermsAndConditions';
-import { PrivacyPolicy } from './components/landing/PrivacyPolicy';
-import { PricingModal } from './components/landing/PricingModal';
-import PricingPage from './components/landing/PricingPage';
-import { datadogRum } from "@datadog/browser-rum";
+
+const AuthPage = React.lazy(() => import('./components/auth/AuthPage').then(({ AuthPage }) => ({ default: AuthPage })));
+const Sidebar = React.lazy(() => import('./components/layout/Sidebar').then(({ Sidebar }) => ({ default: Sidebar })));
+const Dashboard = React.lazy(() => import('./components/dashboard/Dashboard').then(({ Dashboard }) => ({ default: Dashboard })));
+const DailyNotes = React.lazy(() => import('./components/dailyNotes/DailyNotes').then(({ DailyNotes }) => ({ default: DailyNotes })));
+const ProjectsPage = React.lazy(() => import('./components/projects/ProjectsPage').then(({ ProjectsPage }) => ({ default: ProjectsPage })));
+const ShortTermMemory = React.lazy(() => import('./components/memory/ShortTermMemory').then(({ ShortTermMemory }) => ({ default: ShortTermMemory })));
+const LongTermMemory = React.lazy(() => import('./components/memory/LongTermMemory').then(({ LongTermMemory }) => ({ default: LongTermMemory })));
+const Analytics = React.lazy(() => import('./components/analytics/Analytics').then(({ Analytics }) => ({ default: Analytics })));
+const Settings = React.lazy(() => import('./components/settings/Settings').then(({ Settings }) => ({ default: Settings })));
+const KnowledgeNetworkPage = React.lazy(() => import('./components/knowledge-network/KnowledgeNetworkPage').then(({ KnowledgeNetworkPage }) => ({ default: KnowledgeNetworkPage })));
+const TasksPage = React.lazy(() => import('./components/tasks/TasksPage').then(({ TasksPage }) => ({ default: TasksPage })));
+const TermsAndConditions = React.lazy(() => import('./components/landing/TermsAndConditions').then(({ TermsAndConditions }) => ({ default: TermsAndConditions })));
+const PrivacyPolicy = React.lazy(() => import('./components/landing/PrivacyPolicy').then(({ PrivacyPolicy }) => ({ default: PrivacyPolicy })));
+const PricingModal = React.lazy(() => import('./components/landing/PricingModal').then(({ PricingModal }) => ({ default: PricingModal })));
+const PricingPage = React.lazy(() => import('./components/landing/PricingPage'));
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -30,15 +30,10 @@ const AppContent: React.FC = () => {
     if (user) setShowLanding(false);
   }, [user]);
 
-  // Test için Datadog action ekle
-  useEffect(() => {
-    datadogRum.addAction("test-action", { foo: "bar" });
-  }, []);
-
   // Kullanıcının oturum durumu henüz belli değilse loading göster
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center text-white">
+      <div className="flex h-screen items-center justify-center text-ink">
         Loading...
       </div>
     );
@@ -55,6 +50,10 @@ const AppContent: React.FC = () => {
     );
   }
 
+  if (!user && location.pathname === '/auth') {
+    return <AuthPage />;
+  }
+
   if (showLanding && !user) {
     return <LandingPage onGoToApp={() => setShowLanding(false)} />;
   }
@@ -66,9 +65,9 @@ const AppContent: React.FC = () => {
   const currentPage = location.pathname.substring(1);
 
   return (
-    <div className="flex h-screen bg-slate-900 overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-canvas text-ink">
       <Sidebar currentPage={currentPage} />
-      <div className="flex-1 lg:ml-0 overflow-y-auto">
+      <main className="min-w-0 flex-1 overflow-y-auto">
         <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/daily-notes" element={<DailyNotes />} />
@@ -84,7 +83,7 @@ const AppContent: React.FC = () => {
             <Route path="/pricing" element={<PricingModal />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
-      </div>
+      </main>
     </div>
   );
 };
@@ -93,7 +92,13 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <AppContent />
+        <Suspense fallback={(
+          <div className="flex h-screen items-center justify-center bg-canvas text-ink">
+            Loading...
+          </div>
+        )}>
+          <AppContent />
+        </Suspense>
       </AuthProvider>
     </HelmetProvider>
   );

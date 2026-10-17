@@ -17,12 +17,12 @@ const parseMarkdown = (text: string) => {
       return <em key={index}>{part.slice(1, -1)}</em>;
     }
     if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
-      return <code key={index} className="bg-slate-700 px-1 py-0.5 rounded text-sm">{part.slice(1, -1)}</code>;
+      return <code key={index} className="bg-surface-muted px-1 py-0.5 rounded text-sm">{part.slice(1, -1)}</code>;
     }
     const linkMatch = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
     if (linkMatch) {
       return (
-        <a key={index} href={linkMatch[2]} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">
+        <a key={index} href={linkMatch[2]} className="text-brand-secondary-deep hover:text-brand-secondary-deep underline" target="_blank" rel="noopener noreferrer">
           {linkMatch[1]}
         </a>
       );
@@ -43,11 +43,11 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ content }) => {
         securityLevel: 'loose',
         logLevel: 0,
         themeVariables: {
-          background: '#1e293b',
-          primaryColor: '#334155',
-          primaryTextColor: '#f1f5f9',
-          lineColor: '#475569',
-          textColor: '#cbd5e1',
+          background: 'var(--color-brand-dark)',
+          primaryColor: 'var(--color-brand-dark)',
+          primaryTextColor: 'var(--color-surface-subtle)',
+          lineColor: 'var(--color-neutral-strong)',
+          textColor: 'var(--color-neutral-strong)',
         },
       });
       window.mermaidInitialized = true;
@@ -68,7 +68,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ content }) => {
                       element.innerHTML = svg;
                     } catch (renderError) {
                       logger.error('Mermaid render error', { error: renderError.message });
-                      element.innerHTML = `<div class="text-red-400 text-sm p-4 border border-red-400/30 rounded bg-red-900/20">
+                      element.innerHTML = `<div class="text-brand-primary-deep text-sm p-4 border border-red-400/30 rounded bg-red-900/20">
                         <strong>Diagram Error:</strong><br/>
                         <pre class="mt-2 text-xs overflow-auto">${diagramCode}</pre>
                       </div>`;
@@ -95,7 +95,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ content }) => {
         const diagramCode = part.replace(/^```mermaid\n|```$/g, '');
         // Each mermaid div needs a unique class for mermaid.run to target it
         return (
-          <div key={index} className={`mermaid mermaid-${id} flex justify-center p-4 my-4 bg-slate-900 rounded-lg border border-slate-700`}>
+          <div key={index} className={`mermaid mermaid-${id} flex justify-center p-4 my-4 bg-canvas rounded-lg border border-ink`}>
             {diagramCode}
           </div>
         );
@@ -111,7 +111,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ content }) => {
   };
 
   return (
-    <div className="whitespace-pre-wrap text-white text-base leading-relaxed">
+    <div className="whitespace-pre-wrap text-ink text-base leading-relaxed">
       {renderParts()}
     </div>
   );

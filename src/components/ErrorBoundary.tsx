@@ -30,11 +30,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="h-screen w-full flex items-center justify-center text-slate-100">
+        <div className="h-screen w-full flex items-center justify-center text-ink">
           <div className="max-w-lg text-center">
             <h1 className="text-2xl font-semibold mb-2">Something went wrong</h1>
-            <p className="text-slate-300 mb-6">Try refreshing the page. If the problem persists, please contact support.</p>
-            <button className="px-4 py-2 rounded bg-slate-700 hover:bg-slate-600" onClick={() => location.reload()}>
+            <p className="text-muted mb-6">Try refreshing the page. If the problem persists, please contact support.</p>
+            <button className="px-4 py-2 rounded bg-surface-muted hover:bg-surface-muted" onClick={() => location.reload()}>
               Refresh
             </button>
           </div>

@@ -79,6 +79,22 @@ For polymaths building their second brain:
 - **Supabase** - Backend & Database
 - **AI Integration** - Smart features
 
+## Local development
+
+1. Install dependencies with `bun install`.
+2. Copy `.env.example` to `.env.local` and add your Supabase project URL and anon key.
+3. Start the app with `bun run dev`.
+
+The public landing page still loads without Supabase credentials. Sign-in and account creation require a configured Supabase project.
+
+Use `http://localhost:5173/` for local authentication. That origin is already allowed in the existing Supabase project, and registration emails now return to the app's current origin. Keep `.env.local` out of Git; never use a service-role key in a `VITE_` variable.
+
+### Existing Supabase project
+
+The connected project is `juyzcctqoxypkrcdqahg` (Second Brain). The corrective migration `20261017135243_complete_productora_supabase_setup.sql` was applied through the dashboard SQL Editor on 2026-10-17. It makes the 24 existing analytics views use caller RLS, secures profile creation, and backfills missing profiles. The script can safely be reapplied, but the dashboard does not record CLI migration history. Reconcile the remote history before using `db push`; the original repository migration is not a complete baseline of the existing database.
+
+The four AI functions (`ai-tags`, `ai-short-term`, `ai-long-term`, `ai-mermaid`) and the server-side `GEMINI_API_KEY` secret already exist. Their CORS preflight responses allow localhost. AI generation still requires a signed-in session and a valid provider key; it was not invoked during setup.
+
 
 ## 📄 License
 

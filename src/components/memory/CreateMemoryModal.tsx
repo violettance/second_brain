@@ -128,26 +128,26 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50  z-50 flex items-center justify-center p-4">
       <div 
         ref={modalRef}
-        className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-surface border border-ink rounded-2xl w-full max-w-4xl max-h-modal overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-slate-700">
+        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-ink">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg" style={{ background: memoryType === 'short-term' ? '#fb923c' : '#C2B5FC' }}>
+            <div className="p-2 rounded-lg" style={{ background: memoryType === 'short-term' ? 'var(--color-brand-yellow)' : 'var(--color-brand-primary)' }}>
               {memoryType === 'short-term' ? (
-                <Clock className="h-5 w-5 text-white" />
+                <Clock className="h-5 w-5 text-ink" />
               ) : (
-                <Brain className="h-5 w-5 text-slate-900" />
+                <Brain className="h-5 w-5 text-ink" />
               )}
             </div>
             <div>
-              <h2 className="text-xl lg:text-2xl font-bold text-white">
+              <h2 className="text-xl lg:text-2xl font-bold text-ink">
                 Create {memoryType === 'short-term' ? 'Short Term' : 'Long Term'} Note
               </h2>
-              <p className="text-slate-400 text-xs lg:text-sm">
+              <p className="text-muted text-xs lg:text-sm">
                 {memoryType === 'short-term' 
                   ? 'Temporary note - will be archived after 30 days'
                   : 'Permanent note - part of your knowledge base'
@@ -172,9 +172,9 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             
             <button
               onClick={onClose}
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-surface-muted rounded-lg transition-colors"
             >
-              <X className="h-5 w-5 lg:h-6 lg:w-6 text-slate-400" />
+              <X className="h-5 w-5 lg:h-6 lg:w-6 text-muted" />
             </button>
           </div>
         </div>
@@ -183,7 +183,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-muted mb-2">
               Note Title
             </label>
             <input
@@ -191,8 +191,8 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter note title..."
-              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent text-base lg:text-lg font-semibold"
-              style={{ '--tw-ring-color': memoryType === 'short-term' ? '#fb923c' : '#C2B5FC' } as React.CSSProperties}
+              className="w-full px-4 py-3 bg-surface-muted border border-ink rounded-xl text-ink placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent text-base lg:text-lg font-semibold"
+              style={{ '--tw-ring-color': memoryType === 'short-term' ? 'var(--color-brand-yellow)' : 'var(--color-brand-primary)' } as React.CSSProperties}
             />
           </div>
 
@@ -201,22 +201,22 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             memoryType === 'short-term' 
               ? 'bg-orange-500/10 border-orange-500/30' 
               : 'border'
-          }`} style={memoryType === 'long-term' ? { backgroundColor: '#C2B5FC10', borderColor: '#C2B5FC30' } : {}}>
+          }`} style={memoryType === 'long-term' ? { backgroundColor: 'color-mix(in srgb, var(--color-brand-purple) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--color-brand-purple) 30%, transparent)' } : {}}>
             <div className="flex items-center space-x-3">
               {memoryType === 'short-term' ? (
                 <>
-                  <Clock className="h-5 w-5 text-orange-400" />
+                  <Clock className="h-5 w-5 text-brand-yellow-ink" />
                   <div>
-                    <div className="text-orange-400 font-medium">Short Term Memory</div>
-                    <div className="text-slate-400 text-sm">This note will be automatically archived after 30 days unless moved to long term memory</div>
+                    <div className="text-brand-yellow-ink font-medium">Short Term Memory</div>
+                    <div className="text-muted text-sm">This note will be automatically archived after 30 days unless moved to long term memory</div>
                   </div>
                 </>
               ) : (
                 <>
-                  <Brain className="h-5 w-5" style={{ color: '#C2B5FC' }} />
+                  <Brain className="h-5 w-5" style={{ color: 'var(--color-brand-primary)' }} />
                   <div>
-                    <div className="font-medium" style={{ color: '#C2B5FC' }}>Long Term Memory</div>
-                    <div className="text-slate-400 text-sm">This note will be permanently stored in your knowledge base</div>
+                    <div className="font-medium" style={{ color: 'var(--color-brand-primary)' }}>Long Term Memory</div>
+                    <div className="text-muted text-sm">This note will be permanently stored in your knowledge base</div>
                   </div>
                 </>
               )}
@@ -225,27 +225,27 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">
+            <label className="block text-sm font-medium text-muted mb-3">
               Tags
             </label>
             <div className="space-y-3">
               <div className="flex space-x-2">
                 <div className="relative flex-1">
-                  <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted" />
                   <input
                     type="text"
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Add tags..."
-                    className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 text-sm"
-                    style={{ '--tw-ring-color': memoryType === 'short-term' ? '#fb923c' : '#C2B5FC' } as React.CSSProperties}
+                    className="w-full pl-10 pr-4 py-2 bg-surface-muted border border-ink rounded-lg text-ink placeholder-slate-400 focus:outline-none focus:ring-2 text-sm"
+                    style={{ '--tw-ring-color': memoryType === 'short-term' ? 'var(--color-brand-yellow)' : 'var(--color-brand-primary)' } as React.CSSProperties}
                   />
                 </div>
                 <button
                   onClick={addTag}
-                  className="px-4 py-2 text-white rounded-lg font-medium transition-colors text-sm hover:opacity-90"
-                  style={{ background: memoryType === 'short-term' ? '#fb923c' : '#C2B5FC' }}
+                  className="px-4 py-2 text-ink rounded-lg font-medium transition-colors text-sm hover:opacity-90"
+                  style={{ background: memoryType === 'short-term' ? 'var(--color-brand-yellow)' : 'var(--color-brand-primary)' }}
                 >
                   Add
                 </button>
@@ -260,11 +260,11 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                   title="Suggest Tags with AI"
                 >
                   {isGeneratingTags ? (
-                    <Loader2 className={`h-4 w-4 animate-spin ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
+                    <Loader2 className={`h-4 w-4 animate-spin ${memoryType === 'short-term' ? 'text-brand-yellow-ink' : 'text-brand-purple-deep'}`} />
                   ) : (
-                    <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
+                    <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-brand-yellow-ink' : 'text-brand-purple-deep'}`} />
                   )}
-                  <span className={memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}>Suggest Tags with AI</span>
+                  <span className={memoryType === 'short-term' ? 'text-brand-yellow-ink' : 'text-brand-purple-deep'}>Suggest Tags with AI</span>
                 </button>
               </div>
               
@@ -272,8 +272,8 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
               {aiAddedTags.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
-                    <span className={`text-sm font-medium ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`}>AI Added Tags (click X to remove)</span>
+                    <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-brand-yellow-ink' : 'text-brand-purple-deep'}`} />
+                    <span className={`text-sm font-medium ${memoryType === 'short-term' ? 'text-brand-yellow-ink' : 'text-brand-purple-deep'}`}>AI Added Tags (click X to remove)</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {aiAddedTags.map((tag) => (
@@ -281,8 +281,8 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                         key={tag}
                         className={`flex items-center space-x-1 px-3 py-1 border rounded-lg text-sm ${
                           memoryType === 'short-term'
-                            ? 'bg-orange-500/10 border-orange-500/30 text-orange-300'
-                            : 'bg-purple-600/10 border-purple-500/30 text-purple-300'
+                            ? 'bg-orange-500/10 border-orange-500/30 text-brand-yellow-ink'
+                            : 'bg-purple-600/10 border-purple-500/30 text-brand-purple-deep'
                         }`}
                       >
                         <span>{tag}</span>
@@ -308,11 +308,11 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                   {tags.filter(t => !aiAddedTags.includes(t)).map((tag) => (
                     <span
                       key={tag}
-                      className="flex items-center space-x-1 px-3 py-1 rounded-full text-sm"
-                      style={memoryType === 'short-term' 
-                        ? { backgroundColor: '#fb923c20', color: '#fb923c', border: '1px solid #fb923c50' }
-                        : { backgroundColor: '#C2B5FC20', color: '#C2B5FC', border: '1px solid #C2B5FC50' }
-                      }
+                      className={`flex items-center space-x-1 px-3 py-1 rounded-full border text-sm ${
+                        memoryType === 'short-term'
+                          ? 'border-brand-yellow/50 bg-brand-yellow/20 text-brand-yellow-ink'
+                          : 'border-brand-purple/50 bg-brand-purple/20 text-brand-purple-ink'
+                      }`}
                     >
                       <span>{tag}</span>
                       <button
@@ -330,7 +330,7 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
           {/* Content Editor */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">
+            <label className="block text-sm font-medium text-muted mb-3">
               Content
             </label>
             
@@ -338,23 +338,23 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Start writing your note..."
-              className="w-full h-48 lg:h-64 px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 resize-none text-sm lg:text-base"
-              style={{ '--tw-ring-color': memoryType === 'short-term' ? '#fb923c' : '#C2B5FC' } as React.CSSProperties}
+              className="w-full h-48 lg:h-64 px-4 py-3 bg-surface-muted border border-ink rounded-xl text-ink placeholder-slate-400 focus:outline-none focus:ring-2 resize-none text-sm lg:text-base"
+              style={{ '--tw-ring-color': memoryType === 'short-term' ? 'var(--color-brand-yellow)' : 'var(--color-brand-primary)' } as React.CSSProperties}
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between p-4 lg:p-6 border-t border-slate-700 space-y-4 lg:space-y-0">
-          <div className="text-xs lg:text-sm text-slate-400">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between p-4 lg:p-6 border-t border-ink space-y-4 lg:space-y-0">
+          <div className="text-xs lg:text-sm text-muted">
             {memoryType === 'short-term' ? (
               <span className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-orange-400" />
+                <Clock className="h-4 w-4 text-brand-yellow-ink" />
                 <span>Short-term memory - Will be archived after 30 days</span>
               </span>
             ) : (
               <span className="flex items-center space-x-2">
-                <Brain className="h-4 w-4" style={{ color: '#C2B5FC' }} />
+                <Brain className="h-4 w-4" style={{ color: 'var(--color-brand-primary)' }} />
                 <span>Long-term memory - Permanent knowledge base</span>
               </span>
             )}
@@ -363,15 +363,15 @@ export const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
-              className="flex-1 lg:flex-none px-4 lg:px-6 py-2 lg:py-3 border border-slate-600 text-slate-300 rounded-xl font-semibold hover:bg-slate-700 transition-colors text-sm lg:text-base"
+              className="flex-1 lg:flex-none px-4 lg:px-6 py-2 lg:py-3 border border-ink text-muted rounded-xl font-semibold hover:bg-surface-muted transition-colors text-sm lg:text-base"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving || !title.trim()}
-              className="flex-1 lg:flex-none flex items-center justify-center space-x-2 px-4 lg:px-6 py-2 lg:py-3 text-white rounded-xl font-semibold transition-colors text-sm lg:text-base hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: memoryType === 'short-term' ? '#fb923c' : '#C2B5FC' }}
+              className="flex-1 lg:flex-none flex items-center justify-center space-x-2 px-4 lg:px-6 py-2 lg:py-3 text-ink rounded-xl font-semibold transition-colors text-sm lg:text-base hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: memoryType === 'short-term' ? 'var(--color-brand-yellow)' : 'var(--color-brand-primary)' }}
             >
               <Save className="h-4 w-4" />
               <span>{isSaving ? 'Saving...' : 'Save Note'}</span>

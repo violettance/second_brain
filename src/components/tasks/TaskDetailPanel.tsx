@@ -120,53 +120,53 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
   };
 
   return (
-    <div className="w-96 bg-slate-800 border-l border-slate-700 p-6 flex flex-col h-screen">
+    <div className="w-96 bg-surface border-l border-ink p-6 flex flex-col h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-white">Task Details</h2>
+        <h2 className="text-xl font-bold text-ink">Task Details</h2>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowDeleteConfirm(true)} className="p-1 rounded-full hover:bg-slate-700" title="Delete Task">
-            <Trash2 className="h-6 w-6" style={{ color: '#C2B5FC' }} />
+          <button onClick={() => setShowDeleteConfirm(true)} className="p-1 rounded-full hover:bg-surface-muted" title="Delete Task">
+            <Trash2 className="h-6 w-6" style={{ color: 'var(--color-brand-primary)' }} />
           </button>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-700" title="Close">
-            <X className="h-6 w-6 text-slate-400" />
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-surface-muted" title="Close">
+            <X className="h-6 w-6 text-muted" />
           </button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto space-y-4">
         <div>
-          <label htmlFor="task-name" className="block text-sm font-medium text-slate-400 mb-1">Task Name</label>
+          <label htmlFor="task-name" className="block text-sm font-medium text-muted mb-1">Task Name</label>
           <input
             id="task-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-slate-700 text-white rounded-md p-2"
+            className="w-full bg-surface-muted text-ink rounded-md p-2"
           />
         </div>
         <div>
-          <label htmlFor="task-description" className="block text-sm font-medium text-slate-400 mb-1">Description</label>
+          <label htmlFor="task-description" className="block text-sm font-medium text-muted mb-1">Description</label>
           <textarea
             id="task-description"
             value={description || ''}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-slate-700 text-white rounded-md p-2 h-32"
+            className="w-full bg-surface-muted text-ink rounded-md p-2 h-32"
           />
         </div>
         <div>
-          <h3 className="text-lg font-medium text-slate-300 mb-2">Subtasks</h3>
+          <h3 className="text-lg font-medium text-muted mb-2">Subtasks</h3>
           <div className="space-y-2">
             {subtasks.map(subtask => (
-              <div key={subtask.id} className="flex items-center bg-slate-700 p-2 rounded-md">
+              <div key={subtask.id} className="flex items-center bg-surface-muted p-2 rounded-md">
                 <input 
                   type="checkbox" 
                   checked={subtask.completed} 
                   onChange={() => handleToggleSubtask(subtask)}
-                  className="mr-3 h-4 w-4 bg-slate-600 border-slate-500 text-indigo-500 focus:ring-indigo-500 rounded"
+                  className="mr-3 h-4 w-4 bg-surface-muted border-ink text-indigo-500 focus:ring-indigo-500 rounded"
                 />
-                <span className={`flex-1 ${subtask.completed ? 'line-through text-slate-500' : 'text-slate-300'}`}>
+                <span className={`flex-1 ${subtask.completed ? 'line-through text-muted' : 'text-muted'}`}>
                   {subtask.name}
                 </span>
-                <button onClick={() => handleDeleteSubtask(subtask.id)} className="ml-2 p-1 rounded hover:bg-slate-600" style={{ color: '#C2B5FC' }} title="Delete Subtask">
+                <button onClick={() => handleDeleteSubtask(subtask.id)} className="ml-2 p-1 rounded hover:bg-surface-muted" style={{ color: 'var(--color-brand-primary)' }} title="Delete Subtask">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -178,12 +178,12 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
               value={newSubtaskName}
               onChange={(e) => setNewSubtaskName(e.target.value)}
               placeholder="Add a new subtask"
-              className="flex-1 bg-slate-700 text-white rounded-md p-2 text-sm"
+              className="flex-1 bg-surface-muted text-ink rounded-md p-2 text-sm"
               onKeyDown={(e) => e.key === 'Enter' && handleCreateSubtask()}
             />
-            <button onClick={handleCreateSubtask} className="ml-2 p-2 rounded-md transition-colors" style={{ background: '#C2B5FC', color: '#18181b' }} title="Add Subtask"
-              onMouseOver={e => { e.currentTarget.style.background = '#b39ddb'; }}
-              onMouseOut={e => { e.currentTarget.style.background = '#C2B5FC'; }}
+            <button onClick={handleCreateSubtask} className="ml-2 p-2 rounded-md transition-colors" style={{ background: 'var(--color-brand-primary)', color: 'var(--color-brand-dark)' }} title="Add Subtask"
+              onMouseOver={e => { e.currentTarget.style.background = 'var(--color-brand-purple)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'var(--color-brand-primary)'; }}
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -194,26 +194,26 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, onClose,
         <button 
           onClick={handleSave} 
           className="w-full font-bold py-2 px-4 rounded-md transition-colors"
-          style={{ background: '#C2B5FC', color: '#18181b' }}
+          style={{ background: 'var(--color-brand-primary)', color: 'var(--color-brand-dark)' }}
           disabled={isSaving}
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
         </button>
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-            <div className="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-xs flex flex-col items-center">
-              <Trash2 className="h-8 w-8 text-red-400 mb-2" />
-              <p className="text-white text-lg font-semibold mb-4 text-center">Are you sure you want to delete this task?</p>
+            <div className="bg-surface rounded-lg shadow-xl p-6 w-full max-w-xs flex flex-col items-center">
+              <Trash2 className="h-8 w-8 text-brand-primary-deep mb-2" />
+              <p className="text-ink text-lg font-semibold mb-4 text-center">Are you sure you want to delete this task?</p>
               <div className="flex gap-3 w-full">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-2 rounded-md bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors"
+                  className="flex-1 py-2 rounded-md bg-surface-muted text-ink hover:bg-surface-muted transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={async () => { setShowDeleteConfirm(false); await handleDeleteTask(); }}
-                  className="flex-1 py-2 rounded-md bg-red-500 text-white font-bold hover:bg-red-600 transition-colors"
+                  className="flex-1 py-2 rounded-md bg-red-500 text-ink font-bold hover:bg-red-600 transition-colors"
                 >
                   Delete
                 </button>

@@ -342,14 +342,14 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50  flex items-center justify-center z-50 p-4">
       <div 
         ref={modalRef}
-        className="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-surface border border-ink rounded-xl w-full max-w-2xl max-h-modal overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-lg font-medium text-white">
+        <div className="flex items-center justify-between p-4 border-b border-ink">
+          <h2 className="text-lg font-medium text-ink">
             {existingNote ? 'Edit Note' : 'New Note'}
           </h2>
           
@@ -369,9 +369,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             
             <button
               onClick={onClose}
-              className="p-1 hover:bg-slate-700 rounded-md transition-colors"
+              className="p-1 hover:bg-surface-muted rounded-md transition-colors"
             >
-              <X className="h-5 w-5 text-slate-400" />
+              <X className="h-5 w-5 text-muted" />
             </button>
           </div>
         </div>
@@ -381,8 +381,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           {/* Title */}
           <div>
             <div className="flex items-center space-x-2 mb-1">
-              <Type className="h-4 w-4 text-slate-400" />
-              <label htmlFor="note-title" className="text-sm font-medium text-slate-300">
+              <Type className="h-4 w-4 text-muted" />
+              <label htmlFor="note-title" className="text-sm font-medium text-muted">
                 Title
               </label>
             </div>
@@ -392,16 +392,16 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Note title"
-              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-1 text-sm"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="w-full px-3 py-2 bg-surface-muted border border-ink rounded-md text-ink placeholder-slate-400 focus:outline-none focus:ring-1 text-sm"
+              style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
             />
           </div>
           
           {/* Memory Type */}
           <div>
             <div className="flex items-center space-x-2 mb-1">
-              <Brain className="h-4 w-4 text-slate-400" />
-              <label className="text-sm font-medium text-slate-300">
+              <Brain className="h-4 w-4 text-muted" />
+              <label className="text-sm font-medium text-muted">
                 Memory Type
               </label>
             </div>
@@ -410,8 +410,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
                 onClick={() => setMemoryType('short-term')}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-all ${
                   memoryType === 'short-term'
-                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                    : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'
+                    ? 'bg-orange-500/20 text-brand-yellow-ink border border-orange-500/30'
+                    : 'bg-surface-muted text-muted border border-ink hover:bg-surface-muted'
                 }`}
               >
                 <Clock className="h-4 w-4" />
@@ -422,13 +422,13 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
                 onClick={() => setMemoryType('long-term')}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-all ${
                   memoryType === 'long-term'
-                    ? 'border border-purple-500/30 text-purple-400'
-                    : 'bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600'
+                    ? 'border border-purple-500/30 text-brand-purple-deep'
+                    : 'bg-surface-muted text-muted border border-ink hover:bg-surface-muted'
                 }`}
-                style={memoryType === 'long-term' ? { backgroundColor: 'rgba(194, 181, 252, 0.2)' } : {}}
+                style={memoryType === 'long-term' ? { backgroundColor: 'color-mix(in srgb, var(--color-brand-purple) 20%, transparent)' } : {}}
               >
-                <Brain className="h-4 w-4" style={{ color: memoryType === 'long-term' ? '#C2B5FC' : 'currentColor' }} />
-                <span className="text-sm" style={{ color: memoryType === 'long-term' ? '#C2B5FC' : 'currentColor' }}>Long Term</span>
+                <Brain className="h-4 w-4" style={{ color: memoryType === 'long-term' ? 'var(--color-brand-primary)' : 'currentColor' }} />
+                <span className="text-sm" style={{ color: memoryType === 'long-term' ? 'var(--color-brand-primary)' : 'currentColor' }}>Long Term</span>
               </button>
             </div>
           </div>
@@ -436,49 +436,49 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           {/* Content */}
           <div>
             <div className="flex items-center space-x-2 mb-1">
-              <List className="h-4 w-4 text-slate-400" />
-              <label htmlFor="note-content" className="text-sm font-medium text-slate-300">
+              <List className="h-4 w-4 text-muted" />
+              <label htmlFor="note-content" className="text-sm font-medium text-muted">
                 Content
               </label>
             </div>
             
             {/* Basic Formatting Toolbar */}
-            <div className="flex items-center space-x-1 mb-2 p-1 bg-slate-700 rounded-t-md border-x border-t border-slate-600">
+            <div className="flex items-center space-x-1 mb-2 p-1 bg-surface-muted rounded-t-md border-x border-t border-ink">
               <button 
                 onClick={handleBold}
-                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                className="p-1 hover:bg-surface-muted rounded transition-colors"
                 title="Bold (Ctrl+B)"
               >
-                <Bold className="h-4 w-4 text-slate-400" />
+                <Bold className="h-4 w-4 text-muted" />
               </button>
               <button 
                 onClick={handleItalic}
-                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                className="p-1 hover:bg-surface-muted rounded transition-colors"
                 title="Italic (Ctrl+I)"
               >
-                <Italic className="h-4 w-4 text-slate-400" />
+                <Italic className="h-4 w-4 text-muted" />
               </button>
               <button 
                 onClick={handleCode}
-                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                className="p-1 hover:bg-surface-muted rounded transition-colors"
                 title="Code"
               >
-                <Code className="h-4 w-4 text-slate-400" />
+                <Code className="h-4 w-4 text-muted" />
               </button>
-              <div className="h-4 border-r border-slate-600 mx-1"></div>
+              <div className="h-4 border-r border-ink mx-1"></div>
               <button 
                 onClick={handleLink}
-                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                className="p-1 hover:bg-surface-muted rounded transition-colors"
                 title="Add Link"
               >
-                <Link className="h-4 w-4 text-slate-400" />
+                <Link className="h-4 w-4 text-muted" />
               </button>
               <button 
                 onClick={handleIndent}
-                className="p-1 hover:bg-slate-600 rounded transition-colors"
+                className="p-1 hover:bg-surface-muted rounded transition-colors"
                 title="Indent"
               >
-                <Quote className="h-4 w-4 text-slate-400" />
+                <Quote className="h-4 w-4 text-muted" />
               </button>
             </div>
             
@@ -487,23 +487,23 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Write your note here..."
-              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-b-md text-white placeholder-slate-400 focus:outline-none focus:ring-1 text-sm min-h-[200px]"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="w-full px-3 py-2 bg-surface-muted border border-ink rounded-b-md text-ink placeholder-slate-400 focus:outline-none focus:ring-1 text-sm min-h-note-editor"
+              style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
             />
           </div>
           
           {/* Tags */}
           <div>
             <div className="flex items-center space-x-2 mb-1">
-              <Tag className="h-4 w-4 text-slate-400" />
-              <label htmlFor="note-tags" className="text-sm font-medium text-slate-300">
+              <Tag className="h-4 w-4 text-muted" />
+              <label htmlFor="note-tags" className="text-sm font-medium text-muted">
                 Tags
               </label>
             </div>
             
             <div className="flex items-center space-x-2">
               <div className="relative flex-1">
-                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted" />
                 <input
                   id="note-tags"
                   type="text"
@@ -511,24 +511,24 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
                   onChange={(e) => setCurrentTag(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Add tags..."
-                  className="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-1 text-sm"
-                  style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+                  className="w-full pl-10 pr-3 py-2 bg-surface-muted border border-ink rounded-md text-ink placeholder-slate-400 focus:outline-none focus:ring-1 text-sm"
+                  style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
                 />
               </div>
               <button
                 onClick={handleAddTag}
                 disabled={!currentTag.trim()}
-                className="p-2 bg-slate-700 hover:bg-slate-600 rounded-md border border-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 bg-surface-muted hover:bg-surface-muted rounded-md border border-ink transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Plus className="h-4 w-4 text-slate-400" />
+                <Plus className="h-4 w-4 text-muted" />
               </button>
               <button
                 onClick={handleGenerateAITags}
                 disabled={isGeneratingTags || (!title.trim() && !content.trim())}
                 className={`flex items-center space-x-2 px-3 py-2 border rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm ${
                   memoryType === 'short-term'
-                    ? 'bg-orange-500/20 hover:bg-orange-500/30 border-orange-500/30 text-orange-400'
-                    : 'bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/30 text-purple-400'
+                    ? 'bg-orange-500/20 hover:bg-orange-500/30 border-orange-500/30 text-brand-yellow-ink'
+                    : 'bg-purple-600/20 hover:bg-purple-600/30 border-purple-500/30 text-brand-purple-deep'
                 }`}
                 title="Suggest Tags with AI"
               >
@@ -545,8 +545,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             {aiAddedTags.length > 0 && (
               <div className="mt-3">
                 <div className="flex items-center space-x-2 mb-2">
-                  <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`} />
-                  <span className={`text-sm font-medium ${memoryType === 'short-term' ? 'text-orange-400' : 'text-purple-400'}`}>AI Added Tags (click X to remove)</span>
+                  <Sparkles className={`h-4 w-4 ${memoryType === 'short-term' ? 'text-brand-yellow-ink' : 'text-brand-purple-deep'}`} />
+                  <span className={`text-sm font-medium ${memoryType === 'short-term' ? 'text-brand-yellow-ink' : 'text-brand-purple-deep'}`}>AI Added Tags (click X to remove)</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {aiAddedTags.map((tag) => (
@@ -554,8 +554,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
                       key={tag}
                       className={`flex items-center space-x-1 px-2 py-1 border rounded-md text-xs ${
                         memoryType === 'short-term'
-                          ? 'bg-orange-500/10 border-orange-500/30 text-orange-300'
-                          : 'bg-purple-600/10 border-purple-500/30 text-purple-300'
+                          ? 'bg-orange-500/10 border-orange-500/30 text-brand-yellow-ink'
+                          : 'bg-purple-600/10 border-purple-500/30 text-brand-purple-deep'
                       }`}
                     >
                       <span>{tag}</span>
@@ -584,15 +584,15 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
                     key={tag}
                     className={`flex items-center space-x-1 px-2 py-1 rounded-md text-xs ${
                       memoryType === 'short-term' 
-                        ? 'bg-orange-500/20 text-orange-400' 
+                        ? 'bg-orange-500/20 text-brand-yellow-ink'
                         : ''
                     }`}
-                    style={memoryType === 'long-term' ? { backgroundColor: 'rgba(194, 181, 252, 0.2)', color: '#C2B5FC' } : {}}
+                    style={memoryType === 'long-term' ? { backgroundColor: 'color-mix(in srgb, var(--color-brand-purple) 20%, transparent)', color: 'var(--color-brand-primary)' } : {}}
                   >
                                             <span>{tag}</span>
                     <button
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:bg-slate-600 rounded-full p-0.5"
+                      className="hover:bg-surface-muted rounded-full p-0.5"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -610,29 +610,29 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
           
           {/* Error Message */}
           {error && (
-            <div className="bg-red-500/20 border border-red-500/30 text-red-400 px-3 py-2 rounded-md text-sm">
+            <div className="bg-red-500/20 border border-red-500/30 text-brand-primary-deep px-3 py-2 rounded-md text-sm">
               {error}
             </div>
           )}
         </div>
         
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-slate-700">
-          <div className="text-xs text-slate-400">
+        <div className="flex items-center justify-between p-4 border-t border-ink">
+          <div className="text-xs text-muted">
             {existingNote ? 'Last edited: ' + new Date(existingNote.updated_at).toLocaleString() : 'New note for ' + selectedDate.toLocaleDateString()}
           </div>
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-md text-sm transition-colors"
+              className="px-4 py-2 bg-surface-muted hover:bg-surface-muted text-muted rounded-md text-sm transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving || !title.trim()}
-              className="flex items-center space-x-2 px-4 py-2 text-slate-900 rounded-md text-sm transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: '#C2B5FC' }}
+              className="flex items-center space-x-2 px-4 py-2 text-ink rounded-md text-sm transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'var(--color-brand-primary)' }}
             >
               <Save className="h-4 w-4" />
               <span>{isSaving ? 'Saving...' : 'Save Note'}</span>

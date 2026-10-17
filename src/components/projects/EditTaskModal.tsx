@@ -27,40 +27,40 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center">
-      <div className="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-white mb-4">Edit Task</h2>
+      <div className="bg-surface rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-ink mb-4">Edit Task</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="task-name" className="block text-slate-400 text-sm font-medium mb-2">Task Name</label>
+            <label htmlFor="task-name" className="block text-muted text-sm font-medium mb-2">Task Name</label>
             <input
               id="task-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="w-full bg-surface-muted border border-ink rounded-lg px-3 py-2 text-ink placeholder-slate-500 focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
               required
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="task-description" className="block text-slate-400 text-sm font-medium mb-2">Description</label>
+            <label htmlFor="task-description" className="block text-muted text-sm font-medium mb-2">Description</label>
             <textarea
               id="task-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="w-full bg-surface-muted border border-ink rounded-lg px-3 py-2 text-ink placeholder-slate-500 focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
               rows={4}
             ></textarea>
           </div>
           <div className="mb-6">
-            <label htmlFor="task-status" className="block text-slate-400 text-sm font-medium mb-2">Status</label>
+            <label htmlFor="task-status" className="block text-muted text-sm font-medium mb-2">Status</label>
             <select
               id="task-status"
               value={status}
               onChange={(e) => setStatus(e.target.value as TaskStatus)}
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2"
-              style={{ '--tw-ring-color': '#C2B5FC' } as React.CSSProperties}
+              className="w-full bg-surface-muted border border-ink rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': 'var(--color-brand-primary)' } as React.CSSProperties}
             >
               <option value="TO DO">To Do</option>
               <option value="IN PROGRESS">In Progress</option>
@@ -71,14 +71,14 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors"
+              className="px-4 py-2 bg-surface-muted text-muted rounded-lg hover:bg-surface-muted transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-slate-900 rounded-lg font-semibold transition-colors hover:opacity-90"
-              style={{ background: '#C2B5FC' }}
+              className="px-4 py-2 text-ink rounded-lg font-semibold transition-colors hover:opacity-90"
+              style={{ background: 'var(--color-brand-primary)' }}
             >
               Save Changes
             </button>
